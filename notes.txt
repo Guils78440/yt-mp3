@@ -1,3 +1,4 @@
-- Nouvelle version détectée même quand l'application est déjà ouverte (vérification toutes les 30 min)
-- Fenêtre de proposition avec la liste des nouveautés : Installer maintenant / Plus tard
-- Si un téléchargement est en cours, la mise à jour attend qu'il soit terminé puis s'installe toute seule
+- Nouvel onglet Mix : deux platines A et B comme un logiciel DJ
+- BPM détecté automatiquement, tempo ±8 % sans changer la tonalité, bouton SYNC
+- Égaliseur 3 bandes avec coupure, volume par platine, crossfader et enchaînement automatique (4, 8 ou 16 s)
+- Voix / Instrumental au choix sur chaque platine pour mélanger deux morceaux

@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.2 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.3 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.2'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.3'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -324,6 +324,49 @@ body.has-player{--toast-b:112px}
 @keyframes eq{0%,100%{height:6px}50%{height:22px}}
 @media (max-width:820px){.player{grid-template-columns:1fr auto;}.pl-right{display:none}}
 
+/* ---- Mode DJ ---- */
+body.dj-mode main{max-width:1240px}
+body.dj-mode .player{display:none}
+body.dj-mode main{padding-bottom:60px}
+.dj{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.deck{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;--dc:var(--a1)}
+#deckB{--dc:var(--a2)}
+.deck.on{border-color:color-mix(in srgb,var(--dc) 55%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--dc) 25%,transparent),0 10px 30px #0006}
+.dk-head{display:flex;align-items:center;gap:12px;min-width:0}
+.dk-cover{width:52px;height:52px;border-radius:10px;background:var(--panel2) center/cover no-repeat;flex:none;display:grid;place-items:center;color:var(--faint);position:relative}
+.dk-letter{position:absolute;left:-6px;top:-6px;width:22px;height:22px;border-radius:7px;background:var(--dc);color:#fff;font-weight:700;font-size:12px;display:grid;place-items:center}
+.dk-meta{flex:1;min-width:0}
+.dk-bpm{text-align:right;line-height:1.1}
+.dk-bpm b{display:block;font-size:20px;font-variant-numeric:tabular-nums}
+.dk-bpm small{color:var(--muted);font-size:11px;letter-spacing:.8px}
+.dk-wave{width:100%;height:74px;border-radius:10px;background:var(--bg);cursor:pointer;display:block}
+.dk-time{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:-4px}
+.dk-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dk-btn{height:40px;min-width:54px;padding:0 12px;border-radius:11px;background:var(--panel2);border:1px solid var(--line);font-weight:700;font-size:13px;letter-spacing:.5px;display:grid;place-items:center}
+.dk-btn:hover{border-color:#3a4050}
+.dk-play{background:var(--dc);border-color:transparent;color:#fff;min-width:64px}
+.dk-play svg{width:20px;height:20px}
+.dk-cue{color:#fbbf24}
+.dk-row .sp{flex:1}
+.dk-grid{display:grid;grid-template-columns:72px 1fr 52px;align-items:center;gap:6px 10px;font-size:12.5px;color:var(--muted)}
+.dk-grid output{font-variant-numeric:tabular-nums;text-align:right;color:var(--text);font-size:12px}
+.deck input[type=range],.xf input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;background:#2b303c;outline:0;cursor:pointer;width:100%}
+.deck input[type=range]::-webkit-slider-thumb,.xf input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--dc,#fff) 45%,transparent)}
+.dk-sync{height:28px;padding:0 8px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--text)}
+.dk-sync:hover{border-color:var(--dc)}
+.xfrow{display:flex;align-items:center;justify-content:center;gap:22px;margin:16px 0 4px;flex-wrap:wrap}
+.xf{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 18px;width:min(460px,100%)}
+.xf b{font-size:13px;width:22px;height:22px;border-radius:7px;display:grid;place-items:center;color:#fff;background:var(--a1)}
+.xf b:last-child{background:var(--a2)}
+.xf input[type=range]{height:8px;background:linear-gradient(90deg,var(--a1),#2b303c 50%,var(--a2))}
+.mixctl{display:flex;align-items:center;gap:10px}
+.mixctl .go.sm{box-shadow:none}
+.djrow .acts{gap:6px}
+.ab{width:36px;height:32px;border-radius:9px;font-weight:700;font-size:13px;border:1px solid var(--line);background:var(--panel2)}
+.ab.a:hover{border-color:var(--a1);color:#ff8aa5}.ab.b:hover{border-color:var(--a2);color:#c4b5fd}
+.ab.on{color:#fff;border-color:transparent}.ab.a.on{background:var(--a1)}.ab.b.on{background:var(--a2)}
+@media (max-width:900px){.dj{grid-template-columns:1fr}}
+
 /* ---- Onglets & paramètres ---- */
 .tabs{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:3px;gap:2px}
 .tabs button{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:8px;font-size:14px;color:var(--muted);transition:.15s}
@@ -366,6 +409,7 @@ body.has-player{--toast-b:112px}
     <div class="sp"></div>
     <nav class="tabs">
       <button data-tab="main" class="on">Convertir</button>
+      <button data-tab="dj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="7" cy="12" r="4.5"/><circle cx="17" cy="12" r="4.5"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/></svg>Mix</button>
       <button data-tab="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Paramètres</button>
     </nav>
     <button class="btn-ghost" id="folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Dossier MP3</button>
@@ -405,6 +449,27 @@ body.has-player{--toast-b:112px}
     </div>
     <div class="list lib" id="lib"></div>
   </section>
+  </div>
+
+  <div id="v-dj" hidden>
+    <div class="dj">
+      <div class="deck" id="deckA"></div>
+      <div class="deck" id="deckB"></div>
+    </div>
+    <div class="xfrow">
+      <div class="xf"><b>A</b><input type="range" id="xf" min="0" max="1000" value="500" title="Crossfader (double-clic : centre)"><b>B</b></div>
+      <div class="mixctl">
+        <button class="go sm" id="automix"></button>
+        <div class="seg mini" id="mixlen" title="Durée de l'enchaînement">
+          <button type="button" data-l="4">4 s</button><button type="button" data-l="8">8 s</button><button type="button" data-l="16">16 s</button>
+        </div>
+      </div>
+    </div>
+    <section>
+      <div class="sh"><h2>Bibliothèque</h2><span class="count">charge un morceau sur la platine A ou B</span><div class="sp"></div>
+        <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="djq" placeholder="Rechercher…"></label></div>
+      <div class="list" id="djlib"></div>
+    </section>
   </div>
 
   <div id="v-set" hidden>
@@ -686,6 +751,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.3', '13/10/2026', ['Nouvel onglet Mix : deux platines A et B comme un logiciel DJ', 'BPM détecté automatiquement, tempo ±8 % sans changer la tonalité, bouton SYNC', 'Égaliseur 3 bandes avec coupure, volume par platine, crossfader et enchaînement automatique (4, 8 ou 16 s)', 'Voix / Instrumental au choix sur chaque platine pour mélanger deux morceaux']],
   ['2.2', '13/10/2026', ['Nouvelle version détectée même quand l\'application est déjà ouverte (vérification toutes les 30 min)', 'Fenêtre de proposition avec la liste des nouveautés : Installer maintenant / Plus tard', 'Si un téléchargement est en cours, la mise à jour attend qu\'il soit terminé puis s\'installe toute seule']],
   ['2.1', '13/10/2026', ['Mises à jour intégrées depuis GitHub : vérification au démarrage, installation en un clic, sans alerte Windows', 'Installation en une ligne de commande, sans .exe à télécharger']],
   ['2.0.2', '13/10/2026', ['Noms propres : tirets spéciaux reconnus, « CLIP OFFICIEL » retiré même sans parenthèses', 'Titres du type « Artiste 1 - Artiste 2 " Titre " » correctement séparés']],
@@ -823,7 +889,7 @@ decks.forEach((a, n) => {
     if (P.repeat === 'one') { a.currentTime = 0; a.play(); return; }
     go(1);
   });
-  a.addEventListener('play', () => { if (n === deck) { P.playing = true; updateMeta(); } });
+  a.addEventListener('play', () => { if (n === deck) { djPauseAll(); P.playing = true; updateMeta(); } });
   a.addEventListener('pause', () => { if (n === deck && !P.fading) { P.playing = false; updateMeta(); } });
   a.addEventListener('error', () => { if (n === deck && a.getAttribute('src')) { toast('Lecture impossible de ce fichier', 'err'); setTimeout(() => go(1), 800); } });
 });
@@ -981,11 +1047,317 @@ $('#dlgLater').onclick = () => {
 };
 $('#newver').onclick = () => { show('set'); setTimeout(() => $('#updcard').scrollIntoView({behavior:'smooth'}), 50); };
 
+/* ===================== Mode DJ : deux platines, crossfader, enchaînement ===================== */
+const DJ = { ctx: null, master: null, xf: 0.5, len: 8, mix: null, d: [] };
+const DJ_MAX = 40 * 1048576;   // au-delà (mixtapes), pas de forme d'onde ni de BPM, la lecture reste possible
+function djBpmCache(){ try { return JSON.parse(localStorage.getItem('bpm') || '{}'); } catch { return {}; } }
+function djBpmSave(id, v){ try { const c = djBpmCache(); c[id] = v; localStorage.setItem('bpm', JSON.stringify(c)); } catch {} }
+
+function djDeckHtml(L){
+  return `<div class="dk-head"><div class="dk-cover"><span class="dk-letter">${L}</span></div>
+    <div class="dk-meta"><div class="t dk-title">Platine ${L} vide</div><div class="s dk-sub">Charge un morceau avec le bouton ${L} de la bibliothèque</div></div>
+    <div class="dk-bpm"><b class="dk-bpmv">--</b><small>BPM</small></div></div>
+  <canvas class="dk-wave" title="Clique pour te déplacer dans le morceau"></canvas>
+  <div class="dk-time"><span class="dk-cur">0:00</span><span class="dk-rem">-0:00</span></div>
+  <div class="dk-row">
+    <button class="dk-btn dk-cue" title="À l'arrêt : place le point de départ. En lecture : revient au point de départ">CUE</button>
+    <button class="dk-btn dk-play" title="Lecture / pause"></button>
+    <div class="sp"></div>
+    <div class="seg mini dk-stem"><button type="button" data-s="orig">Original</button><button type="button" data-s="voix">Voix</button><button type="button" data-s="instru">Instru</button></div>
+  </div>
+  <div class="dk-grid">
+    <span>Tempo</span><input type="range" class="dk-tempo" min="-8" max="8" step="0.1" value="0" title="Double-clic : 0 %"><button class="dk-sync" title="Cale le tempo sur l'autre platine">SYNC</button>
+    <span>Aigus</span><input type="range" class="dk-eq" data-b="high" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="high">0 dB</output>
+    <span>Médiums</span><input type="range" class="dk-eq" data-b="mid" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="mid">0 dB</output>
+    <span>Graves</span><input type="range" class="dk-eq" data-b="low" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="low">0 dB</output>
+    <span>Volume</span><input type="range" class="dk-vol" min="0" max="100" value="100"><output data-o="vol">100 %</output>
+  </div>`;
+}
+
+function djCtx(){
+  if (!DJ.ctx) {
+    DJ.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    DJ.master = DJ.ctx.createGain(); DJ.master.connect(DJ.ctx.destination);
+    DJ.d.forEach(d => {
+      const c = DJ.ctx, src = c.createMediaElementSource(d.el);
+      const low = c.createBiquadFilter(); low.type = 'lowshelf'; low.frequency.value = 220;
+      const mid = c.createBiquadFilter(); mid.type = 'peaking'; mid.frequency.value = 1000; mid.Q.value = 0.8;
+      const high = c.createBiquadFilter(); high.type = 'highshelf'; high.frequency.value = 3500;
+      const vol = c.createGain(), xg = c.createGain();
+      src.connect(low).connect(mid).connect(high).connect(vol).connect(xg).connect(DJ.master);
+      d.nodes = { low, mid, high, vol, xg };
+      djApply(d);
+    });
+    djApplyXf();
+  }
+  if (DJ.ctx.state === 'suspended') DJ.ctx.resume();
+  return DJ.ctx;
+}
+function djApply(d){
+  if (!d.nodes) return;
+  const t = DJ.ctx.currentTime;
+  ['low', 'mid', 'high'].forEach(b => d.nodes[b].gain.setTargetAtTime(d.eq[b], t, 0.015));
+  d.nodes.vol.gain.setTargetAtTime(d.vol, t, 0.015);
+}
+function djApplyXf(){   // crossfader à puissance constante : pas de creux de volume au milieu
+  if (!DJ.ctx) return;
+  const t = DJ.ctx.currentTime, x = DJ.xf;
+  DJ.d[0].nodes.xg.gain.setTargetAtTime(Math.cos(x * Math.PI / 2), t, 0.015);
+  DJ.d[1].nodes.xg.gain.setTargetAtTime(Math.sin(x * Math.PI / 2), t, 0.015);
+}
+function djPauseAll(){ (DJ.d || []).forEach(d => { if (!d.el.paused) d.el.pause(); }); djStopMix(); }
+function djPauseMain(){ if (typeof P !== 'undefined' && P.id && !A().paused) { cancelFade(); A().pause(); } }
+
+function djLoad(i, id, stem){
+  const d = DJ.d[i], x = byId(id); if (!x) return;
+  djStopMix();
+  d.el.pause();
+  d.id = id; d.stem = stemFor(x, stem || 'orig'); d.cue = 0; d.peaks = null;
+  d.bpm = djBpmCache()[id] || null;
+  djSetSrc(d, 0, false);
+  djMeta(d); djAnalyse(d); djRenderLib(true);
+  toast(`${x.title} chargé sur la platine ${d.L}`);
+}
+function djSetSrc(d, at, play){
+  d.el.src = url(d.id, d.stem);
+  d.el.defaultPlaybackRate = d.rate; d.el.preservesPitch = true;
+  d.el.addEventListener('loadedmetadata', () => { d.el.playbackRate = d.rate; if (at) d.el.currentTime = at; if (play) d.el.play().catch(() => {}); }, { once: true });
+}
+
+// Récupère tout le fichier par morceaux (le moteur envoie 2 Mo maximum par requête)
+async function djFetchAll(u){
+  const parts = []; let got = 0, total = null;
+  while (total === null || got < total) {
+    const r = await fetch(u, { headers: { Range: `bytes=${got}-` } });
+    if (!r.ok) return null;
+    const m = (r.headers.get('Content-Range') || '').match(/\/(\d+)$/);
+    total = m ? +m[1] : null;
+    if (total && total > DJ_MAX) return null;
+    const b = new Uint8Array(await r.arrayBuffer());
+    if (!b.length) break;
+    parts.push(b); got += b.length;
+    if (total === null) break;
+  }
+  const out = new Uint8Array(got); let o = 0;
+  parts.forEach(p => { out.set(p, o); o += p.length; });
+  return out.buffer;
+}
+async function djAnalyse(d){
+  const id = d.id, stem = d.stem;
+  try {
+    const buf = await djFetchAll(url(id, stem));
+    if (d.id !== id || d.stem !== stem) return;
+    if (!buf) { d.peaks = 'x'; return; }
+    const ab = await new OfflineAudioContext(1, 1, 11025).decodeAudioData(buf);   // décodé en 11 kHz : léger et suffisant
+    if (d.id !== id || d.stem !== stem) return;
+    let mono = ab.getChannelData(0);
+    if (ab.numberOfChannels > 1) { const r = ab.getChannelData(1); const m = new Float32Array(mono.length); for (let i = 0; i < m.length; i++) m[i] = (mono[i] + r[i]) / 2; mono = m; }
+    d.peaks = djPeaks(mono, 1200);
+    if (!d.bpm) { d.bpm = djBpm(mono, ab.sampleRate); if (d.bpm) djBpmSave(id, d.bpm); }
+    djMeta(d); djRenderLib(true);
+  } catch { if (d.id === id) d.peaks = 'x'; }
+}
+function djPeaks(x, n){
+  const step = Math.max(1, Math.floor(x.length / n)), p = new Float32Array(n); let mx = 0;
+  for (let i = 0; i < n; i++) {
+    let m = 0; const s = i * step, e = Math.min(x.length, s + step);
+    for (let j = s; j < e; j += 2) { const v = Math.abs(x[j]); if (v > m) m = v; }
+    p[i] = m; if (m > mx) mx = m;
+  }
+  if (mx > 0) for (let i = 0; i < n; i++) p[i] /= mx;
+  return p;
+}
+// Estimation du tempo : enveloppe d'attaques puis autocorrélation (sur 90 s au milieu du morceau)
+function djBpm(x, sr){
+  const hop = 64, win = 256;
+  const len = Math.min(x.length, Math.floor(sr * 90)), start = Math.max(0, Math.floor((x.length - len) / 2));
+  const nF = Math.floor((len - win) / hop); if (nF < 400) return null;
+  const env = new Float32Array(nF);
+  for (let f = 0; f < nF; f++) { let s = 0; const o = start + f * hop; for (let j = 0; j < win; j++) { const v = x[o + j]; s += v * v; } env[f] = Math.sqrt(s / win); }
+  const on = new Float32Array(nF); let mean = 0;
+  for (let f = 1; f < nF; f++) { const dv = env[f] - env[f - 1]; on[f] = dv > 0 ? dv : 0; mean += on[f]; }
+  mean /= nF; for (let f = 0; f < nF; f++) on[f] -= mean;
+  const fd = hop / sr, minL = Math.floor(60 / 200 / fd), maxL = Math.ceil(60 / 60 / fd);
+  const ac = new Float32Array(2 * maxL + 2);
+  for (let L = minL - 1; L <= Math.min(2 * maxL + 1, nF - 1); L++) { let s = 0; for (let f = 0; f + L < nF; f++) s += on[f] * on[f + L]; ac[L] = s / (nF - L); }
+  let best = -Infinity, bL = 0;
+  for (let L = minL; L <= maxL; L++) { const sc = ac[L] + 0.5 * ac[2 * L]; if (sc > best) { best = sc; bL = L; } }
+  if (!bL || best <= 0) return null;
+  const a = ac[bL - 1], b = ac[bL], c = ac[bL + 1], den = a - 2 * b + c;
+  let bpm = 60 / ((bL + (den ? 0.5 * (a - c) / den : 0)) * fd);
+  while (bpm < 75) bpm *= 2; while (bpm >= 165) bpm /= 2;
+  return Math.round(bpm * 10) / 10;
+}
+
+function djMeta(d){
+  const x = byId(d.id), q = s => d.root.querySelector(s);
+  if (!x) return;
+  q('.dk-title').textContent = x.title;
+  q('.dk-sub').textContent = x.uploader + (d.stem === 'voix' ? ' · Voix seules' : d.stem === 'instru' ? ' · Instrumental' : '');
+  const cv = coverUrl(x.vid, x.thumb), cov = q('.dk-cover');
+  cov.style.backgroundImage = cv ? `url('${cv.replace(/'/g, '%27')}')` : '';
+  q('.dk-bpmv').textContent = d.bpm ? (d.bpm * d.rate).toFixed(1).replace('.', ',') : '--';
+  d.root.querySelectorAll('.dk-stem button').forEach(b => {
+    b.disabled = b.dataset.s !== 'orig' && !x[b.dataset.s];
+    b.classList.toggle('on', b.dataset.s === d.stem);
+  });
+  djPlayIcon(d);
+}
+function djPlayIcon(d){
+  d.root.querySelector('.dk-play').innerHTML = d.el.paused ? I.play : I.pause;
+  d.root.classList.toggle('on', !d.el.paused);
+  if (!DJ.mix) djMixBtn();
+}
+
+// Dessin des formes d'onde (forme, partie jouée, point CUE, tête de lecture)
+function djDraw(){
+  if (!$('#v-dj').hidden) DJ.d.forEach(d => {
+    const cv = d.root.querySelector('.dk-wave'), w = cv.clientWidth, h = cv.clientHeight, r = devicePixelRatio || 1;
+    if (!w) return;
+    if (cv.width !== Math.round(w * r)) { cv.width = Math.round(w * r); cv.height = Math.round(h * r); }
+    const g = cv.getContext('2d'); g.setTransform(r, 0, 0, r, 0, 0); g.clearRect(0, 0, w, h);
+    const dur = d.el.duration || 0, cur = d.el.currentTime || 0, k = dur ? cur / dur : 0;
+    const col = d.i ? '#8b5cf6' : '#ff3b6b';
+    if (d.peaks instanceof Float32Array) {
+      const n = d.peaks.length;
+      for (let px = 0; px < w; px += 2) {
+        const v = d.peaks[Math.floor(px / w * n)], bh = Math.max(1, v * (h - 8));
+        g.fillStyle = px / w < k ? col : '#3a4050'; g.fillRect(px, (h - bh) / 2, 1.4, bh);
+      }
+    } else {
+      g.fillStyle = '#2b303c'; g.fillRect(0, h / 2 - 1, w, 2);
+      g.fillStyle = col; g.fillRect(0, h / 2 - 1, w * k, 2);
+      if (d.id) { g.fillStyle = '#8a90a0'; g.font = '12px Segoe UI, system-ui'; g.fillText(d.peaks === 'x' ? 'Forme d’onde indisponible (fichier trop long)' : 'Analyse du morceau…', 10, 18); }
+    }
+    if (dur) {
+      g.fillStyle = '#fbbf24'; g.fillRect(d.cue / dur * w, 0, 2, h);
+      g.fillStyle = '#fff'; g.fillRect(k * w - 1, 0, 2, h);
+    }
+    d.root.querySelector('.dk-cur').textContent = fmtT(cur);
+    d.root.querySelector('.dk-rem').textContent = '-' + fmtT(Math.max(0, dur - cur));
+  });
+  requestAnimationFrame(djDraw);
+}
+
+// ---- Enchaînement automatique : le crossfader glisse vers l'autre platine ----
+function djStopMix(){ if (DJ.mix) { clearInterval(DJ.mix.timer); DJ.mix = null; } djMixBtn(); }
+// Platine visée : celle qui ne joue pas ; si les deux (ou aucune) jouent, celle vers laquelle le crossfader n'est pas tourné
+function djMixTarget(){
+  const pa = !DJ.d[0].el.paused, pb = !DJ.d[1].el.paused;
+  if (pa && !pb) return 1;
+  if (pb && !pa) return 0;
+  return DJ.xf <= 0.5 ? 1 : 0;
+}
+function djMixBtn(){
+  const b = $('#automix'); if (!b || DJ.d.length < 2) return;
+  b.textContent = DJ.mix ? 'Arrêter l’enchaînement' : (djMixTarget() ? 'Enchaîner vers B ▶' : '◀ Enchaîner vers A');
+}
+function djAutoMix(){
+  if (DJ.mix) { djStopMix(); return; }
+  const to = djMixTarget(), from = 1 - to, dt = DJ.d[to];
+  if (!dt.id) { toast(`Charge d'abord un morceau sur la platine ${dt.L}`, 'err'); return; }
+  djCtx(); djPauseMain();
+  if (dt.el.paused) dt.el.play().catch(() => {});
+  const x0 = DJ.xf, x1 = to ? 1 : 0, t0 = performance.now(), ms = DJ.len * 1000;
+  DJ.mix = { timer: setInterval(() => {
+    const k = Math.min(1, (performance.now() - t0) / ms);
+    DJ.xf = x0 + (x1 - x0) * k; $('#xf').value = Math.round(DJ.xf * 1000); djApplyXf();
+    if (k >= 1) { DJ.d[from].el.pause(); djStopMix(); }
+  }, 40) };
+  djMixBtn();
+}
+
+// ---- Création des deux platines et de leurs commandes ----
+['A', 'B'].forEach((L, i) => {
+  const root = $('#deck' + L); root.innerHTML = djDeckHtml(L);
+  const el = new Audio(); el.preload = 'auto';
+  const d = { i, L, root, el, id: null, stem: 'orig', cue: 0, bpm: null, peaks: null, rate: 1, vol: 1, eq: { low: 0, mid: 0, high: 0 }, nodes: null };
+  DJ.d.push(d);
+  const q = s => root.querySelector(s);
+  root.querySelectorAll('.dk-stem button').forEach(b => { b.disabled = b.dataset.s !== 'orig'; b.classList.toggle('on', b.dataset.s === 'orig'); });
+  djPlayIcon(d);
+  el.addEventListener('play', () => { djPlayIcon(d); djPauseMain(); });
+  el.addEventListener('pause', () => djPlayIcon(d));
+  el.addEventListener('ended', () => djPlayIcon(d));
+  q('.dk-play').onclick = () => {
+    if (!d.id) { toast(`Charge un morceau sur la platine ${L}`, 'err'); return; }
+    djCtx();
+    if (el.paused) el.play().catch(() => {}); else el.pause();
+  };
+  q('.dk-cue').onclick = () => {
+    if (!d.id) return;
+    if (!el.paused) { el.pause(); el.currentTime = d.cue; } else d.cue = el.currentTime;
+  };
+  const cv = q('.dk-wave'); let drag = false;
+  const seek = e => { if (!el.duration) return; const r = cv.getBoundingClientRect(); el.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * el.duration; };
+  cv.addEventListener('pointerdown', e => { drag = true; cv.setPointerCapture(e.pointerId); seek(e); });
+  cv.addEventListener('pointermove', e => { if (drag) seek(e); });
+  cv.addEventListener('pointerup', () => { drag = false; });
+  q('.dk-stem').onclick = e => {
+    const b = e.target.closest('button'); if (!b || b.disabled || !d.id || b.dataset.s === d.stem) return;
+    d.stem = b.dataset.s; d.peaks = null;
+    djSetSrc(d, el.currentTime, !el.paused);
+    djMeta(d); djAnalyse(d);
+  };
+  const tempo = q('.dk-tempo');
+  const setTempo = v => {
+    tempo.value = v; d.rate = 1 + v / 100; el.playbackRate = d.rate; el.defaultPlaybackRate = d.rate;
+    tempo.title = `Tempo ${v > 0 ? '+' : ''}${(+v).toFixed(1).replace('.', ',')} % (double-clic : 0 %)`;
+    djMeta(d);
+  };
+  d.setTempo = setTempo;
+  tempo.oninput = () => setTempo(+tempo.value);
+  tempo.ondblclick = () => setTempo(0);
+  q('.dk-sync').onclick = () => {
+    const o = DJ.d[1 - i];
+    if (!d.bpm || !o.bpm) { toast('BPM pas encore détecté sur les deux platines', 'err'); return; }
+    let ratio = o.bpm * o.rate / d.bpm;
+    [2, 0.5].forEach(f => { if (Math.abs(ratio * f - 1) < Math.abs(ratio - 1)) ratio *= f; });   // demi/double tempo
+    const v = (ratio - 1) * 100;
+    if (Math.abs(v) > 8) { toast('Écart de tempo trop grand (plus de 8 %)', 'err'); return; }
+    setTempo(Math.round(v * 10) / 10);
+    toast(`Platine ${L} calée sur ${(o.bpm * o.rate).toFixed(1).replace('.', ',')} BPM`);
+  };
+  root.querySelectorAll('.dk-eq').forEach(r => {
+    const b = r.dataset.b, out = q(`output[data-o="${b}"]`);
+    const set = v => { r.value = v; d.eq[b] = +v; out.textContent = +v <= -26 ? 'coupé' : `${v > 0 ? '+' : ''}${(+v).toFixed(1).replace('.0', '').replace('.', ',')} dB`; djApply(d); };
+    r.oninput = () => set(r.value); r.ondblclick = () => set(0);
+  });
+  const vol = q('.dk-vol');
+  vol.oninput = () => { d.vol = vol.value / 100; q('output[data-o="vol"]').textContent = vol.value + ' %'; djApply(d); };
+});
+$('#xf').oninput = e => { djStopMix(); DJ.xf = e.target.value / 1000; djApplyXf(); djMixBtn(); };
+$('#xf').ondblclick = () => { djStopMix(); DJ.xf = 0.5; $('#xf').value = 500; djApplyXf(); djMixBtn(); };
+$('#automix').onclick = djAutoMix;
+try { DJ.len = +localStorage.getItem('mixlen') || 8; } catch {}
+const djLen = () => document.querySelectorAll('#mixlen button').forEach(b => b.classList.toggle('on', +b.dataset.l === DJ.len));
+$('#mixlen').onclick = e => { const b = e.target.closest('button'); if (!b) return; DJ.len = +b.dataset.l; try { localStorage.setItem('mixlen', DJ.len); } catch {} djLen(); };
+djLen(); djMixBtn(); requestAnimationFrame(djDraw);
+
+// ---- Bibliothèque de l'onglet Mix ----
+let djLibKey = '';
+function djRenderLib(force){
+  if ($('#v-dj').hidden || !state) return;
+  const f = ($('#djq').value || '').toLowerCase(), bpm = djBpmCache();
+  const rows = (state.history || []).filter(x => x.exists && (!f || (x.title + ' ' + x.uploader).toLowerCase().includes(f)));
+  const key = JSON.stringify(rows.map(x => [x.id, x.voix, x.instru])) + f + DJ.d.map(d => d.id).join() + JSON.stringify(bpm);
+  if (!force && key === djLibKey) return; djLibKey = key;
+  $('#djlib').innerHTML = rows.length ? rows.map(x => `<div class="item djrow">${thumb(x.vid, x.duration, false, x.thumb)}
+      <div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${bpm[x.id] ? `<span class="tag">${String(bpm[x.id]).replace('.', ',')} BPM</span>` : ''}${x.voix || x.instru ? '<span class="tag">Voix / Instru</span>' : ''}</div></div>
+      <div class="acts"><button class="ab a ${DJ.d[0].id === x.id ? 'on' : ''}" data-load="0" data-id="${x.id}" title="Charger sur la platine A">A</button><button class="ab b ${DJ.d[1].id === x.id ? 'on' : ''}" data-load="1" data-id="${x.id}" title="Charger sur la platine B">B</button></div></div>`).join('')
+    : `<div class="empty">${I.note}<div>${f ? 'Aucun résultat' : 'Télécharge des morceaux pour les mixer ici'}</div></div>`;
+}
+$('#djq').oninput = () => djRenderLib(true);
+$('#djlib').onclick = e => { const b = e.target.closest('[data-load]'); if (b) djLoad(+b.dataset.load, b.dataset.id); };
+
 /* --- Onglets --- */
 function show(tab){
   document.querySelectorAll('.tabs button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   $('#v-main').hidden = tab !== 'main';
   $('#v-set').hidden = tab !== 'set';
+  $('#v-dj').hidden = tab !== 'dj';
+  document.body.classList.toggle('dj-mode', tab === 'dj');
+  if (tab === 'dj') djRenderLib(true);
 }
 document.querySelector('.tabs').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.tab); };
 
@@ -1072,6 +1444,7 @@ function render(s){
   if (s.appVersion) renderAbout(s.appVersion);
   renderSepCard(s.separation || {});
   renderSearch(s.search);
+  djRenderLib(false);
 
   // Paramètres
   const st = s.settings || {};
