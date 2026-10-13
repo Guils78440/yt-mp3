@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.1 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.2 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.2'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -153,6 +153,15 @@ header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
 .ver:hover{color:var(--text)}
 .newver{font:600 11.5px "Segoe UI",system-ui;color:#fff;background:var(--grad);border-radius:6px;padding:3px 8px;vertical-align:3px;margin-left:6px;cursor:pointer;box-shadow:0 4px 14px #ff3b6b40}
 .updst{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:14px}
+.box.dlg{text-align:left;width:min(460px,92vw)}
+.dlg h3{margin:14px 0 4px}
+.dlg-ic{width:44px;height:44px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 8px 24px #ff3b6b40}
+.dlg-ic svg{width:22px;height:22px}
+.dlg-notes{margin:14px 0 0;padding-left:20px;color:var(--text);font-size:14px;display:flex;flex-direction:column;gap:6px}
+.dlg-notes:empty{display:none}
+.dlg-btns{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-top:22px}
+.box.dlg .dlg-btns .go{margin:0}
+.box.dlg p{margin:0}
 .updst .spin{width:18px;height:18px;border-width:2px;margin:0}
 .log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
 .log li{display:flex;gap:14px}
@@ -477,6 +486,13 @@ body.has-player{--toast-b:112px}
 </main>
 
 <div class="overlay" id="ov"><div class="box" id="ovbox"></div></div>
+<div class="overlay" id="upddlg"><div class="box dlg">
+  <div class="dlg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
+  <h3 id="dlgTitle"></h3>
+  <p id="dlgSub"></p>
+  <ul class="dlg-notes" id="dlgNotes"></ul>
+  <div class="dlg-btns"><button class="btn-ghost" id="dlgLater">Plus tard</button><button class="go" id="dlgGo"></button></div>
+</div></div>
 <div class="overlay" id="down"><div class="box">
   <div class="spin"></div>
   <h3>YT MP3 s'est arrêté</h3>
@@ -670,6 +686,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.2', '13/10/2026', ['Nouvelle version détectée même quand l\'application est déjà ouverte (vérification toutes les 30 min)', 'Fenêtre de proposition avec la liste des nouveautés : Installer maintenant / Plus tard', 'Si un téléchargement est en cours, la mise à jour attend qu\'il soit terminé puis s\'installe toute seule']],
   ['2.1', '13/10/2026', ['Mises à jour intégrées depuis GitHub : vérification au démarrage, installation en un clic, sans alerte Windows', 'Installation en une ligne de commande, sans .exe à télécharger']],
   ['2.0.2', '13/10/2026', ['Noms propres : tirets spéciaux reconnus, « CLIP OFFICIEL » retiré même sans parenthèses', 'Titres du type « Artiste 1 - Artiste 2 " Titre " » correctement séparés']],
   ['2.0.1', '13/10/2026', ['Correction : le moteur ne s\'arrête plus après une mise en veille du PC (erreur « Failed to fetch »)', 'Si le moteur s\'arrête quand même, un bouton « Relancer YT MP3 » apparaît et la fenêtre se reconnecte toute seule']],
@@ -899,29 +916,69 @@ function renderUpdate(s){
   const u = s.update || {};
   const nv = $('#newver');
   nv.hidden = u.state !== 'dispo';
-  nv.textContent = `Mise à jour v${u.latest}`;
+  nv.textContent = u.planned ? `Mise à jour v${u.latest} prévue` : `Mise à jour v${u.latest}`;
   const key = JSON.stringify(u); if (key === updKey) return; updKey = key;
   let html;
   if (u.state === 'verif') html = `<div class="updst"><div class="spin"></div>Recherche d'une mise à jour…</div>`;
+  else if (u.state === 'dispo' && u.planned) html = `<div class="updst"><div class="spin"></div>La v${esc(u.latest)} s'installera automatiquement à la fin des téléchargements en cours.</div><button class="btn-ghost" id="cancelPlan">Annuler</button>`;
   else if (u.state === 'dispo') html = `<div class="updst">Nouvelle version disponible : <b>v${esc(u.latest)}</b> (tu as v${esc(s.appVersion)})</div>`
-      + (u.canApply ? `<button class="go sm" id="doUpdate">Installer la mise à jour</button>`
+      + ((u.notes || []).length ? `<ul class="dlg-notes" style="margin:0 0 14px">${u.notes.map(n => `<li>${esc(n)}</li>`).join('')}</ul>` : '')
+      + (u.canApply ? `<button class="go sm" id="doUpdate">${u.busy ? 'Installer à la fin des téléchargements' : 'Installer la mise à jour'}</button>`
                     : `<p class="st err" style="white-space:normal">Installe YT MP3 avec la commande d'installation pour profiter des mises à jour automatiques.</p>`);
   else if (u.state === 'ajour') html = `<div class="updst ok-txt">✓ Tu as la dernière version (v${esc(s.appVersion)}).</div><button class="btn-ghost" data-act="checkupdate">Vérifier à nouveau</button>`;
   else if (u.state === 'erreur') html = `<p class="st err" style="white-space:normal;margin-bottom:12px">${esc(u.error)}</p><button class="btn-ghost" data-act="checkupdate">Réessayer</button>`;
   else html = `<button class="btn-ghost" data-act="checkupdate">Rechercher une mise à jour</button>`;
   $('#updbox').innerHTML = html;
-  const b = $('#doUpdate');
-  if (b) b.onclick = async () => {
-    b.disabled = true; b.textContent = 'Téléchargement…';
-    try {
-      const r = await api('/api/update', {});
-      if (r.error) { toast(r.error, 'err'); b.disabled = false; b.textContent = 'Installer la mise à jour'; return; }
-      updating = true;
-      $('#ov').classList.add('show');
-      $('#ovbox').innerHTML = `<div class="spin"></div><h3>Mise à jour vers v${esc(u.latest)}</h3><p>YT MP3 redémarre, la fenêtre va se recharger toute seule…</p>`;
-    } catch(e){ toast(e.message, 'err'); b.disabled = false; b.textContent = 'Installer la mise à jour'; }
-  };
+  const b = $('#doUpdate'); if (b) b.onclick = () => startUpdate(u);
+  const c = $('#cancelPlan'); if (c) c.onclick = async () => { try { render(await api('/api/cancelupdate', {})); toast('Mise à jour programmée annulée'); } catch {} };
 }
+
+// Lance la mise à jour : tout de suite, ou à la fin des téléchargements en cours
+let updatePlanned = false;
+function showUpdating(v){
+  updating = true; hideDlg();
+  $('#ov').classList.add('show');
+  $('#ovbox').innerHTML = `<div class="spin"></div><h3>Mise à jour vers v${esc(v)}</h3><p>YT MP3 redémarre, la fenêtre va se recharger toute seule…</p>`;
+}
+async function startUpdate(u){
+  const btns = [$('#doUpdate'), $('#dlgGo')].filter(Boolean);
+  btns.forEach(x => { x.disabled = true; });
+  try {
+    const r = await api('/api/update', { whenIdle: !!u.busy });
+    if (r.error) { toast(r.error, 'err'); return; }
+    if (r.planned) { updatePlanned = true; hideDlg(); toast('La mise à jour s\'installera à la fin des téléchargements', 'ok'); return; }
+    showUpdating(u.latest);
+  } catch(e){ toast(e.message, 'err'); }
+  finally { btns.forEach(x => { x.disabled = false; }); }
+}
+
+/* --- Fenêtre « nouvelle version disponible » : proposée d'elle-même, une fois par version --- */
+let dlgShownFor = null;
+function hideDlg(){ $('#upddlg').classList.remove('show'); }
+function maybeOfferUpdate(s){
+  const u = s.update || {};
+  if (u.state !== 'dispo' || !u.canApply || u.planned || updating) { if (u.state !== 'dispo') hideDlg(); return; }
+  let dismissed = null; try { dismissed = localStorage.getItem('updDismissed'); } catch {}
+  if (dismissed === u.latest || dlgShownFor === u.latest) {
+    if ($('#upddlg').classList.contains('show')) fillDlg(u, s.appVersion);   // garde le bon bouton si un téléchargement démarre/finit
+    return;
+  }
+  dlgShownFor = u.latest;
+  fillDlg(u, s.appVersion);
+  $('#upddlg').classList.add('show');
+}
+function fillDlg(u, cur){
+  $('#dlgTitle').textContent = `YT MP3 v${u.latest} est disponible`;
+  $('#dlgSub').textContent = `Tu utilises la v${cur}. La mise à jour prend quelques secondes ; ta bibliothèque et tes réglages sont conservés.` +
+    (u.busy ? ' Un téléchargement est en cours : la mise à jour peut attendre qu\'il soit terminé.' : '');
+  $('#dlgNotes').innerHTML = (u.notes || []).map(n => `<li>${esc(n)}</li>`).join('');
+  $('#dlgGo').textContent = u.busy ? 'Installer à la fin des téléchargements' : 'Installer maintenant';
+  $('#dlgGo').onclick = () => startUpdate(u);
+}
+$('#dlgLater').onclick = () => {
+  try { localStorage.setItem('updDismissed', dlgShownFor); } catch {}
+  hideDlg(); toast('D\'accord. Le badge en haut reste disponible si tu changes d\'avis.');
+};
 $('#newver').onclick = () => { show('set'); setTimeout(() => $('#updcard').scrollIntoView({behavior:'smooth'}), 50); };
 
 /* --- Onglets --- */
@@ -1011,6 +1068,7 @@ function render(s){
   } else if (!updating) ov.classList.remove('show');
 
   renderUpdate(s);
+  maybeOfferUpdate(s);
   if (s.appVersion) renderAbout(s.appVersion);
   renderSepCard(s.separation || {});
   renderSearch(s.search);
@@ -1082,6 +1140,7 @@ function notifyDone(s){
 /* --- Connexion au moteur : détection d'arrêt et relance --- */
 let down = false;
 function setDown(v){
+  if (v && updatePlanned && !updating) { showUpdating(state && state.update ? state.update.latest : ''); return; }
   if (updating) return;
   if (v === down) return;
   down = v;
@@ -1700,7 +1759,12 @@ function Update-Sep {
 #  Mises à jour de YT MP3 depuis GitHub
 #  Un fichier récupéré par PowerShell n'a pas la marque « téléchargé d'Internet » : aucune alerte Windows.
 # =====================================================================
-$script:upd = @{ state = 'inconnu'; latest = ''; error = '' }   # inconnu | verif | ajour | dispo | erreur
+$script:upd = @{ state = 'inconnu'; latest = ''; error = ''; notes = @() }   # inconnu | verif | ajour | dispo | erreur
+$script:lastUpdCheck = [datetime]::MinValue
+$script:updateWhenIdle = $false   # « installer à la fin des téléchargements »
+$UpdateEvery = 1800               # vérification toutes les 30 min tant que l'application est ouverte
+if ($env:YTMP3_UPDATE_EVERY_SEC) { $UpdateEvery = [int]$env:YTMP3_UPDATE_EVERY_SEC }
+function Test-Busy { return [bool]($script:proc -or $script:sepProc -or @($queue | Where-Object { $_.status -eq 'attente' }).Count) }
 $script:updJob = $null
 $script:restartAfter = $false
 $CanSelfUpdate = [bool]($Installed -and $SelfPath)
@@ -1718,15 +1782,22 @@ function New-WebClient {
     return $wc
 }
 
-function Start-UpdateCheck {
+# $Manual : vérification demandée par l'utilisateur (affiche « Recherche… »). Les vérifications
+# automatiques se font en silence et ne changent l'affichage que si une nouvelle version apparaît.
+function Start-UpdateCheck([switch]$Manual) {
     if ($script:updJob -and $script:updJob.State -eq 'Running') { return }
-    $script:upd.state = 'verif'; $script:upd.error = ''
+    $script:lastUpdCheck = Get-Date
+    if ($Manual -or $script:upd.state -eq 'inconnu') { $script:upd.state = 'verif'; $script:upd.error = '' }
     $script:updJob = Start-Job -ArgumentList $UpdateBase -ScriptBlock {
         param($base)
         try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 } catch {}
         $wc = New-Object Net.WebClient
         $wc.Headers['Cache-Control'] = 'no-cache'
-        ($wc.DownloadString("$base/version.txt?t=" + [DateTime]::UtcNow.Ticks)).Trim()
+        $t = [DateTime]::UtcNow.Ticks
+        $v = ($wc.DownloadString("$base/version.txt?t=$t")).Trim()
+        $n = ''
+        try { $wc.Encoding = [Text.Encoding]::UTF8; $n = $wc.DownloadString("$base/notes.txt?t=$t") } catch {}   # nouveautés : facultatif
+        [PSCustomObject]@{ v = $v; notes = $n }
     }
 }
 
@@ -1734,17 +1805,22 @@ function Update-UpdateCheck {
     $j = $script:updJob
     if (-not $j -or $j.State -eq 'Running') { return }
     try {
-        $v = ''
-        if ($j.State -eq 'Completed') { $v = [string](@(Receive-Job $j -ErrorAction Stop) | Select-Object -Last 1) }
+        $v = ''; $n = ''
+        if ($j.State -eq 'Completed') {
+            $r = @(Receive-Job $j -ErrorAction Stop) | Select-Object -Last 1
+            if ($r) { $v = [string]$r.v; $n = [string]$r.notes }
+        }
         if ($v -match '^\d+(\.\d+){0,3}$') {
             $script:upd.latest = $v
+            $script:upd.error = ''
             $script:upd.state = $(if ((ConvertTo-Ver $v) -gt (ConvertTo-Ver $AppVersion)) { 'dispo' } else { 'ajour' })
-        } else {
+            $script:upd.notes = @($n -split "`r?`n" | ForEach-Object { $_.Trim().TrimStart('-', '*', '•').Trim() } | Where-Object { $_ -and $_ -notmatch '^#' } | Select-Object -First 8)
+        } elseif ($script:upd.state -ne 'dispo') {
             $script:upd.state = 'erreur'
             $script:upd.error = 'Impossible de joindre le site des mises à jour (connexion Internet ?)'
         }
     } catch {
-        $script:upd.state = 'erreur'
+        if ($script:upd.state -ne 'dispo') { $script:upd.state = 'erreur' }
         $script:upd.error = 'Impossible de joindre GitHub pour vérifier les mises à jour (connexion Internet ?). Réessaie plus tard.'
     }
     Remove-Job $j -Force -ErrorAction SilentlyContinue
@@ -1754,7 +1830,7 @@ function Update-UpdateCheck {
 # Télécharge la nouvelle version, la contrôle, puis remplace l'ancienne. Renvoie un message d'erreur, ou '' si tout va bien.
 function Invoke-SelfUpdate {
     if (-not $CanSelfUpdate) { return 'La mise à jour automatique fonctionne avec la version installée de YT MP3.' }
-    if ($script:proc -or $script:sepProc -or @($queue | Where-Object { $_.status -eq 'attente' }).Count) {
+    if (Test-Busy) {
         return 'Attends la fin des téléchargements et séparations en cours, puis relance la mise à jour.'
     }
     $tmp = $SelfPath + '.new'
@@ -1926,7 +2002,10 @@ function Get-State {
         setup = $setup; setupError = $script:setupError; setupMb = $mb; queue = $q; history = $hist
         settings = @{ outDir = (Get-Out); cookies = $script:settings.cookies; quality = $script:settings.quality; normalize = $script:settings.normalize; trim = $script:settings.trim; clean = $script:settings.clean; sources = @($script:settings.sources); defaultDir = $DefaultOut }
         version = (Get-Version); appVersion = $AppVersion; installed = $Installed
-        update = @{ state = $script:upd.state; latest = $script:upd.latest; error = $script:upd.error; canApply = $CanSelfUpdate }
+        update = @{
+            state = $script:upd.state; latest = $script:upd.latest; error = $script:upd.error; canApply = $CanSelfUpdate
+            notes = @($script:upd.notes); busy = (Test-Busy); planned = $script:updateWhenIdle
+        }
         separation = @{ state = (Get-SepState); step = (Get-SepStep); error = $script:sepInstallError }
         search = @{
             status = $script:search.status; q = $script:search.q; count = $script:search.count
@@ -2021,8 +2100,13 @@ function Invoke-Request($ctx) {
             }
         }
         '/api/forget'  { $h = Find-Hist $id; if ($h) { $history.Remove($h); Save-History } }
-        '/api/checkupdate' { Start-UpdateCheck }
+        '/api/checkupdate' { Start-UpdateCheck -Manual }
+        '/api/cancelupdate' { $script:updateWhenIdle = $false }
         '/api/update' {
+            if ($body -and $body.whenIdle -and (Test-Busy)) {
+                $script:updateWhenIdle = $true
+                Send-Json $ctx @{ ok = $true; planned = $true }; return
+            }
             $err = Invoke-SelfUpdate
             if ($err) { Send-Json $ctx @{ error = $err }; return }
             Send-Json $ctx @{ ok = $true; restarting = $true }; return
@@ -2136,6 +2220,13 @@ while ($true) {
         try { Update-Search } catch {}
         try { Update-Sep } catch {}
         try { Update-UpdateCheck } catch {}
+        if ($CanSelfUpdate -and ($now - $script:lastUpdCheck).TotalSeconds -gt $UpdateEvery) { try { Start-UpdateCheck } catch {} }
+        # Mise à jour programmée « à la fin des téléchargements » : on l'installe dès que tout est terminé
+        if ($script:updateWhenIdle -and -not (Test-Busy)) {
+            $script:updateWhenIdle = $false
+            $err = Invoke-SelfUpdate
+            if ($err) { $script:upd.error = $err } elseif ($script:restartAfter) { break }
+        }
 
         # Fermeture automatique quand la fenêtre est fermée et qu'il n'y a plus rien à faire
         $pending = @($queue | Where-Object { $_.status -eq 'attente' }).Count -gt 0 -and (Get-SetupState) -ne 'erreur'

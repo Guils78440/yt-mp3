@@ -1,0 +1,3 @@
+- Nouvelle version détectée même quand l'application est déjà ouverte (vérification toutes les 30 min)
+- Fenêtre de proposition avec la liste des nouveautés : Installer maintenant / Plus tard
+- Si un téléchargement est en cours, la mise à jour attend qu'il soit terminé puis s'installe toute seule
