@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.6 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.7 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.6'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.7'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -560,6 +560,7 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
         <div class="seg mini" id="mixlen" title="Durée de l'enchaînement">
           <button type="button" data-l="4">4 s</button><button type="button" data-l="8">8 s</button><button type="button" data-l="16">16 s</button>
         </div>
+        <button class="btn-ghost recb" id="beatmix" title="Enchaînement calé : même tempo, départ sur la mesure, échange des basses"></button>
         <button class="btn-ghost recb" id="recbtn"></button>
         <button class="btn-ghost recb" id="keysbtn" title="Raccourcis clavier"></button>
       </div>
@@ -908,6 +909,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.7', '14/10/2026', ['Enchaînement calé sur le rythme : le morceau suivant prend le tempo du morceau en cours et démarre pile sur le premier temps d\'une mesure', 'Durée de l\'enchaînement arrondie à des mesures entières, échange des basses à mi-parcours (pas de grosses caisses qui se chevauchent)', 'Bouton « Calé » pour revenir au fondu simple si tu préfères']],
   ['2.6', '14/10/2026', ['Séparation voix / instrumental 10 à 20 fois plus rapide avec une carte graphique NVIDIA (activation en un clic dans Paramètres)', 'Sans carte NVIDIA : séparation environ 15 % plus rapide sur le processeur', 'Durée de chaque séparation affichée à la fin']],
   ['2.5', '14/10/2026', ['Mix : liste de soirée (glisser-déposer, tri par BPM) et Auto-DJ qui enchaîne tout seul, calé sur le tempo', 'Tonalité de chaque morceau (notation Camelot) et suggestions de morceaux compatibles', 'Effets Écho et Réverb sur chaque platine', 'Playlists YouTube : téléchargement de toute la playlist en un clic, et suivi automatique des nouveaux titres', 'Mixtapes : bouton pour les découper en morceaux séparés (l\'original reste intact)', 'Copie sur clé USB : sélection, liste de soirée, fichiers numérotés, noms sans accents', 'Choix de la sortie audio du lecteur (enceinte Bluetooth comme un Echo Dot, par exemple)']],
   ['2.4', '14/10/2026', ['Mix : pré-écoute au casque (sortie salle et sortie casque séparées)', 'SYNC aligne maintenant les temps et les garde calés, indicateur des 4 temps de la mesure', '4 hot cues par morceau (mémorisés), boucles de 4 et 8 temps, filtre passe-bas / passe-haut', 'Enregistrement du mix en MP3 directement dans ta bibliothèque', 'Raccourcis clavier (A/Z/E et P/O/I, 1-4 et 7-0, Espace, flèches)']],
@@ -1350,7 +1352,8 @@ function djApply(d){
   n.fb.gain.setTargetAtTime(d.echo ? 0.25 + 0.45 * d.echo : 0, t, 0.02);
   n.echoWet.gain.setTargetAtTime(d.echo * 0.7, t, 0.02);
   n.revWet.gain.setTargetAtTime(d.rev * 0.9, t, 0.03);
-  ['low', 'mid', 'high'].forEach(b => n[b].gain.setTargetAtTime(d.eq[b], t, 0.015));
+  // Pendant un enchaînement calé, les basses d'une platine sont coupées (échange des basses)
+  ['low', 'mid', 'high'].forEach(b => n[b].gain.setTargetAtTime(b === 'low' && d.bassCut ? Math.min(d.eq.low, -26) : d.eq[b], t, b === 'low' ? 0.04 : 0.015));
   n.vol.gain.setTargetAtTime(d.vol, t, 0.015);
   // Filtre : à gauche passe-bas de 20 kHz à 200 Hz, à droite passe-haut de 20 Hz à 5 kHz (courbes exponentielles)
   const f = d.filt / 100;
@@ -1703,7 +1706,11 @@ function djHot(d, n, erase){
 }
 
 /* ---------- Enchaînement automatique : le crossfader glisse vers l'autre platine ---------- */
-function djStopMix(){ if (DJ.mix) { clearInterval(DJ.mix.timer); DJ.mix = null; } djMixBtn(); }
+function djStopMix(){
+  if (DJ.mix) { clearInterval(DJ.mix.timer); clearTimeout(DJ.mix.wait); DJ.mix = null; }
+  DJ.d.forEach(d => { if (d.bassCut) { d.bassCut = false; djApply(d); } });
+  djMixBtn();
+}
 function djMixTarget(){   // platine visée : celle qui ne joue pas
   const pa = !DJ.d[0].el.paused, pb = !DJ.d[1].el.paused;
   if (pa && !pb) return 1;
@@ -1712,21 +1719,65 @@ function djMixTarget(){   // platine visée : celle qui ne joue pas
 }
 function djMixBtn(){
   const b = $('#automix'); if (!b || DJ.d.length < 2) return;
-  b.textContent = DJ.mix ? 'Arrêter l’enchaînement' : (djMixTarget() ? 'Enchaîner vers B ▶' : '◀ Enchaîner vers A');
+  b.textContent = DJ.mix ? (DJ.mix.waiting ? 'Départ sur la mesure…' : 'Arrêter l’enchaînement') : (djMixTarget() ? 'Enchaîner vers B ▶' : '◀ Enchaîner vers A');
+}
+// Les deux tempos sont-ils assez proches pour être calés (y compris moitié / double) ?
+function djTempoOk(a, b){
+  if (!a.bpm || !b.bpm) return false;
+  const r = b.bpm * b.rate / a.bpm;
+  return [1, 2, 0.5].some(m => Math.abs(r * m - 1) <= 0.08);
+}
+DJ.beatmix = LSJ.get('beatmix', true);
+function djBeatBtn(){
+  const b = $('#beatmix'); if (!b) return;
+  b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 12h2l2-6 3 12 3-9 2 3h4"/></svg><span>Calé ${DJ.beatmix ? 'oui' : 'non'}</span>`;
+  b.classList.toggle('on', DJ.beatmix);
 }
 function djAutoMix(){
   if (DJ.mix) { djStopMix(); return; }
-  const to = djMixTarget(), from = 1 - to, dt = DJ.d[to];
+  const to = djMixTarget(), from = 1 - to, dt = DJ.d[to], df = DJ.d[from];
   if (!dt.id) { toast(`Charge d'abord un morceau sur la platine ${dt.L}`, 'err'); return; }
   djCtx(); djPauseMain();
-  if (dt.el.paused) dt.el.play().catch(() => {});
-  const x0 = DJ.xf, x1 = to ? 1 : 0, t0 = performance.now(), ms = DJ.len * 1000;
-  DJ.mix = { timer: setInterval(() => {
-    const k = Math.min(1, (performance.now() - t0) / ms);
-    DJ.xf = x0 + (x1 - x0) * k; $('#xf').value = Math.round(DJ.xf * 1000); djApplyXf();
-    if (k >= 1) { DJ.d[from].el.pause(); djStopMix(); }
-  }, 40) };
-  djMixBtn();
+  const calé = DJ.beatmix && df.id && !df.el.paused && dt.bpm && df.bpm && djTempoOk(dt, df);
+  if (DJ.beatmix && df.id && !df.el.paused && dt.bpm && df.bpm && !calé) toast('Tempos trop éloignés (plus de 8 %) : enchaînement simple', 'err');
+  let ms = DJ.len * 1000, delay = 0, bar = 0;
+  if (calé) {
+    // 1. Même tempo que le morceau en cours
+    djSyncOn(dt, true);
+    const rf = df.el.playbackRate || 1;
+    bar = 4 * 60 / (df.bpm * rf);                                  // durée réelle d'une mesure (4 temps)
+    // 2. Durée de l'enchaînement arrondie à un nombre entier de mesures
+    ms = Math.max(1, Math.round(DJ.len / bar)) * bar * 1000;
+    // 3. Départ sur le prochain premier temps de mesure du morceau en cours
+    const bp = djBeatPos(df, df.el.currentTime);
+    let nextBar = Math.ceil(bp / 4 - 1e-6) * 4;
+    if ((nextBar - bp) * 60 / (df.bpm * rf) < 0.08) nextBar += 4;   // trop proche : mesure suivante
+    delay = (nextBar - bp) * 60 / (df.bpm * rf) * 1000;
+    if (dt.el.paused) {
+      // Le morceau entrant part de son repère (ou de son premier temps), calé sur un temps
+      const c = dt.el.currentTime;
+      dt.el.currentTime = c < 0.05 ? startPoint(dt) : djQuant(dt, c);
+      dt.bassCut = true; djApply(dt);
+    }
+  }
+  const run = () => {
+    if (!DJ.mix) return;
+    DJ.mix.waiting = false;
+    if (dt.el.paused) dt.el.play().catch(() => {});
+    if (calé) { dt.bassCut = true; djApply(dt); requestAnimationFrame(() => djAlign(dt)); }
+    const x0 = DJ.xf, x1 = to ? 1 : 0, t0 = performance.now();
+    let swapped = !calé;
+    DJ.mix.timer = setInterval(() => {
+      const k = Math.min(1, (performance.now() - t0) / ms);
+      DJ.xf = x0 + (x1 - x0) * k; $('#xf').value = Math.round(DJ.xf * 1000); djApplyXf();
+      // 4. Échange des basses à mi-parcours (sur une mesure) : jamais deux grosses caisses en même temps
+      if (!swapped && k >= 0.5) { swapped = true; dt.bassCut = false; df.bassCut = true; djApply(dt); djApply(df); }
+      if (k >= 1) { df.el.pause(); djStopMix(); }
+    }, 25);
+    djMixBtn();
+  };
+  DJ.mix = { waiting: delay > 0, timer: null, wait: delay > 0 ? setTimeout(run, delay - 30) : null, calé, ms, bar };
+  if (!delay) run(); else djMixBtn();
 }
 
 /* ---------- Enregistrement du mix (sortie salle) en MP3 ---------- */
@@ -1845,6 +1896,8 @@ function djRecToggle(){
 $('#xf').oninput = e => { djStopMix(); DJ.xf = e.target.value / 1000; djApplyXf(); djMixBtn(); };
 $('#xf').ondblclick = () => { djStopMix(); DJ.xf = 0.5; $('#xf').value = 500; djApplyXf(); djMixBtn(); };
 $('#automix').onclick = djAutoMix;
+$('#beatmix').onclick = () => { DJ.beatmix = !DJ.beatmix; LSJ.set('beatmix', DJ.beatmix); djBeatBtn(); toast(DJ.beatmix ? 'Enchaînement calé sur le rythme activé' : 'Enchaînement simple (fondu sans calage)'); };
+djBeatBtn();
 $('#recbtn').onclick = djRecToggle;
 $('#keysbtn').innerHTML = IC.keys + '<span>Raccourcis</span>';
 $('#keysbtn').onclick = () => $('#keyhelp').classList.toggle('show');
@@ -1974,10 +2027,11 @@ function autoTick(){
     cur.el.playbackRate = cur.rate * cur.nudge; djSetTempoUI(cur);
   }
   const remain = (cur.el.duration - cur.el.currentTime) / (cur.el.playbackRate || 1);
-  if (cur.el.duration && remain <= DJ.len + 1.5 && nxt.id === nextId && nxt.el.readyState >= 2) {
+  const barS = cur.bpm ? 4 * 60 / (cur.bpm * (cur.el.playbackRate || 1)) : 0;
+  const need = (barS ? Math.max(1, Math.round(DJ.len / barS)) * barS + barS : DJ.len) + 1;   // durée + attente d'une mesure
+  if (cur.el.duration && remain <= need && nxt.id === nextId && nxt.el.readyState >= 2) {
     nxt.loop = null;
     nxt.el.currentTime = startPoint(nxt);
-    if (nxt.bpm && cur.bpm) djSyncOn(nxt, true);
     djAutoMix();
   }
 }

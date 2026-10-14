@@ -1,3 +1,3 @@
-- Séparation voix / instrumental 10 à 20 fois plus rapide avec une carte graphique NVIDIA (activation en un clic dans Paramètres)
-- Sans carte NVIDIA : séparation environ 15 % plus rapide sur le processeur
-- Durée de chaque séparation affichée à la fin
+- Enchaînement calé sur le rythme : le morceau suivant prend le tempo du morceau en cours et démarre pile sur le premier temps d'une mesure
+- Durée de l'enchaînement arrondie à des mesures entières, échange des basses à mi-parcours (pas de grosses caisses qui se chevauchent)
+- Bouton « Calé » pour revenir au fondu simple si tu préfères
