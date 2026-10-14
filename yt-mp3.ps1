@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.5 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.6 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.5'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.6'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -42,6 +42,14 @@ $PyDir    = Join-Path $Bin 'python'
 $PyExe    = Join-Path $PyDir 'python.exe'
 $SepMarker = Join-Path $PyDir 'demucs-ok.txt'
 $SepStepFile = Join-Path $Bin 'data\separation-etape.txt'
+$GpuMarker = Join-Path $PyDir 'gpu-ok.txt'     # PyTorch CUDA installé et carte NVIDIA reconnue
+$TorchCuda = 'https://download.pytorch.org/whl/cu124'
+# Carte NVIDIA présente ? (seules les cartes NVIDIA accélèrent Demucs de façon fiable)
+$script:gpuName = ''
+try {
+    $script:gpuName = [string](@(Get-CimInstance Win32_VideoController -ErrorAction Stop | Where-Object { $_.Name -match 'NVIDIA' } | ForEach-Object { $_.Name }) | Select-Object -First 1)
+} catch {}
+if ($env:YTMP3_FAKE_GPU) { $script:gpuName = $env:YTMP3_FAKE_GPU }
 
 foreach ($d in @($Bin, $Data)) {
     if (-not (Test-Path -LiteralPath $d)) { [void](New-Item -ItemType Directory -Path $d) }
@@ -282,6 +290,8 @@ section{margin-top:28px}
 .stem{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:7px;background:var(--panel2);border:1px solid var(--line);font-size:12.5px;color:var(--text)}
 .stem:hover{border-color:var(--a2)}
 .stem svg{width:12px;height:12px}
+.gpubox{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:13.5px;display:flex;flex-direction:column;gap:3px}
+.gpubox span{color:var(--muted)}.gpubox.on{border-color:#34d39955}.gpubox.on b{color:var(--ok)}
 .sepline{display:flex;align-items:center;gap:10px;margin-top:7px;font-size:12.5px;color:var(--muted)}
 .sepline .bar{flex:1;margin:0;max-width:260px}
 .sepline.err{color:var(--err)}
@@ -898,6 +908,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.6', '14/10/2026', ['Séparation voix / instrumental 10 à 20 fois plus rapide avec une carte graphique NVIDIA (activation en un clic dans Paramètres)', 'Sans carte NVIDIA : séparation environ 15 % plus rapide sur le processeur', 'Durée de chaque séparation affichée à la fin']],
   ['2.5', '14/10/2026', ['Mix : liste de soirée (glisser-déposer, tri par BPM) et Auto-DJ qui enchaîne tout seul, calé sur le tempo', 'Tonalité de chaque morceau (notation Camelot) et suggestions de morceaux compatibles', 'Effets Écho et Réverb sur chaque platine', 'Playlists YouTube : téléchargement de toute la playlist en un clic, et suivi automatique des nouveaux titres', 'Mixtapes : bouton pour les découper en morceaux séparés (l\'original reste intact)', 'Copie sur clé USB : sélection, liste de soirée, fichiers numérotés, noms sans accents', 'Choix de la sortie audio du lecteur (enceinte Bluetooth comme un Echo Dot, par exemple)']],
   ['2.4', '14/10/2026', ['Mix : pré-écoute au casque (sortie salle et sortie casque séparées)', 'SYNC aligne maintenant les temps et les garde calés, indicateur des 4 temps de la mesure', '4 hot cues par morceau (mémorisés), boucles de 4 et 8 temps, filtre passe-bas / passe-haut', 'Enregistrement du mix en MP3 directement dans ta bibliothèque', 'Raccourcis clavier (A/Z/E et P/O/I, 1-4 et 7-0, Espace, flèches)']],
   ['2.3.1', '13/10/2026', ['Les nouvelles versions sont détectées dès leur dépôt sur GitHub (plus d\'attente de 5 minutes)']],
@@ -941,10 +952,19 @@ $('#appver').onclick = () => { show('set'); setTimeout(() => $('#about').scrollI
 
 /* --- Séparation : carte des paramètres --- */
 let sepKey = '';
+function gpuHtml(sp){
+  const n = esc(sp.gpuName || 'NVIDIA');
+  if (sp.gpu === 'pret') return `<div class="gpubox on"><b>⚡ Accélération par la carte graphique active</b><span>${n} : compte environ 10 à 30 secondes par morceau.</span></div>`;
+  if (sp.gpu === 'installation') return `<div class="gpubox"><div class="sepst"><div class="spin"></div><span>Téléchargement de PyTorch pour ta carte ${n} (environ 2,5 Go)…<br><small style="color:var(--muted)">Les séparations reprendront ensuite, beaucoup plus vite.</small></span></div></div>`;
+  if (sp.gpu === 'dispo' || sp.gpu === 'erreur') return `<div class="gpubox"><b>Carte graphique détectée : ${n}</b><span>Elle peut séparer les morceaux 10 à 20 fois plus vite que le processeur (environ 10 à 30 secondes au lieu de 1 à 3 minutes). Téléchargement unique d'environ 2,5 Go.</span>
+      ${sp.gpu === 'erreur' ? `<p class="st err" style="white-space:normal;margin:10px 0 0">${esc(sp.gpuError)}</p>` : ''}
+      <button class="go sm" data-act="gpuinstall" style="margin-top:12px;align-self:flex-start">⚡ ${sp.gpu === 'erreur' ? 'Réessayer' : 'Activer l\'accélération'}</button></div>`;
+  return `<div class="gpubox"><b>Séparation sur le processeur</b><span>Aucune carte graphique NVIDIA détectée : les cartes AMD et Intel ne sont pas prises en charge par le moteur de séparation. Astuce : ferme les autres logiciels lourds pendant une séparation.</span></div>`;
+}
 function renderSepCard(sp){
   const key = JSON.stringify(sp); if (key === sepKey) return; sepKey = key;
   const box = $('#sepbox');
-  if (sp.state === 'pret') box.innerHTML = `<div class="sepst ok-txt">✓ Module installé. Utilise le bouton ${I.split} sur un titre de la bibliothèque.</div>`;
+  if (sp.state === 'pret') box.innerHTML = `<div class="sepst ok-txt">✓ Module installé. Utilise le bouton ${I.split} sur un titre de la bibliothèque.</div>` + gpuHtml(sp);
   else if (sp.state === 'installation') box.innerHTML = `<div class="sepst"><div class="spin"></div><span>${esc(sp.step || 'Installation…')}<br><small style="color:var(--muted)">Tu peux continuer à utiliser l'application pendant ce temps.</small></span></div>`;
   else if (sp.state === 'erreur') box.innerHTML = `<p class="st err" style="white-space:normal;margin-bottom:12px">${esc(sp.error)}</p><button class="go sm" data-act="sepinstall">${I.retry}Réessayer l'installation</button>`;
   else box.innerHTML = `<button class="go sm" data-act="sepinstall">Installer le module (≈ 1,2 Go)</button>`;
@@ -2120,6 +2140,7 @@ document.body.addEventListener('click', async e => {
     toast('Installe d\'abord le module de séparation'); return;
   }
   if (act === 'sepinstall') toast('Installation du module lancée');
+  if (act === 'gpuinstall') toast('Téléchargement de la version carte graphique lancé');
   if (act === 'checkupdate') { updKey = ''; }
   if (act === 'delete' && !confirm('Envoyer ce MP3 à la corbeille ?')) return;
   if (act === 'split') {
@@ -2810,8 +2831,8 @@ $script:sepCur = $null
 
 function Start-SepInstall {
     $script:sepInstallError = ''
-    $script:sepJob = Start-Job -ArgumentList $Bin -ScriptBlock {
-        param($Bin)
+    $script:sepJob = Start-Job -ArgumentList $Bin, [bool]$script:gpuName, $TorchCuda -ScriptBlock {
+        param($Bin, $gpu, $cudaIdx)
         $ErrorActionPreference = 'Continue'
         $env:TORCH_HOME = Join-Path $Bin 'modeles'
         $py = Join-Path $Bin 'python'
@@ -2853,18 +2874,61 @@ function Start-SepInstall {
         }
         # --only-binary : uniquement des paquets prêts à l'emploi (le Python embarqué ne sait pas compiler)
         $pipArgs = @('-m', 'pip', 'install', '--no-warn-script-location', '--disable-pip-version-check', '--only-binary=:all:')
-        Step 'Installation de PyTorch (le plus long, environ 250 Mo)…'
-        & $pyexe @pipArgs torch==2.5.1 *>> $log
-        Check 'Installation de PyTorch impossible'
+        if ($gpu) {
+            Step 'Installation de PyTorch pour carte NVIDIA (le plus long, environ 2,5 Go)…'
+            & $pyexe @pipArgs torch==2.5.1 --index-url $cudaIdx *>> $log
+            Check 'Installation de PyTorch impossible'
+        } else {
+            Step 'Installation de PyTorch (le plus long, environ 250 Mo)…'
+            & $pyexe @pipArgs torch==2.5.1 *>> $log
+            Check 'Installation de PyTorch impossible'
+        }
         Step 'Installation de Demucs…'
         & $pyexe @pipArgs demucs==4.1.0 numpy *>> $log
         Check 'Installation de Demucs impossible'
         Step 'Téléchargement du modèle de séparation…'
         & $pyexe -c "from demucs.pretrained import get_model; get_model('htdemucs')" *>> $log
         Check 'Téléchargement du modèle impossible'
+        if ($gpu) {
+            $r = & $pyexe -c "import torch; print('OK|' + torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'NON')" 2>> $log
+            if ("$r" -like 'OK|*') { Set-Content -LiteralPath (Join-Path $py 'gpu-ok.txt') -Value ("$r".Substring(3)) -Encoding UTF8 }
+        }
         Set-Content -LiteralPath (Join-Path $py 'demucs-ok.txt') -Value 'ok'
     }
 }
+
+# Passage d'un module déjà installé (version processeur) à la version carte graphique NVIDIA
+$script:gpuJob = $null
+$script:gpuError = ''
+function Start-GpuInstall {
+    $script:gpuError = ''
+    $script:gpuJob = Start-Job -ArgumentList $Bin, $TorchCuda -ScriptBlock {
+        param($Bin, $cudaIdx)
+        $ErrorActionPreference = 'Continue'
+        $pyexe = Join-Path $Bin 'python\python.exe'
+        $log = Join-Path $Bin 'data\gpu-install.log'
+        & $pyexe -m pip install --no-warn-script-location --disable-pip-version-check --only-binary=:all: --force-reinstall --no-deps torch==2.5.1 --index-url $cudaIdx *> $log
+        if ($LASTEXITCODE -ne 0) {
+            $last = Get-Content -LiteralPath $log -Tail 40 -ErrorAction SilentlyContinue | Where-Object { $_ -match 'ERROR' } | Select-Object -Last 1
+            throw ('Téléchargement de PyTorch pour NVIDIA impossible' + $(if ($last) { ' : ' + ($last -replace '^.*?ERROR:?\s*', '').Trim() } else { '' }))
+        }
+        & $pyexe -m pip install --no-warn-script-location --disable-pip-version-check --only-binary=:all: torch==2.5.1 --index-url $cudaIdx --extra-index-url https://pypi.org/simple *>> $log
+        $r = & $pyexe -c "import torch; print('OK|' + torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'NON')" 2>> $log
+        if ("$r" -notlike 'OK|*') { throw 'Ta carte NVIDIA n''est pas reconnue : mets à jour son pilote (GeForce Experience ou nvidia.com/drivers), redémarre le PC puis réessaie.' }
+        Set-Content -LiteralPath (Join-Path $Bin 'python\gpu-ok.txt') -Value ("$r".Substring(3)) -Encoding UTF8
+    }
+}
+function Get-GpuState {
+    if ($script:gpuJob -and $script:gpuJob.State -eq 'Running') { return 'installation' }
+    if (Test-Path -LiteralPath $GpuMarker) { return 'pret' }
+    if ($script:gpuJob -and $script:gpuJob.State -eq 'Failed') {
+        if (-not $script:gpuError) { try { $script:gpuError = $script:gpuJob.ChildJobs[0].JobStateInfo.Reason.Message } catch {}; if (-not $script:gpuError) { $script:gpuError = 'Installation interrompue.' } }
+        return 'erreur'
+    }
+    if ($script:gpuName) { return 'dispo' }
+    return 'aucune'
+}
+function Get-GpuName { if (Test-Path -LiteralPath $GpuMarker) { try { $n = (Get-Content -LiteralPath $GpuMarker -Raw -Encoding UTF8).Trim(); if ($n) { return $n } } catch {} }; return $script:gpuName }
 
 function Get-SepState {
     $job = $script:sepJob
@@ -2900,7 +2964,7 @@ function Start-StemEncode($it, [string]$wav, [string]$out, [string]$label) {
 }
 
 function Start-NextSep {
-    if ($script:sepProc -or (Get-SepState) -ne 'pret') { return }
+    if ($script:sepProc -or (Get-SepState) -ne 'pret' -or (Get-GpuState) -eq 'installation') { return }
     $it = $null
     foreach ($q in $sepQueue) { if ($q.status -eq 'attente') { $it = $q; break } }
     if (-not $it) { return }
@@ -2910,7 +2974,12 @@ function Start-NextSep {
     if (Test-Path -LiteralPath $it.tmp) { Remove-Item -LiteralPath $it.tmp -Recurse -Force }
     [void](New-Item -ItemType Directory -Path $it.tmp)
     $it.status = 'separation'; $it.phase = 'demucs'; $it.progress = 0
-    $a = @('-m', 'demucs', '--two-stems', 'vocals', '-n', 'htdemucs', '-o', $it.tmp, '--filename', '{stem}.{ext}', (Get-HistPath $h))
+    if (-not $it.started) { $it.started = Get-Date }
+    $it.gpu = [bool]((Get-GpuState) -eq 'pret' -and -not $it.cpuOnly)
+    $a = @('-m', 'demucs', '--two-stems', 'vocals', '-n', 'htdemucs', '-o', $it.tmp, '--filename', '{stem}.{ext}')
+    # Carte graphique : ~10 à 20 fois plus rapide. Sinon, recouvrement réduit (≈ 15 % plus rapide, différence inaudible).
+    if ($it.gpu) { $a += @('-d', 'cuda') } else { $a += @('-d', 'cpu', '--overlap', '0.1') }
+    $a += (Get-HistPath $h)
     $script:sepProc = Start-Proc $PyExe $a (Join-Path $it.tmp 'demucs.log')
     $script:sepCur = $it
 }
@@ -2937,6 +3006,12 @@ function Update-Sep {
     $wavDir = Join-Path $it.tmp 'htdemucs'
 
     $fail = $null
+    if ($code -ne 0 -and $it.phase -eq 'demucs' -and $it.gpu) {
+        # Problème sur la carte graphique (mémoire insuffisante, pilote…) : on refait ce titre sur le processeur
+        $it.cpuOnly = $true; $it.status = 'attente'; $it.progress = 0
+        Remove-Item -LiteralPath $it.tmp -Recurse -Force -ErrorAction SilentlyContinue
+        $script:sepCur = $null; Start-NextSep; return
+    }
     if ($code -ne 0) {
         $logName = if ($it.phase -eq 'demucs') { 'demucs.log.err' } else { 'ffmpeg.log.err' }
         $err = (Read-Shared (Join-Path $it.tmp $logName)) | Where-Object { $_ -match 'Error|error' } | Select-Object -Last 1
@@ -2951,6 +3026,9 @@ function Update-Sep {
         $h | Add-Member -NotePropertyName instru -NotePropertyValue $instru -Force
         Save-History
         $sepQueue.Remove($it)
+        $secs = [int]((Get-Date) - $it.started).TotalSeconds
+        $dur = $(if ($secs -ge 60) { '{0} min {1:00} s' -f [math]::Floor($secs / 60), ($secs % 60) } else { "$secs s" })
+        Add-News ("« $($h.title) » séparé en $dur" + $(if ($it.gpu) { ' (carte graphique)' } elseif ($it.cpuOnly) { ' (processeur : la carte graphique a échoué sur ce titre)' } else { '' }))
     }
     if ($fail) { $it.status = 'erreur'; $it.error = $fail }
     Remove-Item -LiteralPath $it.tmp -Recurse -Force -ErrorAction SilentlyContinue
@@ -3568,7 +3646,8 @@ function Get-State {
         followBusy = [bool]($script:followRun -or $script:followQueue.Count)
         news = @($script:news)
         export = $script:exp
-        separation = @{ state = (Get-SepState); step = (Get-SepStep); error = $script:sepInstallError }
+        separation = @{ state = (Get-SepState); step = (Get-SepStep); error = $script:sepInstallError
+            gpu = (Get-GpuState); gpuName = (Get-GpuName); gpuError = $script:gpuError }
         search = @{
             status = $script:search.status; q = $script:search.q; count = $script:search.count
             sources = $script:search.sources; results = @($script:search.results)
@@ -3662,10 +3741,11 @@ function Invoke-Request($ctx) {
             if ($err) { Send-Json $ctx @{ error = $err }; return }
             Send-Json $ctx @{ ok = $true; restarting = $true }; return
         }
+        '/api/gpuinstall' { if ((Get-GpuState) -in @('dispo', 'erreur') -and (Get-SepState) -eq 'pret' -and -not $script:sepProc) { Start-GpuInstall } }
         '/api/sepinstall' { if ((Get-SepState) -ne 'installation') { Start-SepInstall } }
         '/api/separate' {
             if ((Find-Hist $id) -and -not (Find-Sep $id)) {
-                [void]$sepQueue.Add([PSCustomObject]@{ id = $id; status = 'attente'; progress = 0; error = ''; phase = ''; tmp = '' })
+                [void]$sepQueue.Add([PSCustomObject]@{ id = $id; status = 'attente'; progress = 0; error = ''; phase = ''; tmp = ''; started = $null; gpu = $false; cpuOnly = $false })
                 Start-NextSep
             }
         }

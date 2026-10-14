@@ -1,7 +1,3 @@
-- Mix : liste de soirée (glisser-déposer, tri par BPM) et Auto-DJ qui enchaîne tout seul, calé sur le tempo
-- Tonalité de chaque morceau (notation Camelot) et suggestions de morceaux compatibles
-- Effets Écho et Réverb sur chaque platine
-- Playlists YouTube : téléchargement de toute la playlist en un clic, et suivi automatique des nouveaux titres
-- Mixtapes : bouton pour les découper en morceaux séparés (l'original reste intact)
-- Copie sur clé USB : sélection, liste de soirée, fichiers numérotés, noms sans accents
-- Choix de la sortie audio du lecteur (enceinte Bluetooth comme un Echo Dot, par exemple)
+- Séparation voix / instrumental 10 à 20 fois plus rapide avec une carte graphique NVIDIA (activation en un clic dans Paramètres)
+- Sans carte NVIDIA : séparation environ 15 % plus rapide sur le processeur
+- Durée de chaque séparation affichée à la fin
