@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.7 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.7.1 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.7'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.7.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -168,6 +168,8 @@ header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
 .box.dlg{text-align:left;width:min(460px,92vw)}
 .dlg h3{margin:14px 0 4px}
 .dlg-ic{width:44px;height:44px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 8px 24px #ff3b6b40}
+.dlg-ic.warn{background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 8px 24px #f59e0b40}
+.dlg-choice .lnk.danger{color:var(--err)}
 .dlg-ic svg{width:22px;height:22px}
 .dlg-notes{margin:14px 0 0;padding-left:20px;color:var(--text);font-size:14px;display:flex;flex-direction:column;gap:6px}
 .dlg-notes:empty{display:none}
@@ -702,6 +704,12 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
   <div id="exprog"></div>
   <div class="dlg-btns"><button class="btn-ghost" id="exclose">Fermer</button><button class="go" id="exgo">Copier</button></div>
 </div></div>
+<div class="overlay" id="loaddlg"><div class="box dlg">
+  <div class="dlg-ic warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
+  <h3 id="ldTitle"></h3>
+  <p id="ldSub"></p>
+  <div class="dlg-choice" id="ldBtns"></div>
+</div></div>
 <div class="overlay" id="upddlg"><div class="box dlg">
   <div class="dlg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
   <h3 id="dlgTitle"></h3>
@@ -909,6 +917,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.7.1', '14/10/2026', ['Mix : protection contre les coupures, si tu charges un morceau sur la platine qui joue, YT MP3 te propose de le mettre sur l\'autre platine']],
   ['2.7', '14/10/2026', ['Enchaînement calé sur le rythme : le morceau suivant prend le tempo du morceau en cours et démarre pile sur le premier temps d\'une mesure', 'Durée de l\'enchaînement arrondie à des mesures entières, échange des basses à mi-parcours (pas de grosses caisses qui se chevauchent)', 'Bouton « Calé » pour revenir au fondu simple si tu préfères']],
   ['2.6', '14/10/2026', ['Séparation voix / instrumental 10 à 20 fois plus rapide avec une carte graphique NVIDIA (activation en un clic dans Paramètres)', 'Sans carte NVIDIA : séparation environ 15 % plus rapide sur le processeur', 'Durée de chaque séparation affichée à la fin']],
   ['2.5', '14/10/2026', ['Mix : liste de soirée (glisser-déposer, tri par BPM) et Auto-DJ qui enchaîne tout seul, calé sur le tempo', 'Tonalité de chaque morceau (notation Camelot) et suggestions de morceaux compatibles', 'Effets Écho et Réverb sur chaque platine', 'Playlists YouTube : téléchargement de toute la playlist en un clic, et suivi automatique des nouveaux titres', 'Mixtapes : bouton pour les découper en morceaux séparés (l\'original reste intact)', 'Copie sur clé USB : sélection, liste de soirée, fichiers numérotés, noms sans accents', 'Choix de la sortie audio du lecteur (enceinte Bluetooth comme un Echo Dot, par exemple)']],
@@ -2124,8 +2133,39 @@ function djRenderLib(force){
 $('#djq').oninput = () => djRenderLib(true);
 $('#djlib').onclick = e => {
   const s = e.target.closest('[data-setadd]'); if (s) { setAdd(s.dataset.setadd); return; }
-  const b = e.target.closest('[data-load]'); if (b) djLoad(+b.dataset.load, b.dataset.id);
+  const b = e.target.closest('[data-load]'); if (b) djLoadSafe(+b.dataset.load, b.dataset.id);
 };
+
+/* ---------- Protection : ne jamais couper la platine qui joue par erreur ---------- */
+// Une platine « à l'antenne » : en lecture et audible dans la salle (crossfader et volume)
+const djOnAir = d => !d.el.paused && d.id && d.vol > 0.02 && (d.i === 0 ? DJ.xf < 0.98 : DJ.xf > 0.02);
+function djLoadSafe(i, id){
+  const d = DJ.d[i], o = DJ.d[1 - i], x = byId(id);
+  if (!x || d.id === id && !d.el.paused) { if (d.id === id) toast(`${x ? x.title : 'Ce morceau'} est déjà sur la platine ${d.L}`); return; }
+  if (!djOnAir(d)) { djLoad(i, id); return; }
+  const cur = byId(d.id), oFree = !djOnAir(o);
+  $('#ldTitle').textContent = `La platine ${d.L} est en train de jouer`;
+  $('#ldSub').innerHTML = `« ${esc(cur ? cur.title : '')} » passe en ce moment dans la salle. Charger « ${esc(x.title)} » sur la platine ${d.L} couperait la musique.`
+    + (oFree ? '' : `<br><br>La platine ${o.L} joue aussi : attends la fin de l'enchaînement, ou choisis celle à remplacer.`);
+  $('#ldBtns').innerHTML = (oFree ? `<button class="go" data-ld="${o.i}">Mettre sur la platine ${o.L}${o.id ? ' (à la place du morceau en attente)' : ''}</button>` : '')
+    + `<button class="btn-ghost" data-ld="cancel">Annuler</button>`
+    + `<button class="lnk danger" data-ld="${i}" style="align-self:center">Remplacer quand même sur ${d.L} (coupe le son)</button>`;
+  $('#loaddlg').dataset.id = id;
+  $('#loaddlg').classList.add('show');
+  setTimeout(() => { const g = $('#ldBtns .go') || $('#ldBtns .btn-ghost'); g && g.focus(); }, 30);
+}
+$('#loaddlg').addEventListener('click', e => {
+  const b = e.target.closest('[data-ld]'); if (!b && e.target !== $('#loaddlg')) return;
+  $('#loaddlg').classList.remove('show');
+  if (!b || b.dataset.ld === 'cancel') return;
+  djLoad(+b.dataset.ld, $('#loaddlg').dataset.id);
+});
+// Fenêtre ouverte : les raccourcis du Mix sont suspendus (Échap ferme, Entrée valide le bouton choisi)
+document.addEventListener('keydown', e => {
+  if (!$('#loaddlg').classList.contains('show')) return;
+  if (e.key === 'Escape') $('#loaddlg').classList.remove('show');
+  if (e.key !== 'Enter' && e.key !== 'Tab') { e.stopImmediatePropagation(); if (e.key === ' ') e.preventDefault(); }
+}, true);
 
 /* --- Onglets --- */
 function show(tab){

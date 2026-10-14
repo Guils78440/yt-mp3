@@ -1,3 +1,4 @@
+- Mix : protection contre les coupures, si tu charges un morceau sur la platine qui joue, YT MP3 te propose de le mettre sur l'autre platine
 - Enchaînement calé sur le rythme : le morceau suivant prend le tempo du morceau en cours et démarre pile sur le premier temps d'une mesure
 - Durée de l'enchaînement arrondie à des mesures entières, échange des basses à mi-parcours (pas de grosses caisses qui se chevauchent)
 - Bouton « Calé » pour revenir au fondu simple si tu préfères
