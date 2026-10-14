@@ -1,5 +1,7 @@
-- Mix : pré-écoute au casque (sortie salle et sortie casque séparées)
-- SYNC aligne maintenant les temps et les garde calés, indicateur des 4 temps de la mesure
-- 4 hot cues par morceau (mémorisés), boucles de 4 et 8 temps, filtre passe-bas / passe-haut
-- Enregistrement du mix en MP3 directement dans ta bibliothèque
-- Raccourcis clavier (A/Z/E et P/O/I, 1-4 et 7-0, Espace, flèches)
+- Mix : liste de soirée (glisser-déposer, tri par BPM) et Auto-DJ qui enchaîne tout seul, calé sur le tempo
+- Tonalité de chaque morceau (notation Camelot) et suggestions de morceaux compatibles
+- Effets Écho et Réverb sur chaque platine
+- Playlists YouTube : téléchargement de toute la playlist en un clic, et suivi automatique des nouveaux titres
+- Mixtapes : bouton pour les découper en morceaux séparés (l'original reste intact)
+- Copie sur clé USB : sélection, liste de soirée, fichiers numérotés, noms sans accents
+- Choix de la sortie audio du lecteur (enceinte Bluetooth comme un Echo Dot, par exemple)

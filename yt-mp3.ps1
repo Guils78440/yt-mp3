@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.4 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.5 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.4'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.5'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -395,9 +395,62 @@ body.dj-mode main{padding-bottom:60px}
 .keys .kgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin-top:12px;font-size:13.5px;color:var(--muted)}
 .keys .kgrid b{color:var(--text)}
 kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--text);margin-right:3px}
+.plsample{margin:12px 0 0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px;max-height:140px;overflow:hidden}
+.plsample i{font-style:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dlg-choice{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.dlg-choice .go,.dlg-choice .btn-ghost{width:100%;justify-content:center;margin:0}
+.chk{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:14px;cursor:pointer}
+.chk input{width:17px;height:17px;accent-color:#ff3b6b}
+.chk span{flex:1}.chk small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.fwrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
+.fwrow .ft{flex:1;min-width:0}.fwrow .ft b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fwrow .ft span{color:var(--muted);font-size:12.5px}
+.box.dlg.wide{width:min(620px,94vw)}
+.exlist{margin-top:12px;max-height:290px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.exlist label{display:flex;align-items:center;gap:10px;padding:7px 12px;border-top:1px solid var(--line);font-size:13.5px;cursor:pointer}
+.exlist label:first-child{border-top:0}
+.exlist label span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exlist label em{font-style:normal;color:var(--muted);font-size:12px}
+.exlist input{accent-color:#ff3b6b}
+.expre{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.expre .btn-ghost{padding:6px 12px;font-size:13px}
+.exsum{margin-top:10px;font-size:13px;color:var(--muted)}
+.exdest{display:flex;gap:8px;margin-top:12px}
+.exdest input{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:14px}
+.usbb{display:inline-flex;align-items:center;gap:6px;margin-right:10px}
+.usbb svg{width:16px;height:16px}
 .outrow{display:flex;align-items:center;gap:12px;margin-top:10px}
-.outrow span{width:60px;color:var(--muted);font-size:13.5px}
+.outrow span{width:84px;color:var(--muted);font-size:13.5px}
 .outrow select{flex:1;max-width:460px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:14px}
+.dk-key{font-size:11px;font-weight:700;color:var(--muted);margin-top:3px;letter-spacing:.3px}
+.dk-key b{display:inline;font-size:11px;color:#fff;background:#334155;border-radius:4px;padding:0 5px;margin-right:4px}
+.dk-key.ok b{background:#16a34a}
+.djbottom{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:18px;margin-top:26px;align-items:start}
+.djbottom section{margin-top:0}
+.setpanel{position:sticky;top:12px}
+.setnow{font-size:12.5px;color:var(--muted);margin:-4px 2px 10px;min-height:1em}
+.setnow b{color:var(--text);font-weight:600}
+.setlist{gap:6px;max-height:62vh;overflow:auto;padding-right:2px}
+.setitem{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 8px 8px 6px;cursor:grab}
+.setitem.drag{opacity:.4}
+.setitem.over{border-color:var(--a1)}
+.setitem.now{border-color:#22c55e;background:linear-gradient(90deg,#22c55e18,transparent 70%),var(--panel)}
+.setitem.next{border-color:#38bdf8}
+.setitem.done{opacity:.45}
+.setitem .num{width:22px;text-align:center;color:var(--faint);font-size:12px;font-variant-numeric:tabular-nums}
+.setitem .meta{min-width:0}
+.setitem .t{font-size:13.5px}
+.setitem .s{font-size:12px}
+.setitem .ib{width:28px;height:28px}
+.setitem .thumb{width:52px;height:34px;flex:none;border-radius:7px}
+.setempty{border:1px dashed var(--line);border-radius:12px;padding:22px 16px;text-align:center;color:var(--faint);font-size:13px}
+.ab.plus{font-size:16px;line-height:1}
+.ab.plus.on{background:#22c55e;color:#0b0c10}
+#autodj.on{background:#22c55e;color:#0b0c10;border-color:transparent}
+.autodjb{width:100%;justify-content:center;margin-bottom:10px;padding:11px;font-weight:600}
+#autodj svg{width:16px;height:16px}
+.tag.key{color:#e2e8f0}
+@media (max-width:980px){.djbottom{grid-template-columns:1fr}.setpanel{position:static}}
 @media (max-width:900px){.dj{grid-template-columns:1fr}}
 
 /* ---- Onglets & paramètres ---- */
@@ -478,6 +531,7 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
   <section>
     <div class="sh">
       <h2>Bibliothèque</h2><span class="count" id="hcount"></span><div class="sp"></div>
+      <button class="lnk usbb" id="usbbtn" title="Copier des titres sur une clé USB ou une carte SD"></button>
       <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" placeholder="Rechercher…"></label>
     </div>
     <div class="list lib" id="lib"></div>
@@ -500,11 +554,21 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
         <button class="btn-ghost recb" id="keysbtn" title="Raccourcis clavier"></button>
       </div>
     </div>
-    <section>
-      <div class="sh"><h2>Bibliothèque</h2><span class="count">charge un morceau sur la platine A ou B</span><div class="sp"></div>
-        <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="djq" placeholder="Rechercher…"></label></div>
-      <div class="list" id="djlib"></div>
-    </section>
+    <div class="djbottom">
+      <section class="setpanel">
+        <div class="sh"><h2>Liste de soirée</h2><span class="count" id="setcount"></span><div class="sp"></div>
+          <button class="lnk" id="setsort" title="Trie par tempo croissant pour faire monter l'énergie">Trier par BPM</button>
+          <button class="lnk" id="setclear">Vider</button></div>
+        <button class="btn-ghost recb autodjb" id="autodj" title="Auto-DJ : enchaîne tout seul la liste de soirée (puis des morceaux compatibles)"></button>
+        <div class="setnow" id="setnow"></div>
+        <div class="list setlist" id="setlist"></div>
+      </section>
+      <section class="djlibpanel">
+        <div class="sh"><h2>Bibliothèque</h2><span class="count" id="anacount"></span><div class="sp"></div>
+          <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="djq" placeholder="Rechercher…"></label></div>
+        <div class="list" id="djlib"></div>
+      </section>
+    </div>
   </div>
 
   <div id="v-set" hidden>
@@ -543,12 +607,19 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
     </div>
 
     <div class="card" id="djcard">
-      <h3>Mode DJ : sorties audio</h3>
-      <p>Choisis où part le son de la salle (tes enceintes) et celui de la pré-écoute (ton casque). Avec le bouton casque d'une platine, tu entends le morceau suivant dans le casque pendant que la salle écoute l'autre.</p>
-      <div class="outrow"><span>Salle</span><select id="outMain"></select></div>
-      <div class="outrow"><span>Casque</span><select id="outCue"></select></div>
+      <h3>Sorties audio</h3>
+      <p>Choisis où part le son de chaque partie de YT MP3. Une enceinte Bluetooth appairée à Windows (Echo Dot, JBL…) apparaît ici comme n'importe quelle sortie. En mode DJ, le bouton casque d'une platine te fait entendre le morceau suivant dans le casque pendant que la salle écoute l'autre.</p>
+      <div class="outrow"><span>Lecteur</span><select id="outPlayer"></select></div>
+      <div class="outrow"><span>Mix salle</span><select id="outMain"></select></div>
+      <div class="outrow"><span>Mix casque</span><select id="outCue"></select></div>
       <div class="row" style="margin-top:12px"><button class="btn-ghost" id="outNames">Afficher les noms</button><span class="lbl" id="outHint"></span></div>
       <p style="margin:12px 0 0;font-size:12.5px">Windows ne donne le nom des sorties audio qu'après une autorisation d'accès au micro : il n'est jamais utilisé ni enregistré.</p>
+    </div>
+
+    <div class="card" id="plcard">
+      <h3>Playlists suivies</h3>
+      <p>Les nouveaux titres ajoutés à ces playlists YouTube sont téléchargés automatiquement, au démarrage puis toutes les 6 heures. Pour suivre une playlist, colle son lien dans l'onglet Convertir.</p>
+      <div id="plbox"></div>
     </div>
 
     <div class="card" id="sepcard">
@@ -607,6 +678,19 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
   <p style="margin-top:14px"><kbd>Espace</kbd> enchaîner vers l'autre platine · <kbd>←</kbd> <kbd>→</kbd> crossfader · <kbd>Maj</kbd> + chiffre : effacer un hot cue (ou clic droit sur le repère)</p>
   <div class="dlg-btns"><button class="go kclose">OK</button></div>
 </div></div>
+<div class="overlay" id="pldlg"><div class="box dlg" id="plbox2"></div></div>
+<div class="overlay" id="expdlg"><div class="box dlg wide">
+  <h3 style="margin-top:0">Copier sur une clé USB</h3>
+  <p>Coche les titres à copier. L'ordre de la copie est celui de la liste : pratique pour un autoradio qui lit les fichiers dans l'ordre.</p>
+  <div class="expre"><button class="btn-ghost" data-ex="all">Tout</button><button class="btn-ghost" data-ex="set">Liste de soirée</button><button class="btn-ghost" data-ex="none">Aucun</button></div>
+  <div class="exlist" id="exlist"></div>
+  <div class="exsum" id="exsum"></div>
+  <label class="chk"><input type="checkbox" id="exnum" checked><span>Numéroter les fichiers<small>(01 - …, 02 - … : garde l'ordre sur tous les lecteurs)</small></span></label>
+  <label class="chk"><input type="checkbox" id="exascii"><span>Noms sans accents<small>(pour les vieux autoradios)</small></span></label>
+  <div class="exdest"><input id="exdir" spellcheck="false" placeholder="Ex. E:\"><button class="btn-ghost" id="expick">Choisir…</button></div>
+  <div id="exprog"></div>
+  <div class="dlg-btns"><button class="btn-ghost" id="exclose">Fermer</button><button class="go" id="exgo">Copier</button></div>
+</div></div>
 <div class="overlay" id="upddlg"><div class="box dlg">
   <div class="dlg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
   <h3 id="dlgTitle"></h3>
@@ -657,6 +741,8 @@ const I = {
   play:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
   reveal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>',
+  cut:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.12 15.88M14.47 14.48 20 20M8.12 8.12 12 12"/></svg>',
+  usb:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6v6H9z"/><path d="M7 8h10v9a5 5 0 0 1-10 0z"/><path d="M12 17v5"/></svg>',
   split:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M8 7v10M4 10v4M16 7v10M20 10v4"/></svg>',
   pause:'<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></svg>',
   prev:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13M18.5 6.3v11.4a.8.8 0 0 1-1.2.7L9 12.7a.8.8 0 0 1 0-1.4l8.3-5.7a.8.8 0 0 1 1.2.7z"/><rect x="5" y="5" width="2.4" height="14" rx="1"/></svg>',
@@ -727,6 +813,11 @@ async function add(text){
   if (!urls.length){
     if (String(text).trim()) return search(text);
     toast('Colle un lien ou tape une recherche', 'err'); return;
+  }
+  if (urls.length === 1 && /youtu.*[?&]list=[\w-]+/.test(urls[0])) {
+    $('#url').value = ''; plOpen = true; plKey = '';
+    try { render(await api('/api/plinfo', {url: urls[0]})); } catch(e){ toast(e.message, 'err'); }
+    return;
   }
   try {
     render(await api('/api/add', {urls}));
@@ -807,6 +898,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.5', '14/10/2026', ['Mix : liste de soirée (glisser-déposer, tri par BPM) et Auto-DJ qui enchaîne tout seul, calé sur le tempo', 'Tonalité de chaque morceau (notation Camelot) et suggestions de morceaux compatibles', 'Effets Écho et Réverb sur chaque platine', 'Playlists YouTube : téléchargement de toute la playlist en un clic, et suivi automatique des nouveaux titres', 'Mixtapes : bouton pour les découper en morceaux séparés (l\'original reste intact)', 'Copie sur clé USB : sélection, liste de soirée, fichiers numérotés, noms sans accents', 'Choix de la sortie audio du lecteur (enceinte Bluetooth comme un Echo Dot, par exemple)']],
   ['2.4', '14/10/2026', ['Mix : pré-écoute au casque (sortie salle et sortie casque séparées)', 'SYNC aligne maintenant les temps et les garde calés, indicateur des 4 temps de la mesure', '4 hot cues par morceau (mémorisés), boucles de 4 et 8 temps, filtre passe-bas / passe-haut', 'Enregistrement du mix en MP3 directement dans ta bibliothèque', 'Raccourcis clavier (A/Z/E et P/O/I, 1-4 et 7-0, Espace, flèches)']],
   ['2.3.1', '13/10/2026', ['Les nouvelles versions sont détectées dès leur dépôt sur GitHub (plus d\'attente de 5 minutes)']],
   ['2.3', '13/10/2026', ['Nouvel onglet Mix : deux platines A et B comme un logiciel DJ', 'BPM détecté automatiquement, tempo ±8 % sans changer la tonalité, bouton SYNC', 'Égaliseur 3 bandes avec coupure, volume par platine, crossfader et enchaînement automatique (4, 8 ou 16 s)', 'Voix / Instrumental au choix sur chaque platine pour mélanger deux morceaux']],
@@ -1121,7 +1213,11 @@ const djInfo = id => (LSJ.get('djinfo', {}))[id] || null;               // { bpm
 const djInfoSave = (id, v) => { const c = LSJ.get('djinfo', {}); c[id] = v; LSJ.set('djinfo', c); };
 const djCuesOf = id => (LSJ.get('djcues', {}))[id] || [null, null, null, null];
 const djCuesSave = (id, v) => { const c = LSJ.get('djcues', {}); c[id] = v; LSJ.set('djcues', c); };
-const djOut = () => LSJ.get('djout', { main: '', cue: '' });
+const djOut = () => LSJ.get('djout', { main: '', cue: '', player: '' });
+async function applyPlayerOut(){
+  const o = djOut().player || '';
+  for (const a of decks) { try { if (a.setSinkId && (o || a.sinkId)) await a.setSinkId(o); } catch { toast('Sortie du lecteur introuvable : sortie par défaut utilisée', 'err'); break; } }
+}
 const fr1 = v => (+v).toFixed(1).replace('.', ',');
 
 const IC = {
@@ -1135,7 +1231,7 @@ function djDeckHtml(L){
   const keys = L === 'A' ? ['A', 'Z', 'E', '1-4'] : ['P', 'O', 'I', '7-0'];
   return `<div class="dk-head"><div class="dk-cover"><span class="dk-letter">${L}</span></div>
     <div class="dk-meta"><div class="t dk-title">Platine ${L} vide</div><div class="s dk-sub">Charge un morceau avec le bouton ${L} de la bibliothèque</div></div>
-    <div class="dk-bpm"><b class="dk-bpmv">--</b><small>BPM</small><div class="dk-beats" title="Temps de la mesure"><i></i><i></i><i></i><i></i></div></div></div>
+    <div class="dk-bpm"><b class="dk-bpmv">--</b><small>BPM</small><div class="dk-beats" title="Temps de la mesure"><i></i><i></i><i></i><i></i></div><div class="dk-key" title="Tonalité (notation Camelot). En vert : compatible avec l'autre platine"></div></div></div>
   <canvas class="dk-wave" title="Clique pour te déplacer dans le morceau"></canvas>
   <div class="dk-time"><span class="dk-cur">0:00</span><span class="dk-rem">-0:00</span></div>
   <div class="dk-row">
@@ -1159,6 +1255,8 @@ function djDeckHtml(L){
   <div class="dk-grid">
     <span>Tempo</span><input type="range" class="dk-tempo" min="-8" max="8" step="0.1" value="0" title="Double-clic : 0 %"><output data-o="tempo">0,0 %</output>
     <span>Filtre</span><input type="range" class="dk-filt" min="-100" max="100" step="1" value="0" title="À gauche : son étouffé (passe-bas) · à droite : son aigu (passe-haut) · double-clic : neutre"><output data-o="filt">—</output>
+    <span>Écho</span><input type="range" class="dk-fx" data-fx="echo" min="0" max="100" value="0" title="Écho calé sur le tempo (3/4 de temps) · double-clic : 0"><output data-o="echo">—</output>
+    <span>Réverb</span><input type="range" class="dk-fx" data-fx="rev" min="0" max="100" value="0" title="Réverbération · double-clic : 0"><output data-o="rev">—</output>
     <span>Aigus</span><input type="range" class="dk-eq" data-b="high" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="high">0 dB</output>
     <span>Médiums</span><input type="range" class="dk-eq" data-b="mid" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="mid">0 dB</output>
     <span>Graves</span><input type="range" class="dk-eq" data-b="low" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="low">0 dB</output>
@@ -1180,11 +1278,19 @@ function djCtx(){
       const high = c.createBiquadFilter(); high.type = 'highshelf'; high.frequency.value = 3500;
       const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 20000; lp.Q.value = 1.1;
       const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 10; hp.Q.value = 1.1;
-      const vol = c.createGain(), xg = c.createGain(), pfl = c.createGain();
+      const vol = c.createGain(), xg = c.createGain(), pfl = c.createGain(), sum = c.createGain();
+      // Écho : retard réinjecté (feedback) ; réverbération : convolution avec une réponse générée
+      const delay = c.createDelay(2), fb = c.createGain(), echoWet = c.createGain();
+      const conv = c.createConvolver(), revWet = c.createGain();
+      conv.buffer = djImpulse(c, 2.6);
+      echoWet.gain.value = 0; revWet.gain.value = 0; fb.gain.value = 0;
       src.connect(low).connect(mid).connect(high).connect(lp).connect(hp);
-      hp.connect(vol).connect(xg).connect(DJ.master);
-      hp.connect(pfl).connect(DJ.cueBus);
-      d.nodes = { low, mid, high, lp, hp, vol, xg, pfl };
+      hp.connect(sum);
+      hp.connect(delay); delay.connect(fb).connect(delay); delay.connect(echoWet).connect(sum);
+      hp.connect(conv).connect(revWet).connect(sum);
+      sum.connect(vol).connect(xg).connect(DJ.master);
+      sum.connect(pfl).connect(DJ.cueBus);
+      d.nodes = { low, mid, high, lp, hp, vol, xg, pfl, delay, fb, echoWet, revWet };
       djApply(d);
     });
     djApplyXf();
@@ -1195,7 +1301,11 @@ function djCtx(){
 }
 async function djApplyOutputs(){
   const o = djOut();
-  try { if (DJ.ctx && DJ.ctx.setSinkId) await DJ.ctx.setSinkId(o.main || ''); } catch { toast('Sortie salle introuvable : sortie par défaut utilisée', 'err'); }
+  // On ne change de sortie que si une sortie précise est choisie (ou pour revenir à la sortie par défaut)
+  try {
+    if (DJ.ctx && DJ.ctx.setSinkId && (o.main || DJ.ctx.sinkId)) await DJ.ctx.setSinkId(o.main || '');
+    if (DJ.ctx && DJ.ctx.state === 'suspended') DJ.ctx.resume();
+  } catch { toast('Sortie salle introuvable : sortie par défaut utilisée', 'err'); }
   if (o.cue && DJ.ctx) {
     if (!DJ.cueCtx) {
       const C = window.AudioContext || window.webkitAudioContext;
@@ -1206,9 +1316,20 @@ async function djApplyOutputs(){
     if (DJ.cueCtx.state === 'suspended') DJ.cueCtx.resume();
   } else if (DJ.cueCtx) { DJ.cueCtx.close(); DJ.cueCtx = null; }
 }
+// Réponse impulsionnelle d'une salle : bruit stéréo qui décroît
+function djImpulse(c, sec){
+  const len = Math.floor(c.sampleRate * sec), buf = c.createBuffer(2, len, c.sampleRate);
+  for (let ch = 0; ch < 2; ch++) { const x = buf.getChannelData(ch); for (let i = 0; i < len; i++) x[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+  return buf;
+}
 function djApply(d){
   if (!d.nodes) return;
   const t = DJ.ctx.currentTime, n = d.nodes;
+  const beat = d.bpm ? 60 / (d.bpm * d.rate) : 0.5;
+  n.delay.delayTime.setTargetAtTime(Math.min(1.9, beat * 0.75), t, 0.05);
+  n.fb.gain.setTargetAtTime(d.echo ? 0.25 + 0.45 * d.echo : 0, t, 0.02);
+  n.echoWet.gain.setTargetAtTime(d.echo * 0.7, t, 0.02);
+  n.revWet.gain.setTargetAtTime(d.rev * 0.9, t, 0.03);
   ['low', 'mid', 'high'].forEach(b => n[b].gain.setTargetAtTime(d.eq[b], t, 0.015));
   n.vol.gain.setTargetAtTime(d.vol, t, 0.015);
   // Filtre : à gauche passe-bas de 20 kHz à 200 Hz, à droite passe-haut de 20 Hz à 5 kHz (courbes exponentielles)
@@ -1227,16 +1348,16 @@ function djPauseAll(){ (DJ.d || []).forEach(d => { if (!d.el.paused) d.el.pause(
 function djPauseMain(){ if (typeof P !== 'undefined' && P.id && !A().paused) { cancelFade(); A().pause(); } }
 
 /* ---------- Chargement et analyse (forme d'onde, tempo, grille des temps) ---------- */
-function djLoad(i, id, stem){
+function djLoad(i, id, stem, quiet){
   const d = DJ.d[i], x = byId(id); if (!x) return;
-  djStopMix();
+  if (!quiet) djStopMix();
   d.el.pause();
   d.id = id; d.stem = stemFor(x, stem || 'orig'); d.cue = 0; d.peaks = null; d.loop = null; d.sync = false; d.nudge = 1;
-  const inf = djInfo(id); d.bpm = inf ? inf.bpm : null; d.b0 = inf ? inf.b0 : 0;
+  const inf = djInfo(id); d.bpm = inf ? inf.bpm : null; d.b0 = inf ? inf.b0 : 0; d.key = inf ? inf.key : null;
   d.hot = djCuesOf(id);
   djSetSrc(d, 0, false);
-  djMeta(d); djAnalyse(d); djRenderLib(true);
-  toast(`${x.title} chargé sur la platine ${d.L}`);
+  djMeta(d); djAnalyse(d); djRenderLib(true); djRenderSet();
+  if (!quiet) toast(`${x.title} chargé sur la platine ${d.L}`);
 }
 function djSetSrc(d, at, play){
   d.el.src = url(d.id, d.stem);
@@ -1265,23 +1386,91 @@ async function djFetchAll(u){
   parts.forEach(p => { out.set(p, o); o += p.length; });
   return out.buffer;
 }
+// Décode un fichier en 11 kHz mono (léger) ; null si trop long ou illisible
+async function djDecode(u){
+  const buf = await djFetchAll(u);
+  if (!buf) return null;
+  const ab = await new OfflineAudioContext(1, 1, 11025).decodeAudioData(buf);
+  let mono = ab.getChannelData(0);
+  if (ab.numberOfChannels > 1) { const r = ab.getChannelData(1); const m = new Float32Array(mono.length); for (let i = 0; i < m.length; i++) m[i] = (mono[i] + r[i]) / 2; mono = m; }
+  return { mono, sr: ab.sampleRate };
+}
+// Tempo et tonalité se calculent sur l'original (les voix seules n'ont pas de rythme fiable)
+function djAnalyseMono(id, mono, sr){
+  const inf = Object.assign({}, djInfo(id) || {});
+  if (!inf.bpm) { const r = djRhythm(mono, sr); if (r) Object.assign(inf, r); }
+  if (!inf.key) { const k = djKey(mono, sr); if (k) inf.key = k; }
+  inf.v = 2;
+  djInfoSave(id, inf);
+  return inf;
+}
 async function djAnalyse(d){
   const id = d.id, stem = d.stem;
   try {
-    const buf = await djFetchAll(url(id, stem));
+    const r = await djDecode(url(id, stem));
     if (d.id !== id || d.stem !== stem) return;
-    if (!buf) { d.peaks = 'x'; return; }
-    const ab = await new OfflineAudioContext(1, 1, 11025).decodeAudioData(buf);   // décodé en 11 kHz : léger et suffisant
-    if (d.id !== id || d.stem !== stem) return;
-    let mono = ab.getChannelData(0);
-    if (ab.numberOfChannels > 1) { const r = ab.getChannelData(1); const m = new Float32Array(mono.length); for (let i = 0; i < m.length; i++) m[i] = (mono[i] + r[i]) / 2; mono = m; }
-    d.peaks = djPeaks(mono, 1200);
-    if (!d.bpm) {   // le tempo se calcule sur le morceau original (les voix seules n'ont pas de rythme fiable)
-      const r = djRhythm(mono, ab.sampleRate);
-      if (r) { d.bpm = r.bpm; d.b0 = r.b0; djInfoSave(id, r); }
+    if (!r) { d.peaks = 'x'; return; }
+    d.peaks = djPeaks(r.mono, 1200);
+    if (stem === 'orig' && (!d.bpm || !d.key)) {
+      const inf = djAnalyseMono(id, r.mono, r.sr);
+      d.bpm = inf.bpm || null; d.b0 = inf.b0 || 0; d.key = inf.key || null;
     }
-    djMeta(d); djRenderLib(true);
+    djMeta(d); djMeta(DJ.d[1 - d.i]); djRenderLib(true); djRenderSet();
   } catch { if (d.id === id) d.peaks = 'x'; }
+}
+
+/* ---------- Tonalité : profil de chroma (12 notes) comparé aux 24 gammes (Krumhansl) ---------- */
+const NOTE_FR = ['Do', 'Do♯', 'Ré', 'Mi♭', 'Mi', 'Fa', 'Fa♯', 'Sol', 'La♭', 'La', 'Si♭', 'Si'];
+const KS_MAJ = [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88];
+const KS_MIN = [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17];
+function djFFT(re, im){
+  const n = re.length;
+  for (let i = 1, j = 0; i < n; i++) { let bit = n >> 1; for (; j & bit; bit >>= 1) j ^= bit; j ^= bit; if (i < j) { [re[i], re[j]] = [re[j], re[i]]; [im[i], im[j]] = [im[j], im[i]]; } }
+  for (let len = 2; len <= n; len <<= 1) {
+    const ang = -2 * Math.PI / len, wr = Math.cos(ang), wi = Math.sin(ang);
+    for (let i = 0; i < n; i += len) {
+      let cr = 1, ci = 0;
+      for (let k = 0; k < len / 2; k++) {
+        const a = i + k, b = a + len / 2, tr = re[b] * cr - im[b] * ci, ti = re[b] * ci + im[b] * cr;
+        re[b] = re[a] - tr; im[b] = im[a] - ti; re[a] += tr; im[a] += ti;
+        const nr = cr * wr - ci * wi; ci = cr * wi + ci * wr; cr = nr;
+      }
+    }
+  }
+}
+function djKey(x, sr){
+  const N = 4096, len = Math.min(x.length, Math.floor(sr * 120)), start = Math.max(0, Math.floor((x.length - len) / 2));
+  const frames = Math.floor(len / N); if (frames < 8) return null;
+  const chroma = new Float64Array(12), re = new Float64Array(N), im = new Float64Array(N), win = new Float64Array(N);
+  for (let i = 0; i < N; i++) win[i] = 0.5 - 0.5 * Math.cos(2 * Math.PI * i / (N - 1));
+  const kMin = Math.ceil(60 * N / sr), kMax = Math.floor(2100 * N / sr), pcOf = new Int8Array(kMax + 1);
+  for (let k = kMin; k <= kMax; k++) pcOf[k] = ((Math.round(12 * Math.log2(k * sr / N / 440)) + 69) % 12 + 12) % 12;
+  for (let f = 0; f < frames; f++) {
+    const o = start + f * N;
+    for (let i = 0; i < N; i++) { re[i] = x[o + i] * win[i]; im[i] = 0; }
+    djFFT(re, im);
+    let tot = 0; const fr = new Float64Array(12);
+    for (let k = kMin; k <= kMax; k++) { const m = Math.sqrt(re[k] * re[k] + im[k] * im[k]); fr[pcOf[k]] += m; tot += m; }
+    if (tot > 0) for (let p = 0; p < 12; p++) chroma[p] += fr[p] / tot;   // chaque trame compte pareil
+  }
+  const corr = (a, b) => { const ma = a.reduce((s, v) => s + v, 0) / 12, mb = b.reduce((s, v) => s + v, 0) / 12; let n = 0, da = 0, db = 0; for (let i = 0; i < 12; i++) { n += (a[i] - ma) * (b[i] - mb); da += (a[i] - ma) ** 2; db += (b[i] - mb) ** 2; } return n / Math.sqrt(da * db || 1); };
+  let best = -2, key = null;
+  for (let tonic = 0; tonic < 12; tonic++) for (const minor of [false, true]) {
+    const prof = minor ? KS_MIN : KS_MAJ, rot = Array.from({ length: 12 }, (_, i) => prof[(i - tonic + 12) % 12]);
+    const c = corr(Array.from(chroma), rot);
+    if (c > best) { best = c; key = { tonic, minor }; }
+  }
+  if (best < 0.45) return { cam: '', name: '', none: true };
+  const camMaj = pc => ((pc * 7) % 12 + 7) % 12 + 1;
+  const num = key.minor ? camMaj((key.tonic + 3) % 12) : camMaj(key.tonic);
+  return { cam: num + (key.minor ? 'A' : 'B'), name: NOTE_FR[key.tonic] + (key.minor ? ' mineur' : ' majeur') };
+}
+// Compatibilité harmonique (roue de Camelot) : même case, voisine (±1), ou relative (A↔B)
+function djKeyOk(a, b){
+  if (!a || !b || !a.cam || !b.cam) return false;
+  const na = parseInt(a.cam), nb = parseInt(b.cam), la = a.cam.slice(-1), lb = b.cam.slice(-1);
+  if (na === nb) return true;
+  return la === lb && (Math.abs(na - nb) === 1 || Math.abs(na - nb) === 11);
 }
 function djPeaks(x, n){
   const step = Math.max(1, Math.floor(x.length / n)), p = new Float32Array(n); let mx = 0;
@@ -1298,10 +1487,22 @@ function djRhythm(x, sr){
   const hop = 64, win = 256;
   const len = Math.min(x.length, Math.floor(sr * 90)), start = Math.max(0, Math.floor((x.length - len) / 2));
   const nF = Math.floor((len - win) / hop); if (nF < 400) return null;
-  const env = new Float32Array(nF);
-  for (let f = 0; f < nF; f++) { let s = 0; const o = start + f * hop; for (let j = 0; j < win; j++) { const v = x[o + j]; s += v * v; } env[f] = Math.sqrt(s / win); }
+  // Copie filtrée passe-bas 150 Hz (biquad) : le rythme se lit surtout dans la grosse caisse et la basse
+  const lowx = new Float32Array(len);
+  { const w = 2 * Math.PI * 150 / sr, al = Math.sin(w) / (2 * 0.707), c = Math.cos(w), a0 = 1 + al;
+    const b0 = (1 - c) / 2 / a0, b1 = (1 - c) / a0, b2 = b0, a1 = -2 * c / a0, a2 = (1 - al) / a0;
+    let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+    for (let i = 0; i < len; i++) { const xi = x[start + i], y = b0 * xi + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2; x2 = x1; x1 = xi; y2 = y1; y1 = y; lowx[i] = y; } }
+  const onsetOf = (sig, off) => {
+    const env = new Float32Array(nF), o2 = new Float32Array(nF); let m = 0;
+    for (let f = 0; f < nF; f++) { let s = 0; const o = off + f * hop; for (let j = 0; j < win; j++) { const v = sig[o + j]; s += v * v; } env[f] = Math.sqrt(s / win); }
+    for (let f = 1; f < nF; f++) { const dv = env[f] - env[f - 1]; o2[f] = dv > 0 ? dv : 0; m += o2[f]; }
+    m = m / nF || 1; for (let f = 0; f < nF; f++) o2[f] /= m;
+    return o2;
+  };
+  const onFull = onsetOf(x, start), onLow = onsetOf(lowx, 0);
   const on = new Float32Array(nF), onc = new Float32Array(nF); let mean = 0;
-  for (let f = 1; f < nF; f++) { const dv = env[f] - env[f - 1]; on[f] = dv > 0 ? dv : 0; mean += on[f]; }
+  for (let f = 0; f < nF; f++) { on[f] = 1.5 * onLow[f] + onFull[f]; mean += on[f]; }
   mean /= nF; for (let f = 0; f < nF; f++) onc[f] = on[f] - mean;
   const fd = hop / sr, minL = Math.floor(60 / 200 / fd), maxL = Math.ceil(60 / 60 / fd);
   const ac = new Float32Array(2 * maxL + 2);
@@ -1344,6 +1545,9 @@ function djMeta(d){
     b.classList.toggle('on', b.dataset.s === d.stem);
   });
   d.root.querySelectorAll('.dk-hot').forEach(b => b.classList.toggle('set', d.hot[+b.dataset.h] !== null));
+  const kel = q('.dk-key'), o = DJ.d[1 - d.i];
+  kel.innerHTML = d.key && d.key.cam ? `<b>${d.key.cam}</b>${d.key.name}` : '';
+  kel.classList.toggle('ok', !!(o && o.id && djKeyOk(d.key, o.key)));
   d.root.querySelectorAll('.dk-loop').forEach(b => b.classList.toggle('on', !!d.loop && d.loop.n === +b.dataset.n));
   q('.dk-sync').classList.toggle('on', d.sync);
   q('.dk-pfl').classList.toggle('on', d.pfl);
@@ -1409,13 +1613,13 @@ function djPhaseErr(d, o){
   e = ((e % p) + p) % p; if (e > p / 2) e -= p;
   return e;
 }
-function djSyncOn(d){
-  const o = DJ.d[1 - d.i];
-  if (!d.id || !o.id) { toast('Charge un morceau sur les deux platines', 'err'); return false; }
-  if (!d.bpm || !o.bpm) { toast('Tempo pas encore détecté sur les deux platines', 'err'); return false; }
+function djSyncOn(d, quiet){
+  const o = DJ.d[1 - d.i], say = (m) => { if (!quiet) toast(m, 'err'); };
+  if (!d.id || !o.id) { say('Charge un morceau sur les deux platines'); return false; }
+  if (!d.bpm || !o.bpm) { say('Tempo pas encore détecté sur les deux platines'); return false; }
   let ratio = o.bpm * o.rate / d.bpm, f = 1;
   [2, 0.5].forEach(m => { if (Math.abs(ratio * m - 1) < Math.abs(ratio - 1)) { ratio *= m; f = m; } });   // demi/double tempo
-  if (Math.abs(ratio - 1) > 0.08) { toast('Écart de tempo trop grand (plus de 8 %)', 'err'); return false; }
+  if (Math.abs(ratio - 1) > 0.08) { say('Écart de tempo trop grand (plus de 8 %)'); return false; }
   if (o.sync) { o.sync = false; djMeta(o); }   // une seule platine suit l'autre
   d.sync = true; d.syncF = f; d.rate = ratio; d.nudge = 1;
   d.el.playbackRate = d.rate; d.el.defaultPlaybackRate = d.rate;
@@ -1544,13 +1748,13 @@ function djRecToggle(){
   const root = $('#deck' + L); root.innerHTML = djDeckHtml(L);
   const el = new Audio(); el.preload = 'auto';
   const d = { i, L, root, el, id: null, stem: 'orig', cue: 0, bpm: null, b0: 0, peaks: null, rate: 1, nudge: 1, vol: 1,
-              eq: { low: 0, mid: 0, high: 0 }, filt: 0, pfl: false, sync: false, syncF: 1, loop: null, hot: [null, null, null, null], nodes: null };
+              eq: { low: 0, mid: 0, high: 0 }, filt: 0, echo: 0, rev: 0, key: null, pfl: false, sync: false, syncF: 1, loop: null, hot: [null, null, null, null], nodes: null };
   DJ.d.push(d);
   const q = s => root.querySelector(s);
   root.querySelectorAll('.dk-stem button').forEach(b => { b.disabled = b.dataset.s !== 'orig'; b.classList.toggle('on', b.dataset.s === 'orig'); });
   djPlayIcon(d);
   el.addEventListener('play', () => { djPlayIcon(d); djPauseMain(); });
-  el.addEventListener('playing', () => djAlign(d));
+  el.addEventListener('playing', () => { DJ.autoPending = false; djAlign(d); });
   el.addEventListener('pause', () => djPlayIcon(d));
   el.addEventListener('ended', () => djPlayIcon(d));
   d.toggle = () => {
@@ -1610,6 +1814,11 @@ function djRecToggle(){
     fout.textContent = +v === 0 ? '—' : `${v < 0 ? 'PB' : 'PH'} ${hz >= 1000 ? fr1(hz / 1000) + ' k' : Math.round(hz) + ' '}Hz`;
   };
   filt.oninput = () => setFilt(+filt.value); filt.ondblclick = () => setFilt(0);
+  root.querySelectorAll('.dk-fx').forEach(r => {
+    const k = r.dataset.fx, out = q(`output[data-o="${k}"]`);
+    const set = v => { r.value = v; d[k] = v / 100; out.textContent = +v ? v + ' %' : '—'; djApply(d); };
+    r.oninput = () => set(+r.value); r.ondblclick = () => set(0);
+  });
   const vol = q('.dk-vol');
   vol.oninput = () => { d.vol = vol.value / 100; q('output[data-o="vol"]').textContent = vol.value + ' %'; djApply(d); };
 });
@@ -1645,19 +1854,23 @@ document.addEventListener('keydown', e => {
 
 /* ---------- Paramètres : sorties salle et casque ---------- */
 async function djListOutputs(){
-  const sm = $('#outMain'), sc = $('#outCue'); if (!sm) return;
+  const sm = $('#outMain'), sc = $('#outCue'), sp = $('#outPlayer'); if (!sm) return;
   let devs = [];
   try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === 'audiooutput' && x.deviceId !== 'default' && x.deviceId !== 'communications'); } catch {}
   const o = djOut(), named = devs.some(x => x.label);
   const opts = devs.map((x, n) => `<option value="${esc(x.deviceId)}">${esc(x.label || `Sortie audio ${n + 1}`)}</option>`).join('');
   sm.innerHTML = `<option value="">Sortie par défaut de Windows</option>` + opts;
+  sp.innerHTML = sm.innerHTML;
+  sp.value = devs.some(x => x.deviceId === o.player) ? o.player : '';
   sc.innerHTML = `<option value="">Aucune (pré-écoute désactivée)</option>` + opts;
   sm.value = devs.some(x => x.deviceId === o.main) ? o.main : '';
   sc.value = devs.some(x => x.deviceId === o.cue) ? o.cue : '';
   $('#outNames').hidden = named || !devs.length;
   $('#outHint').textContent = !devs.length ? 'Aucune sortie audio détectée.' : named ? '' : 'Clique sur « Afficher les noms » pour reconnaître tes appareils.';
 }
-const djSaveOut = () => { LSJ.set('djout', { main: $('#outMain').value, cue: $('#outCue').value }); djApplyOutputs(); toast('Sorties audio enregistrées'); };
+const djSaveOut = () => { LSJ.set('djout', { main: $('#outMain').value, cue: $('#outCue').value, player: $('#outPlayer').value }); djApplyOutputs(); applyPlayerOut(); toast('Sorties audio enregistrées'); };
+$('#outPlayer').onchange = djSaveOut;
+applyPlayerOut();
 $('#outMain').onchange = djSaveOut;
 $('#outCue').onchange = () => { djSaveOut(); if (!$('#outCue').value) DJ.d.forEach(d => { d.pfl = false; djApply(d); djMeta(d); }); };
 $('#outNames').onclick = async () => {
@@ -1668,21 +1881,177 @@ $('#outNames').onclick = async () => {
 try { navigator.mediaDevices.addEventListener('devicechange', djListOutputs); } catch {}
 djListOutputs();
 
+/* ===================== Liste de soirée + Auto-DJ ===================== */
+const SET = { ids: LSJ.get('djset', []), played: new Set(), now: null };
+const setSave = () => LSJ.set('djset', SET.ids);
+function setAdd(id){
+  if (SET.ids.includes(id)) { SET.ids = SET.ids.filter(x => x !== id); toast('Retiré de la liste de soirée'); }
+  else { SET.ids.push(id); toast('Ajouté à la liste de soirée'); }
+  setSave(); djRenderSet(); djRenderLib(true);
+}
+const setValid = () => { const ok = new Set((state.history || []).filter(x => x.exists).map(x => x.id)); SET.ids = SET.ids.filter(id => ok.has(id)); };
+
+// Morceau suivant : la liste de soirée d'abord, puis le morceau de la bibliothèque le plus compatible (tempo + tonalité)
+function autoNextId(curId){
+  setValid();
+  const i = SET.ids.indexOf(curId);
+  const fromSet = i >= 0 ? SET.ids.slice(i + 1).find(id => !SET.played.has(id)) : SET.ids.find(id => !SET.played.has(id) && id !== curId);
+  if (fromSet) return fromSet;
+  // choix automatique mémorisé, pour ne pas changer d'avis à chaque instant
+  if (SET.pick && SET.pick.for === curId && !SET.played.has(SET.pick.id) && byId(SET.pick.id)) return SET.pick.id;
+  const cur = djInfo(curId), cand = (state.history || []).filter(x => x.exists && x.id !== curId && !SET.played.has(x.id) && x.uploader !== 'Mix YT MP3');
+  if (!cand.length) return null;
+  const score = x => {
+    const inf = djInfo(x.id); let sc = Math.random() * 0.3;
+    if (cur && cur.bpm && inf && inf.bpm) { let r = inf.bpm / cur.bpm; [2, 0.5].forEach(m => { if (Math.abs(r * m - 1) < Math.abs(r - 1)) r *= m; }); sc += Math.max(0, 1 - Math.abs(r - 1) / 0.08); }
+    if (cur && inf && djKeyOk(cur.key, inf.key)) sc += 0.8;
+    return sc;
+  };
+  const pick = cand.map(x => [x.id, score(x)]).sort((a, b) => b[1] - a[1])[0][0];
+  SET.pick = { for: curId, id: pick };
+  return pick;
+}
+const startPoint = d => d.hot[0] !== null ? d.hot[0] : (d.bpm ? d.b0 : 0);
+
+DJ.auto = false;
+function autoBtn(){
+  const b = $('#autodj'); if (!b) return;
+  b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg><span>Auto-DJ${DJ.auto ? ' activé' : ''}</span>`;
+  b.classList.toggle('on', DJ.auto);
+}
+function autoToggle(){
+  DJ.auto = !DJ.auto; autoBtn();
+  if (DJ.auto) { djCtx(); djPauseMain(); toast('Auto-DJ activé : la soirée s’enchaîne toute seule'); autoTick(); }
+  else toast('Auto-DJ désactivé : tu reprends la main');
+  djRenderSet();
+}
+function autoTick(){
+  if (!DJ.auto || DJ.mix || !state) return;
+  const playing = DJ.d.filter(d => !d.el.paused && d.id);
+  if (!playing.length) {
+    // Morceau en cours mis en pause : on attend (sauf si c'est nous qui sommes en train de le lancer)
+    const held = DJ.d.find(x => x.id && x.id === SET.now && !x.el.ended);
+    if (held) { if (DJ.autoPending) held.el.play().catch(() => {}); return; }
+    // Démarrage : morceau suivant sur la platine A, crossfader côté A
+    const d = DJ.d[0];
+    const id = d.id && !SET.played.has(d.id) ? d.id : autoNextId(SET.now);
+    if (!id) { DJ.auto = false; autoBtn(); toast('Plus de morceau à enchaîner : Auto-DJ arrêté'); return; }
+    if (d.id !== id) djLoad(0, id, 'orig', true);
+    DJ.xf = 0; $('#xf').value = 0; djApplyXf(); djMixBtn();
+    const go = () => { d.el.currentTime = startPoint(d); d.el.play().catch(() => {}); };
+    if (d.el.readyState >= 1) go(); else d.el.addEventListener('loadedmetadata', go, { once: true });
+    SET.now = id; SET.played.add(id); DJ.autoPending = true; djRenderSet();
+    return;
+  }
+  const cur = playing.length === 1 ? playing[0] : (DJ.xf < 0.5 ? DJ.d[0] : DJ.d[1]), nxt = DJ.d[1 - cur.i];
+  if (SET.now !== cur.id) { SET.now = cur.id; SET.played.add(cur.id); djRenderSet(); }
+  const nextId = autoNextId(cur.id);
+  if (!nextId) return;
+  if (nxt.id !== nextId && nxt.el.paused) { djLoad(nxt.i, nextId, 'orig', true); return; }   // préchargement
+  // Hors enchaînement : retour progressif au tempo d'origine du morceau en cours
+  if (!cur.sync && Math.abs(cur.rate - 1) > 0.001 && cur.el.duration - cur.el.currentTime > 40) {
+    cur.rate += Math.sign(1 - cur.rate) * Math.min(0.0005, Math.abs(1 - cur.rate));
+    cur.el.playbackRate = cur.rate * cur.nudge; djSetTempoUI(cur);
+  }
+  const remain = (cur.el.duration - cur.el.currentTime) / (cur.el.playbackRate || 1);
+  if (cur.el.duration && remain <= DJ.len + 1.5 && nxt.id === nextId && nxt.el.readyState >= 2) {
+    nxt.loop = null;
+    nxt.el.currentTime = startPoint(nxt);
+    if (nxt.bpm && cur.bpm) djSyncOn(nxt, true);
+    djAutoMix();
+  }
+}
+setInterval(() => { try { autoTick(); } catch {} }, 400);
+// Fin d'un enchaînement automatique : la platine qui reste devient libre (plus de SYNC)
+const _djStopMix = djStopMix;
+djStopMix = function(){
+  const was = !!DJ.mix; _djStopMix();
+  if (was && DJ.auto) DJ.d.forEach(d => { if (d.sync && DJ.d[1 - d.i].el.paused) { d.sync = false; d.nudge = 1; d.el.playbackRate = d.rate; djMeta(d); } });
+};
+
+// Affichage de la liste (glisser-déposer pour réordonner)
+let setKey = '', dragFrom = null;
+function djRenderSet(){
+  if (!state || $('#v-dj').hidden) return;
+  setValid();
+  const info = LSJ.get('djinfo', {}), nextId = SET.now ? autoNextId(SET.now) : null;
+  const key = JSON.stringify([SET.ids, SET.now, [...SET.played], nextId, DJ.auto, info]);
+  if (key === setKey) return; setKey = key;
+  $('#setcount').textContent = SET.ids.length ? `${SET.ids.length} titre${SET.ids.length > 1 ? 's' : ''}` : '';
+  const nx = nextId && byId(nextId), cu = SET.now && byId(SET.now);
+  $('#setnow').innerHTML = DJ.auto
+    ? (cu ? `En cours : <b>${esc(cu.title)}</b>${nx ? ` · ensuite : <b>${esc(nx.title)}</b>` : ''}` : 'Auto-DJ prêt…')
+    : 'Active <b>Auto-DJ</b> pour enchaîner la liste toute seule.';
+  $('#setlist').innerHTML = SET.ids.length ? SET.ids.map((id, i) => {
+    const x = byId(id); if (!x) return '';
+    const inf = info[id] || {};
+    const cls = id === SET.now ? 'now' : id === nextId ? 'next' : SET.played.has(id) ? 'done' : '';
+    return `<div class="setitem ${cls}" draggable="true" data-i="${i}">
+      <span class="num">${id === SET.now ? '▶' : i + 1}</span>
+      ${thumb(x.vid, '', false, x.thumb)}
+      <div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${inf.bpm ? ` · ${fr1(inf.bpm)} BPM` : ''}${inf.key && inf.key.cam ? ` · ${inf.key.cam}` : ''}</div></div>
+      <button class="ib" data-setrm="${i}" title="Retirer de la liste">${I.x}</button></div>`;
+  }).join('') : `<div class="setempty">Ajoute des morceaux avec le bouton <b>+</b> de la bibliothèque.<br>Sans liste, l'Auto-DJ choisit lui-même des morceaux compatibles.</div>`;
+}
+$('#setlist').addEventListener('click', e => {
+  const b = e.target.closest('[data-setrm]'); if (!b) return;
+  SET.ids.splice(+b.dataset.setrm, 1); setSave(); djRenderSet(); djRenderLib(true);
+});
+$('#setlist').addEventListener('dragstart', e => { const it = e.target.closest('.setitem'); if (!it) return; dragFrom = +it.dataset.i; it.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'set'); });
+$('#setlist').addEventListener('dragend', e => { const it = e.target.closest('.setitem'); if (it) it.classList.remove('drag'); });
+$('#setlist').addEventListener('dragover', e => { const it = e.target.closest('.setitem'); if (dragFrom === null || !it) return; e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.setitem.over').forEach(x => x.classList.remove('over')); it.classList.add('over'); });
+$('#setlist').addEventListener('drop', e => {
+  const it = e.target.closest('.setitem'); if (dragFrom === null || !it) return;
+  e.preventDefault(); e.stopPropagation();
+  const to = +it.dataset.i, [m] = SET.ids.splice(dragFrom, 1); SET.ids.splice(to, 0, m);
+  dragFrom = null; setSave(); setKey = ''; djRenderSet();
+});
+$('#setsort').onclick = () => {
+  const info = LSJ.get('djinfo', {});
+  SET.ids.sort((a, b) => ((info[a] || {}).bpm || 999) - ((info[b] || {}).bpm || 999));
+  setSave(); setKey = ''; djRenderSet(); toast('Liste triée par tempo croissant');
+};
+$('#setclear').onclick = () => { if (!SET.ids.length || !confirm('Vider la liste de soirée ?')) return; SET.ids = []; SET.played.clear(); setSave(); djRenderSet(); djRenderLib(true); };
+$('#autodj').onclick = autoToggle;
+autoBtn();
+
+/* ---------- Analyse de fond : tempo et tonalité de toute la bibliothèque (onglet Mix ouvert) ---------- */
+let anaBusy = false;
+async function djAnalyseLibrary(){
+  if (anaBusy || $('#v-dj').hidden || !state) return;
+  const todo = (state.history || []).filter(x => x.exists && x.uploader !== 'Mix YT MP3' && !LSJ.get('anaskip', {})[x.id] && !((djInfo(x.id) || {}).v === 2));
+  $('#anacount').textContent = todo.length ? `analyse du tempo et de la tonalité… (${todo.length} restant${todo.length > 1 ? 's' : ''})` : '';
+  if (!todo.length) return;
+  anaBusy = true;
+  const x = todo[0];
+  try {
+    const r = await djDecode(url(x.id, 'orig'));
+    if (r) djAnalyseMono(x.id, r.mono, r.sr);
+    else { const sk = LSJ.get('anaskip', {}); sk[x.id] = 1; LSJ.set('anaskip', sk); }   // fichier trop long : ignoré
+  } catch { const sk = LSJ.get('anaskip', {}); sk[x.id] = 1; LSJ.set('anaskip', sk); }
+  anaBusy = false;
+  djRenderLib(true); djRenderSet(); DJ.d.forEach(djMeta);
+}
+setInterval(djAnalyseLibrary, 1500);
+
 /* ---------- Bibliothèque de l'onglet Mix ---------- */
 let djLibKey = '';
 function djRenderLib(force){
   if ($('#v-dj').hidden || !state) return;
   const f = ($('#djq').value || '').toLowerCase(), info = LSJ.get('djinfo', {});
   const rows = (state.history || []).filter(x => x.exists && (!f || (x.title + ' ' + x.uploader).toLowerCase().includes(f)));
-  const key = JSON.stringify(rows.map(x => [x.id, x.voix, x.instru])) + f + DJ.d.map(d => d.id).join() + JSON.stringify(info);
+  const key = JSON.stringify(rows.map(x => [x.id, x.voix, x.instru])) + f + DJ.d.map(d => d.id).join() + JSON.stringify(info) + SET.ids.join();
   if (!force && key === djLibKey) return; djLibKey = key;
   $('#djlib').innerHTML = rows.length ? rows.map(x => `<div class="item djrow">${thumb(x.vid, x.duration, false, x.thumb)}
-      <div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${info[x.id] ? `<span class="tag">${fr1(info[x.id].bpm)} BPM</span>` : ''}${x.voix || x.instru ? '<span class="tag">Voix / Instru</span>' : ''}</div></div>
-      <div class="acts"><button class="ab a ${DJ.d[0].id === x.id ? 'on' : ''}" data-load="0" data-id="${x.id}" title="Charger sur la platine A">A</button><button class="ab b ${DJ.d[1].id === x.id ? 'on' : ''}" data-load="1" data-id="${x.id}" title="Charger sur la platine B">B</button></div></div>`).join('')
+      <div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${info[x.id] && info[x.id].bpm ? `<span class="tag">${fr1(info[x.id].bpm)} BPM</span>` : ''}${info[x.id] && info[x.id].key && info[x.id].key.cam ? `<span class="tag key" title="${esc(info[x.id].key.name)}">${info[x.id].key.cam}</span>` : ''}${x.voix || x.instru ? '<span class="tag">Voix / Instru</span>' : ''}</div></div>
+      <div class="acts"><button class="ab plus ${SET.ids.includes(x.id) ? 'on' : ''}" data-setadd="${x.id}" title="${SET.ids.includes(x.id) ? 'Retirer de' : 'Ajouter à'} la liste de soirée">${SET.ids.includes(x.id) ? '✓' : '+'}</button><button class="ab a ${DJ.d[0].id === x.id ? 'on' : ''}" data-load="0" data-id="${x.id}" title="Charger sur la platine A">A</button><button class="ab b ${DJ.d[1].id === x.id ? 'on' : ''}" data-load="1" data-id="${x.id}" title="Charger sur la platine B">B</button></div></div>`).join('')
     : `<div class="empty">${I.note}<div>${f ? 'Aucun résultat' : 'Télécharge des morceaux pour les mixer ici'}</div></div>`;
 }
 $('#djq').oninput = () => djRenderLib(true);
-$('#djlib').onclick = e => { const b = e.target.closest('[data-load]'); if (b) djLoad(+b.dataset.load, b.dataset.id); };
+$('#djlib').onclick = e => {
+  const s = e.target.closest('[data-setadd]'); if (s) { setAdd(s.dataset.setadd); return; }
+  const b = e.target.closest('[data-load]'); if (b) djLoad(+b.dataset.load, b.dataset.id);
+};
 
 /* --- Onglets --- */
 function show(tab){
@@ -1691,7 +2060,7 @@ function show(tab){
   $('#v-set').hidden = tab !== 'set';
   $('#v-dj').hidden = tab !== 'dj';
   document.body.classList.toggle('dj-mode', tab === 'dj');
-  if (tab === 'dj') djRenderLib(true);
+  if (tab === 'dj') { djRenderLib(true); setKey = ''; djRenderSet(); }
 }
 document.querySelector('.tabs').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.tab); };
 
@@ -1753,6 +2122,10 @@ document.body.addEventListener('click', async e => {
   if (act === 'sepinstall') toast('Installation du module lancée');
   if (act === 'checkupdate') { updKey = ''; }
   if (act === 'delete' && !confirm('Envoyer ce MP3 à la corbeille ?')) return;
+  if (act === 'split') {
+    const x = byId(id), n = x && x.chapters >= 2 ? `${x.chapters} morceaux` : 'morceaux (selon les chapitres de la vidéo)';
+    if (!confirm(`Découper « ${x ? x.title : ''} » en ${n} ?\n\nLe fichier d'origine reste intact : les morceaux sont créés dans un dossier à part.`)) return;
+  }
   try { const s = await api('/api/' + act, {id, stem: b.dataset.stem}); if (s && s.setup) render(s); }
   catch(err){ toast(err.message, 'err'); }
 });
@@ -1777,8 +2150,9 @@ function render(s){
   maybeOfferUpdate(s);
   if (s.appVersion) renderAbout(s.appVersion);
   renderSepCard(s.separation || {});
+  renderPl(s.playlist || {}); renderFollows(s); renderNews(s.news || []); renderExport(s.export || {});
   renderSearch(s.search);
-  djRenderLib(false);
+  djRenderLib(false); djRenderSet();
 
   // Paramètres
   const st = s.settings || {};
@@ -1826,8 +2200,9 @@ function render(s){
     <div class="item ${x.exists ? '' : 'missing'} ${P.id === x.id ? 'playing' : ''}" ${x.exists ? `data-act="play" data-id="${x.id}" style="cursor:pointer"` : ''}>
       ${thumb(x.vid, x.duration, x.exists, x.thumb).replace('</div>', P.id === x.id ? `</div><div class="eq ${P.playing ? '' : 'paused'}"><i></i><i></i><i></i></div>` : '</div>')}
       <div class="meta"><div class="t">${esc(x.title)}</div>
-        <div class="s">${esc(x.uploader)}<span class="dot">•</span>${x.exists ? mb(x.size) : 'Fichier introuvable'}<span class="dot">•</span>${esc(x.date)}${qtag(x)}</div>${sepHtml(x)}</div>
+        <div class="s">${esc(x.uploader)}<span class="dot">•</span>${x.exists ? mb(x.size) : 'Fichier introuvable'}<span class="dot">•</span>${esc(x.date)}${qtag(x)}${x.splitDir ? '<span class="tag">Découpée</span>' : ''}${x.part ? `<span class="tag">Piste ${x.part}</span>` : ''}</div>${sepHtml(x)}${splitHtml(x)}</div>
       <div class="acts">
+        ${canSplit(x) && !x.split ? `<button class="ib" data-act="split" data-id="${x.id}" title="Découper cette mixtape en morceaux (l'original reste intact)">${I.cut}</button>` : ''}
         ${x.exists && !x.sep && !(x.voix && x.instru) ? `<button class="ib" data-act="separate" data-id="${x.id}" title="Séparer voix / instrumental">${I.split}</button>` : ''}
         ${x.exists ? `<button class="ib" data-act="reveal" data-id="${x.id}" title="Afficher dans le dossier">${I.reveal}</button>` : ''}
         <button class="ib del" data-act="${x.exists ? 'delete' : 'forget'}" data-id="${x.id}" title="${x.exists ? 'Supprimer' : 'Retirer de la liste'}">${x.exists ? I.trash : I.x}</button>
@@ -1836,11 +2211,130 @@ function render(s){
     : `<div class="empty">${I.note}<div>${filter ? 'Aucun résultat' : 'Tes MP3 apparaîtront ici'}</div></div>`;
 }
 
+/* --- Playlists YouTube --- */
+let plOpen = false, plKey = '';
+function renderPl(p){
+  const box = $('#plbox2');
+  $('#pldlg').classList.toggle('show', plOpen && p.status && p.status !== 'vide');
+  if (!plOpen || !p.status || p.status === 'vide') return;
+  const k = JSON.stringify(p); if (k === plKey) return; plKey = k;
+  if (p.status === 'lecture') { box.innerHTML = `<div class="spin"></div><h3>Lecture de la playlist…</h3><p>YT MP3 récupère la liste des titres.</p><div class="dlg-btns"><button class="btn-ghost" id="plno">Annuler</button></div>`; return; }
+  if (p.status === 'erreur') {
+    box.innerHTML = `<h3 style="margin-top:0">Playlist illisible</h3><p>Cette playlist est privée, vide ou introuvable.${p.single ? ' Tu peux quand même télécharger le titre seul.' : ''}</p>
+      <div class="dlg-btns"><button class="btn-ghost" id="plno">Fermer</button>${p.single ? '<button class="go" data-pl="one">Ce titre seulement</button>' : ''}</div>`;
+    return;
+  }
+  const canFollow = !p.radio && p.listId;
+  box.innerHTML = `<div class="dlg-ic">${I.note}</div><h3>${esc(p.title)}</h3>
+    <p>${p.count} titre${p.count > 1 ? 's' : ''}${p.radio ? ' · mix généré par YouTube (limité aux 25 premiers)' : ''}</p>
+    <div class="plsample">${(p.sample || []).map(t => `<i>${esc(t)}</i>`).join('')}${p.count > 5 ? `<i>… et ${p.count - 5} autre${p.count - 5 > 1 ? 's' : ''}</i>` : ''}</div>
+    ${canFollow ? (p.followed ? `<p style="margin-top:12px;color:var(--ok)">✓ Tu suis déjà cette playlist.</p>` :
+      `<label class="chk"><input type="checkbox" id="plfollow"><span>Suivre cette playlist<small>(les prochains titres ajoutés seront téléchargés tout seuls)</small></span></label>`) : ''}
+    <div class="dlg-choice">
+      <button class="go" data-pl="all">Télécharger toute la playlist (${p.count})</button>
+      ${p.single ? '<button class="btn-ghost" data-pl="one">Ce titre seulement</button>' : ''}
+      ${canFollow && !p.followed ? '<button class="btn-ghost" data-pl="follow">Suivre sans télécharger l\'existant</button>' : ''}
+      <button class="lnk" id="plno" style="align-self:center;margin-top:4px">Annuler</button>
+    </div>`;
+}
+$('#pldlg').addEventListener('click', async e => {
+  if (e.target.closest('#plno')) { plOpen = false; $('#pldlg').classList.remove('show'); try { render(await api('/api/plclose', {})); } catch {} return; }
+  const b = e.target.closest('[data-pl]'); if (!b) return;
+  const p = state.playlist || {}, f = $('#plfollow');
+  const body = b.dataset.pl === 'all' ? { all: true, follow: !!(f && f.checked) } : b.dataset.pl === 'follow' ? { all: false, follow: true } : { all: false, follow: false };
+  plOpen = false; $('#pldlg').classList.remove('show');
+  try {
+    render(await api('/api/addplaylist', body));
+    toast(body.all ? `${p.count} titres ajoutés à la file` : body.follow ? `Playlist « ${p.title} » suivie` : 'Ajouté à la file');
+    if (body.all && body.follow) toast(`Playlist « ${p.title} » suivie`, 'ok');
+  } catch(err){ toast(err.message, 'err'); }
+});
+let fwKey = '';
+function renderFollows(s){
+  const f = s.follows || [], k = JSON.stringify(f) + s.followBusy; if (k === fwKey) return; fwKey = k;
+  $('#plbox').innerHTML = !f.length ? `<p style="margin:12px 0 0;color:var(--muted)">Aucune playlist suivie pour l'instant.</p>` :
+    f.map(x => `<div class="fwrow"><div class="ft"><b>${esc(x.title)}</b><span>${x.count} titre${x.count > 1 ? 's' : ''} connus · vérifiée le ${esc(x.last || '—')}</span></div>
+      <button class="lnk" data-unfollow="${esc(x.listId)}">Ne plus suivre</button></div>`).join('') +
+    `<div class="row" style="margin-top:12px"><button class="btn-ghost" id="fwcheck" ${s.followBusy ? 'disabled' : ''}>${s.followBusy ? 'Vérification…' : 'Vérifier maintenant'}</button></div>`;
+}
+$('#plbox').addEventListener('click', async e => {
+  const u = e.target.closest('[data-unfollow]');
+  if (u) { if (!confirm('Ne plus suivre cette playlist ? Les titres déjà téléchargés restent dans ta bibliothèque.')) return; try { render(await api('/api/unfollow', {listId: u.dataset.unfollow})); toast('Playlist retirée'); } catch(err){ toast(err.message, 'err'); } return; }
+  if (e.target.closest('#fwcheck')) { try { render(await api('/api/followcheck', {})); toast('Vérification des playlists lancée'); } catch(err){ toast(err.message, 'err'); } }
+});
+let newsSeen = null;
+function renderNews(n){
+  const last = n.length ? n[n.length - 1].n : 0;
+  if (newsSeen !== null) for (const x of n) if (x.n > newsSeen) toast(x.text, 'ok');
+  newsSeen = Math.max(newsSeen || 0, last);
+}
+
+/* --- Découpage d'une mixtape (uniquement sur demande) --- */
+const secsOf = d => String(d || '').split(':').reduce((a, v) => a * 60 + (+v || 0), 0);
+const canSplit = x => x.exists && x.vid && !x.fromMix && !x.splitDir && (x.chapters >= 2 || (x.chapters == null && secsOf(x.duration) >= 600));
+function splitHtml(x){
+  const sp = x.split;
+  if (sp) {
+    if (sp.status === 'erreur') return `<div class="sepline err">${esc(sp.error)}<button class="lnk" data-act="splitcancel" data-id="${x.id}">OK</button></div>`;
+    const txt = sp.status === 'attente' ? 'Découpage en attente…' : sp.status === 'analyse' ? 'Lecture des chapitres…'
+      : sp.status === 'telechargement' ? `Préparation des ${sp.total} morceaux… ${sp.progress} %` : `Morceau ${Math.min(sp.done + 1, sp.total)} sur ${sp.total}`;
+    const pct = sp.status === 'decoupe' ? Math.round(sp.done * 100 / sp.total) : sp.status === 'telechargement' ? sp.progress : 0;
+    return `<div class="sepline">${txt}<div class="bar ${pct ? '' : 'ind'}"><i style="width:${pct}%"></i></div><button class="lnk" data-act="splitcancel" data-id="${x.id}">Annuler</button></div>`;
+  }
+  return '';
+}
+
+/* --- Export clé USB --- */
+let exSel = [];
+const exItems = () => (state.history || []).filter(x => x.exists);
+function exRender(){
+  const items = exItems(), sel = new Set(exSel);
+  const ordered = [...exSel.map(id => items.find(x => x.id === id)).filter(Boolean), ...items.filter(x => !sel.has(x.id))];
+  $('#exlist').innerHTML = ordered.map(x => `<label><input type="checkbox" data-exid="${x.id}" ${sel.has(x.id) ? 'checked' : ''}><span>${sel.has(x.id) ? `<em>${exSel.indexOf(x.id) + 1}.</em> ` : ''}${esc(x.title)} <em>· ${esc(x.uploader)}</em></span><em>${mb(x.size)}</em></label>`).join('')
+    || '<div class="empty" style="padding:20px">Bibliothèque vide</div>';
+  const tot = exSel.reduce((a, id) => a + ((items.find(x => x.id === id) || {}).size || 0), 0);
+  $('#exsum').textContent = `${exSel.length} titre${exSel.length > 1 ? 's' : ''} sélectionné${exSel.length > 1 ? 's' : ''} · ${mb(tot)}`;
+}
+$('#usbbtn').innerHTML = I.usb + 'Clé USB';
+$('#usbbtn').onclick = () => {
+  exSel = []; try { const d = localStorage.getItem('exdir'); if (d) $('#exdir').value = d; } catch {}
+  exRender(); renderExport(state.export || {}, true); $('#expdlg').classList.add('show');
+};
+$('#exlist').addEventListener('change', e => {
+  const c = e.target.closest('[data-exid]'); if (!c) return;
+  exSel = c.checked ? [...exSel, c.dataset.exid] : exSel.filter(x => x !== c.dataset.exid); exRender();
+});
+document.querySelector('.expre').addEventListener('click', e => {
+  const b = e.target.closest('[data-ex]'); if (!b) return;
+  const items = exItems();
+  exSel = b.dataset.ex === 'all' ? items.map(x => x.id) : b.dataset.ex === 'set' ? SET.ids.filter(id => items.some(x => x.id === id)) : [];
+  if (b.dataset.ex === 'set' && !exSel.length) toast('Ta liste de soirée est vide (onglet Mix)', 'err');
+  exRender();
+});
+$('#expick').onclick = async () => { try { const r = await api('/api/pickdir', {}); if (r.dir) $('#exdir').value = r.dir; } catch(err){ toast(err.message, 'err'); } };
+$('#exclose').onclick = async () => { $('#expdlg').classList.remove('show'); if (state.export && /fini|erreur/.test(state.export.status)) try { render(await api('/api/exportdone', {})); } catch {} };
+$('#exgo').onclick = async () => {
+  const dest = $('#exdir').value.trim().replace(/^"|"$/g, '');
+  if (!exSel.length) return toast('Coche au moins un titre', 'err');
+  if (!dest) return toast('Choisis la clé USB ou le dossier de destination', 'err');
+  try { localStorage.setItem('exdir', dest); } catch {}
+  try { const r = await api('/api/export', { ids: exSel, dest, numbered: $('#exnum').checked, ascii: $('#exascii').checked }); if (r.error) toast(r.error, 'err'); else render(r); }
+  catch(err){ toast(err.message, 'err'); }
+};
+function renderExport(x, force){
+  const st = x.status || 'vide', busy = st === 'copie';
+  $('#exgo').disabled = busy; $('#exgo').textContent = busy ? 'Copie en cours…' : 'Copier';
+  $('#exprog').innerHTML = st === 'vide' ? '' : st === 'copie'
+    ? `<div class="sepline" style="margin-top:14px">Copie ${x.done} / ${x.total}<div class="bar"><i style="width:${Math.round(x.done * 100 / Math.max(1, x.total))}%"></i></div></div>`
+    : st === 'fini' ? `<p style="margin-top:14px;color:var(--ok)">✓ ${x.total} titre${x.total > 1 ? 's copiés' : ' copié'}. Tu peux retirer la clé en toute sécurité depuis la barre des tâches.</p>`
+    : `<p style="margin-top:14px;color:var(--err)">${esc(x.error)}</p>`;
+}
+
 /* --- Notifications de fin --- */
 let known = null;
 function notifyDone(s){
   const ids = new Set((s.history || []).map(x => x.id));
-  if (known) for (const x of s.history || []) if (!known.has(x.id)) toast('✓ ' + x.title, 'ok');
+  if (known) for (const x of s.history || []) if (!known.has(x.id) && !x.fromMix) toast('✓ ' + x.title, 'ok');
   known = ids;
 }
 
@@ -2056,7 +2550,7 @@ function Start-Next {
         # Étape 1 : analyse de la piste audio source (sans téléchargement)
         $item.status = 'analyse'
         $item.phase = 'probe'
-        $a += @('--simulate', '--print', '[A]%(abr)s|%(acodec)s|%(duration)s|%(artist)s|%(track)s|%(id)s|%(uploader)s|%(duration_string)s|%(thumbnail)s|%(title)s')
+        $a += @('--simulate', '--print', '[A]%(abr)s|%(acodec)s|%(duration)s|%(artist)s|%(track)s|%(id)s|%(uploader)s|%(duration_string)s|%(thumbnail)s|%(title)s', '--print', '[C]%(chapters)j')
     } else {
         # Étape 2 : téléchargement et conversion
         $item.status = 'telechargement'
@@ -2134,6 +2628,8 @@ function Update-Job {
                 $item.vid = $p[5]; $item.uploader = $p[6]; $item.duration = $p[7]; $item.title = $p[9]
                 if ($p[8] -ne 'NA') { $item.thumb = $p[8] }
             }
+        } elseif ($l.StartsWith('[C]')) {
+            $item.chapters = ([regex]::Matches($l, '"start_time"')).Count
         } elseif ($l.StartsWith('[I]')) {
             $p = $l.Substring(3) -split '\|', 4
             if ($p.Count -eq 4 -and -not $item.title) { $item.vid = $p[0]; $item.uploader = $p[1]; $item.duration = $p[2]; $item.title = $p[3] }
@@ -2179,7 +2675,7 @@ function Update-Job {
                 id = $item.id; vid = $item.vid; title = $item.title; uploader = $item.uploader
                 duration = $item.duration; file = $fi.Name; path = $fi.FullName; size = $fi.Length; quality = $item.quality
                 srcAbr = $item.srcAbr; srcCodec = $item.srcCodec; thumb = $item.thumb; normalized = $item.normalized; trimmed = $item.trimmed; cleaned = $item.cleaned
-                date = (Get-Date).ToString('dd/MM/yyyy HH:mm')
+                chapters = $item.chapters; date = (Get-Date).ToString('dd/MM/yyyy HH:mm')
             }
             # Un même titre retéléchargé remplace l'ancienne entrée (même fichier)
             foreach ($old in @($history | Where-Object { (Get-HistPath $_) -eq $fi.FullName })) { $history.Remove($old) }
@@ -2471,7 +2967,7 @@ $script:lastUpdCheck = [datetime]::MinValue
 $script:updateWhenIdle = $false   # « installer à la fin des téléchargements »
 $UpdateEvery = 1800               # vérification toutes les 30 min tant que l'application est ouverte
 if ($env:YTMP3_UPDATE_EVERY_SEC) { $UpdateEvery = [int]$env:YTMP3_UPDATE_EVERY_SEC }
-function Test-Busy { return [bool]($script:proc -or $script:sepProc -or @($queue | Where-Object { $_.status -eq 'attente' }).Count) }
+function Test-Busy { return [bool]($script:proc -or $script:sepProc -or $script:splitCur -or $script:expJob -or @($queue | Where-Object { $_.status -eq 'attente' }).Count) }
 $script:updJob = $null
 $script:restartAfter = $false
 $CanSelfUpdate = [bool]($Installed -and $SelfPath)
@@ -2652,6 +3148,274 @@ function Update-Recordings {
     }
 }
 
+# =====================================================================
+#  Playlists YouTube : lecture d'une playlist, téléchargement complet, suivi des nouveaux titres
+# =====================================================================
+$FollowFile = Join-Path $Data 'playlists.json'
+$script:follows = New-Object System.Collections.ArrayList
+if (Test-Path -LiteralPath $FollowFile) {
+    try { foreach ($f in @(Get-Content -LiteralPath $FollowFile -Raw -Encoding UTF8 | ConvertFrom-Json)) { if ($f) { [void]$script:follows.Add($f) } } } catch {}
+}
+function Save-Follows { ConvertTo-Json -InputObject @($script:follows) -Depth 6 | Set-Content -LiteralPath $FollowFile -Encoding UTF8 }
+$script:pl = @{ status = 'vide' }
+$script:plProc = $null
+$script:news = New-Object System.Collections.ArrayList   # messages à afficher dans la fenêtre
+$script:newsN = 0
+function Add-News([string]$t) { $script:newsN++; [void]$script:news.Add(@{ n = $script:newsN; text = $t }); while ($script:news.Count -gt 6) { $script:news.RemoveAt(0) } }
+
+function Get-ListId([string]$u) { $m = [regex]::Match($u, '[?&]list=([\w-]+)'); if ($m.Success) { return $m.Groups[1].Value }; return '' }
+
+function Start-PlaylistRead([string]$u, [string]$purpose) {
+    $lid = Get-ListId $u
+    $radio = $lid -match '^(RD|UL)'   # mix / radio générés par YouTube : sans fin, on se limite à 25 titres
+    $a = @('--encoding', 'utf-8', '--flat-playlist', '--yes-playlist', '--no-warnings', '-I', $(if ($radio) { '1:25' } else { '1:500' }),
+        '--print', 'playlist:[T]%(title)s', '--print', '[E]%(id)s|%(title)s')
+    if ($script:settings.cookies -eq 'firefox') { $a += @('--cookies-from-browser', 'firefox') }
+    $a += $(if ($lid) { "https://www.youtube.com/playlist?list=$lid" } else { $u })
+    if ($radio -and $u -match '[?&]v=') { $a[-1] = $u }
+    return @{ proc = (Start-Proc $YtDlp $a (Join-Path $Data "pl-$purpose.log")); lid = $lid; radio = $radio; log = (Join-Path $Data "pl-$purpose.log") }
+}
+function Read-PlaylistLog([string]$log) {
+    $title = ''; $ids = New-Object System.Collections.ArrayList; $names = New-Object System.Collections.ArrayList
+    foreach ($l in (Read-Shared $log)) {
+        if ($l.StartsWith('[T]') -and -not $title) { $title = $l.Substring(3).Trim() }
+        elseif ($l.StartsWith('[E]')) {
+            $p = $l.Substring(3) -split '\|', 2
+            if ($p[0] -match '^[\w-]{11}$' -and -not $ids.Contains($p[0])) { [void]$ids.Add($p[0]); [void]$names.Add($(if ($p.Count -gt 1) { $p[1] } else { '' })) }
+        }
+    }
+    if ($title -eq 'NA') { $title = '' }
+    return @{ title = $title; ids = @($ids); names = @($names) }
+}
+
+function Start-PlInfo([string]$u) {
+    if ($script:plProc -and -not $script:plProc.proc.HasExited) { try { $script:plProc.proc.Kill() } catch {} }
+    $script:plProc = Start-PlaylistRead $u 'info'
+    $script:pl = @{ status = 'lecture'; url = $u; listId = $script:plProc.lid; radio = [bool]$script:plProc.radio; single = [bool]($u -match '[?&]v=[\w-]{11}') }
+}
+function Update-PlInfo {
+    if (-not $script:plProc -or -not $script:plProc.proc.HasExited) { return }
+    $r = Read-PlaylistLog $script:plProc.log
+    $script:pl.title = $(if ($r.title) { $r.title } elseif ($script:pl.radio) { 'Mix YouTube' } else { 'Playlist' })
+    $script:pl.ids = $r.ids; $script:pl.count = $r.ids.Count
+    $script:pl.sample = @($r.names | Select-Object -First 5)
+    $script:pl.followed = [bool](@($script:follows | Where-Object { $_.listId -eq $script:pl.listId }).Count)
+    $script:pl.status = $(if ($r.ids.Count) { 'ok' } else { 'erreur' })
+    $script:plProc = $null
+}
+
+# Suivi : vérifie une playlist à la fois, au démarrage puis toutes les 6 h
+$script:followQueue = New-Object System.Collections.ArrayList
+$script:followRun = $null
+$script:lastFollowCheck = (Get-Date).AddHours(-5.9)   # première vérification ~5 min après le lancement
+function Start-FollowCheck { foreach ($f in $script:follows) { if (-not $script:followQueue.Contains($f.listId)) { [void]$script:followQueue.Add($f.listId) } }; $script:lastFollowCheck = Get-Date }
+function Update-Follows {
+    if (-not $script:follows.Count) { return }
+    if (((Get-Date) - $script:lastFollowCheck).TotalHours -ge 6) { Start-FollowCheck }
+    if ($script:followRun) {
+        if (-not $script:followRun.proc.HasExited) { return }
+        $f = @($script:follows | Where-Object { $_.listId -eq $script:followRun.lid })[0]
+        $r = Read-PlaylistLog $script:followRun.log
+        if ($f -and $r.ids.Count) {
+            $seen = @($f.seen)
+            $new = @($r.ids | Where-Object { $seen -notcontains $_ })
+            if ($new.Count) {
+                Add-Urls @($new | ForEach-Object { "https://www.youtube.com/watch?v=$_" })
+                $f.seen = @($seen + $new)
+                Add-News ("$($new.Count) nouveau" + $(if ($new.Count -gt 1) { 'x titres' } else { ' titre' }) + " de « $($f.title) » ajouté" + $(if ($new.Count -gt 1) { 's' } else { '' }) + ' à la file')
+            }
+            $f.last = (Get-Date).ToString('dd/MM HH:mm')
+            Save-Follows
+        }
+        Remove-Item -LiteralPath $script:followRun.log, ($script:followRun.log + '.err') -Force -ErrorAction SilentlyContinue
+        $script:followRun = $null
+    }
+    if ($script:followQueue.Count -and (Get-SetupState) -eq 'pret') {
+        $lid = $script:followQueue[0]; $script:followQueue.RemoveAt(0)
+        $f = @($script:follows | Where-Object { $_.listId -eq $lid })[0]
+        if ($f) { $script:followRun = Start-PlaylistRead $f.url ('suivi-' + $lid) }
+    }
+}
+
+# =====================================================================
+#  Découpage d'une mixtape en morceaux (uniquement à la demande) — l'original n'est jamais modifié
+# =====================================================================
+$splitQueue = New-Object System.Collections.ArrayList
+$script:splitCur = $null
+function Find-Split($id) { foreach ($q in $splitQueue) { if ($q.id -eq $id) { return $q } }; return $null }
+function Get-Seconds([string]$d) { $s = 0; foreach ($p in ($d -split ':')) { $s = $s * 60 + [int]$p }; return $s }
+
+function Start-NextSplit {
+    if ($script:splitCur -or $script:proc -or (Get-SetupState) -ne 'pret') { return }
+    $it = $null; foreach ($q in $splitQueue) { if ($q.status -eq 'attente') { $it = $q; break } }
+    if (-not $it) { return }
+    $h = Find-Hist $it.id
+    if (-not $h -or -not $h.vid) { $it.status = 'erreur'; $it.error = 'Seules les vidéos YouTube peuvent être découpées'; return }
+    $it.tmp = Join-Path $Data ('split-' + $it.id)
+    if (Test-Path -LiteralPath $it.tmp) { Remove-Item -LiteralPath $it.tmp -Recurse -Force }
+    [void](New-Item -ItemType Directory -Path $it.tmp)
+    $u = 'https://www.youtube.com/watch?v=' + $h.vid
+    $it.status = 'analyse'
+    $a = @('--encoding', 'utf-8', '--no-playlist', '--skip-download', '--print', '[C]%(chapters)j', $u)
+    if ($script:settings.cookies -eq 'firefox') { $a += @('--cookies-from-browser', 'firefox') }
+    $it.proc = Start-Proc $YtDlp $a (Join-Path $it.tmp 'info.log')
+    $script:splitCur = $it
+}
+
+function Update-Split {
+    if (-not $script:splitCur) { Start-NextSplit; return }
+    $it = $script:splitCur; $h = Find-Hist $it.id
+    $fail = { param($m) $it.status = 'erreur'; $it.error = $m; Remove-Item -LiteralPath $it.tmp -Recurse -Force -ErrorAction SilentlyContinue; $script:splitCur = $null }
+    if ($it.status -eq 'analyse') {
+        if (-not $it.proc.HasExited) { return }
+        $line = (Read-Shared (Join-Path $it.tmp 'info.log')) | Where-Object { $_.StartsWith('[C]') } | Select-Object -First 1
+        $ch = @()
+        if ($line -and $line -notmatch '^\[C\](null|NA)\s*$') { try { $ch = @($line.Substring(3) | ConvertFrom-Json) } catch {} }
+        if ($ch.Count -lt 2) { & $fail 'Cette vidéo n''a pas de chapitres : découpage impossible'; return }
+        $it.chapters = $ch; $it.total = $ch.Count
+        $h | Add-Member -NotePropertyName chapters -NotePropertyValue $ch.Count -Force; Save-History
+        # Téléchargement de la version complète puis découpe par chapitres (yt-dlp), dans un dossier temporaire
+        $it.status = 'telechargement'; $it.progress = 0
+        $a = @('--encoding', 'utf-8', '--newline', '--progress', '--no-playlist', '-f', 'bestaudio/best', '--ffmpeg-location', $Bin,
+            '-x', '--audio-format', 'mp3', '--audio-quality', ('{0}K' -f [int]$h.quality), '--split-chapters',
+            '--progress-template', 'download:[P]%(progress.downloaded_bytes)s/%(progress.total_bytes,progress.total_bytes_estimate)s',
+            '-o', (Join-Path $it.tmp 'complet.%(ext)s'), '-o', ('chapter:' + (Join-Path $it.tmp '%(section_number)03d.%(ext)s')))
+        if ($script:settings.normalize) { $a += @('--postprocessor-args', 'ExtractAudio:-af loudnorm=I=-14:TP=-1.5:LRA=11 -ar 44100') }
+        if ($script:settings.cookies -eq 'firefox') { $a += @('--cookies-from-browser', 'firefox') }
+        $a += ('https://www.youtube.com/watch?v=' + $h.vid)
+        $it.proc = Start-Proc $YtDlp $a (Join-Path $it.tmp 'dl.log')
+        return
+    }
+    if ($it.status -eq 'telechargement') {
+        foreach ($l in (Read-Shared (Join-Path $it.tmp 'dl.log'))) {
+            if ($l.StartsWith('[P]')) { $n = $l.Substring(3) -split '/'; $d = 0.0; $t = 0.0
+                if ($n.Count -gt 1 -and [double]::TryParse($n[0], [Globalization.NumberStyles]::Float, $Inv, [ref]$d) -and [double]::TryParse($n[1], [Globalization.NumberStyles]::Float, $Inv, [ref]$t) -and $t -gt 0) { $it.progress = [math]::Min(100, [math]::Round($d * 100 / $t)) } }
+        }
+        if (-not $it.proc.HasExited) { return }
+        $files = @(Get-ChildItem -LiteralPath $it.tmp -Filter '???.mp3' | Sort-Object Name)
+        if ($it.proc.ExitCode -ne 0 -or $files.Count -lt 2) {
+            $err = (Read-Shared (Join-Path $it.tmp 'dl.log.err')) | Where-Object { $_ -match 'ERROR' } | Select-Object -Last 1
+            & $fail $(if ($err) { ($err -replace '^.*?ERROR:\s*', '') } else { 'Le découpage a échoué' }); return
+        }
+        $it.files = $files; $it.done = 0; $it.status = 'decoupe'
+        $base = [IO.Path]::GetDirectoryName((Get-HistPath $h))
+        $it.dest = Join-Path $base (Get-SafeName ($h.title + ' (découpé)'))
+        if (-not (Test-Path -LiteralPath $it.dest)) { [void](New-Item -ItemType Directory -Path $it.dest) }
+        $it.cover = Join-Path $it.tmp 'cover.jpg'
+        & $Ffmpeg -y -loglevel error -i (Get-HistPath $h) -an -c:v copy $it.cover 2>$null
+        if (-not (Test-Path -LiteralPath $it.cover)) { $it.cover = $null }
+        return
+    }
+    if ($it.status -eq 'decoupe') {
+        # Un morceau par passage de boucle : titre, artiste, album, numéro de piste et pochette
+        $i = $it.done
+        if ($i -lt $it.files.Count) {
+            $c = $it.chapters[[math]::Min($i, $it.chapters.Count - 1)]
+            $cm = Get-CleanMeta ([string]$c.title) $h.uploader '' ''
+            if (-not $cm[1]) { $cm = @($h.uploader, "Partie $($i + 1)") }
+            $name = Get-SafeName ('{0:00} - {1} - {2}' -f ($i + 1), $cm[0], $cm[1])
+            $out = Join-Path $it.dest ($name + '.mp3')
+            $a = @('-y', '-loglevel', 'error', '-i', $it.files[$i].FullName)
+            if ($it.cover) { $a += @('-i', $it.cover, '-map', '0:a', '-map', '1:v') } else { $a += @('-map', '0:a') }
+            $a += @('-c', 'copy', '-id3v2_version', '3', '-map_metadata', '-1',
+                '-metadata', "title=$($cm[1])", '-metadata', "artist=$($cm[0])", '-metadata', "album=$($h.title)", '-metadata', ("track={0}/{1}" -f ($i + 1), $it.files.Count), $out)
+            & $Ffmpeg @a 2>$null
+            if (Test-Path -LiteralPath $out) {
+                $fi = Get-Item -LiteralPath $out
+                $secs = [double]$c.end_time - [double]$c.start_time
+                [void]$history.Insert(0, [PSCustomObject]@{
+                    id = [guid]::NewGuid().ToString('N').Substring(0, 10); vid = $h.vid; title = $cm[1]; uploader = $cm[0]
+                    duration = ('{0}:{1:00}' -f [math]::Floor($secs / 60), [math]::Floor($secs % 60)); file = $fi.Name; path = $fi.FullName
+                    size = $fi.Length; quality = $h.quality; srcAbr = $h.srcAbr; srcCodec = $h.srcCodec; thumb = $h.thumb
+                    normalized = [bool]$script:settings.normalize; trimmed = $false; cleaned = $true; fromMix = $h.title; part = $i + 1
+                    date = (Get-Date).ToString('dd/MM/yyyy HH:mm')
+                })
+            }
+            $it.done++
+            return
+        }
+        Save-History
+        Add-News ("« $($h.title) » découpé en $($it.done) morceaux")
+        $h | Add-Member -NotePropertyName splitDir -NotePropertyValue $it.dest -Force; Save-History
+        Remove-Item -LiteralPath $it.tmp -Recurse -Force -ErrorAction SilentlyContinue
+        $splitQueue.Remove($it); $script:splitCur = $null
+    }
+}
+
+# =====================================================================
+#  Export vers une clé USB / un dossier (copie en arrière-plan)
+# =====================================================================
+$script:exp = @{ status = 'vide' }
+$script:expJob = $null
+function Start-Export($ids, [string]$dest, [bool]$numbered, [bool]$ascii) {
+    if (-not (Test-Path -LiteralPath $dest)) { return 'Dossier de destination introuvable' }
+    $list = @(); $n = 0; $total = [int64]0
+    foreach ($id in $ids) {
+        $h = Find-Hist ([string]$id); if (-not $h) { continue }
+        $p = Get-HistPath $h; if (-not (Test-Path -LiteralPath $p)) { continue }
+        $n++; $total += (Get-Item -LiteralPath $p).Length
+        $list += , @($p, [string]$n)
+    }
+    if (-not $list.Count) { return 'Aucun titre à copier' }
+    try {
+        $drv = New-Object IO.DriveInfo ([IO.Path]::GetPathRoot((Resolve-Path -LiteralPath $dest).Path))
+        if ($drv.AvailableFreeSpace -lt $total + 1MB) { return ('Pas assez de place : il faut {0} Mo, il reste {1} Mo' -f [math]::Ceiling($total / 1MB), [math]::Floor($drv.AvailableFreeSpace / 1MB)) }
+    } catch {}
+    $prog = Join-Path $Data 'export.progress'
+    Set-Content -LiteralPath $prog -Value '0'
+    $script:exp = @{ status = 'copie'; done = 0; total = $list.Count; dest = $dest; error = '' }
+    $script:expJob = Start-Job -ArgumentList $list, $dest, $numbered, $ascii, $prog -ScriptBlock {
+        param($list, $dest, $numbered, $ascii, $prog)
+        $width = [math]::Max(2, ([string]$list.Count).Length)
+        $i = 0
+        foreach ($e in $list) {
+            $src = $e[0]; $i++
+            $name = [IO.Path]::GetFileNameWithoutExtension($src)
+            if ($ascii) {   # vieux autoradios : sans accents ni caractères spéciaux
+                $name = -join ($name.Normalize([Text.NormalizationForm]::FormD).ToCharArray() | Where-Object { [Globalization.CharUnicodeInfo]::GetUnicodeCategory($_) -ne 'NonSpacingMark' })
+                $name = ($name -replace '[^\x20-\x7E]', '_') -replace '_{2,}', '_'
+            }
+            if ($numbered) { $name = ([string]$i).PadLeft($width, '0') + ' - ' + ($name -replace '^\d{1,3} - ', '') }
+            $name = $name -replace '[<>:"/\\|?*]', '' 
+            if ($name.Length -gt 120) { $name = $name.Substring(0, 120).Trim() }
+            [IO.File]::Copy($src, (Join-Path $dest ($name + '.mp3')), $true)
+            Set-Content -LiteralPath $prog -Value $i
+        }
+    }
+    return ''
+}
+function Update-Export {
+    $j = $script:expJob; if (-not $j) { return }
+    try { $script:exp.done = [int](Get-Content -LiteralPath (Join-Path $Data 'export.progress') -Raw) } catch {}
+    if ($j.State -eq 'Running') { return }
+    if ($j.State -eq 'Completed') { $script:exp.status = 'fini'; $script:exp.done = $script:exp.total; Add-News ("$($script:exp.total) titre" + $(if ($script:exp.total -gt 1) { 's copiés' } else { ' copié' }) + " dans $($script:exp.dest)") }
+    else {
+        $script:exp.status = 'erreur'
+        try { $script:exp.error = $j.ChildJobs[0].JobStateInfo.Reason.Message } catch {}
+        if (-not $script:exp.error) { $script:exp.error = 'Copie interrompue (clé retirée ?)' }
+    }
+    Remove-Job $j -Force -ErrorAction SilentlyContinue; $script:expJob = $null
+}
+
+function Add-Urls($urls) {
+    $auto = $script:settings.quality -eq 'auto'
+    $quality = 192
+    if (-not $auto) { $quality = [int]$script:settings.quality }
+    foreach ($u in @($urls)) {
+        $u = ([string]$u).Trim()
+        if ($u -match '^https?://[^\s"]+$') {
+            [void]$queue.Add([PSCustomObject]@{
+                id = [guid]::NewGuid().ToString('N').Substring(0, 10); url = $u; quality = $quality
+                status = 'attente'; progress = 0; title = ''; uploader = ''; duration = ''; vid = ''; file = ''; error = ''
+                attempt = 0; blocked = $false; auto = $auto; analysed = $false; phase = ''
+                srcAbrRaw = ''; srcCodecRaw = ''; srcAbr = 0; srcCodec = ''; normalized = $false
+                thumb = ''; seconds = 0; rawArtist = ''; rawTrack = ''; cleanArtist = ''; cleanTitle = ''; cleaned = $false; trimmed = $false; chapters = $null
+            })
+        }
+    }
+    Start-Next
+}
+
 function Stop-Current {
     if ($script:proc -and -not $script:proc.HasExited) {
         try { & taskkill.exe /PID $script:proc.Id /T /F | Out-Null } catch { try { $script:proc.Kill() } catch {} }
@@ -2775,6 +3539,9 @@ function Get-State {
             voix = [bool]($_.voix -and (Test-Path -LiteralPath $_.voix))
             instru = [bool]($_.instru -and (Test-Path -LiteralPath $_.instru))
             sep = $(if ($sq = Find-Sep $_.id) { @{ status = $sq.status; progress = $sq.progress; error = $sq.error } } else { $null })
+            chapters = $_.chapters; fromMix = $_.fromMix; part = $_.part
+            splitDir = $(if ($_.splitDir -and (Test-Path -LiteralPath $_.splitDir)) { $_.splitDir } else { '' })
+            split = $(if ($sp = Find-Split $_.id) { @{ status = $sp.status; progress = $sp.progress; done = $sp.done; total = $sp.total; error = $sp.error } } else { $null })
         }
     })
     $q = @($queue | ForEach-Object {
@@ -2796,6 +3563,11 @@ function Get-State {
             state = $script:upd.state; latest = $script:upd.latest; error = $script:upd.error; canApply = $CanSelfUpdate
             notes = @($script:upd.notes); busy = (Test-Busy); planned = $script:updateWhenIdle
         }
+        playlist = @{ status = $script:pl.status; title = $script:pl.title; count = $script:pl.count; single = $script:pl.single; radio = $script:pl.radio; followed = $script:pl.followed; sample = @($script:pl.sample); listId = $script:pl.listId }
+        follows = @($script:follows | ForEach-Object { @{ listId = $_.listId; title = $_.title; count = @($_.seen).Count; last = $_.last } })
+        followBusy = [bool]($script:followRun -or $script:followQueue.Count)
+        news = @($script:news)
+        export = $script:exp
         separation = @{ state = (Get-SepState); step = (Get-SepStep); error = $script:sepInstallError }
         search = @{
             status = $script:search.status; q = $script:search.q; count = $script:search.count
@@ -2838,23 +3610,7 @@ function Invoke-Request($ctx) {
 
     switch ($path) {
         '/api/add' {
-            # Qualité : automatique (selon la source) ou forcée dans les paramètres
-            $auto = $script:settings.quality -eq 'auto'
-            $quality = 192
-            if (-not $auto) { $quality = [int]$script:settings.quality }
-            foreach ($u in @($body.urls)) {
-                $u = ([string]$u).Trim()
-                if ($u -match '^https?://[^\s"]+$') {
-                    [void]$queue.Add([PSCustomObject]@{
-                        id = [guid]::NewGuid().ToString('N').Substring(0, 10); url = $u; quality = $quality
-                        status = 'attente'; progress = 0; title = ''; uploader = ''; duration = ''; vid = ''; file = ''; error = ''
-                        attempt = 0; blocked = $false; auto = $auto; analysed = $false; phase = ''
-                        srcAbrRaw = ''; srcCodecRaw = ''; srcAbr = 0; srcCodec = ''; normalized = $false
-                        thumb = ''; seconds = 0; rawArtist = ''; rawTrack = ''; cleanArtist = ''; cleanTitle = ''; cleaned = $false; trimmed = $false
-                    })
-                }
-            }
-            Start-Next
+            Add-Urls @($body.urls)
         }
         '/api/cancel' {
             $it = Find-Queue $id
@@ -2967,6 +3723,50 @@ function Invoke-Request($ctx) {
             }
             $owner.Dispose()
         }
+        '/api/plinfo' { Start-PlInfo ([string]$body.url) }
+        '/api/plclose' { if ($script:plProc) { try { $script:plProc.proc.Kill() } catch {}; $script:plProc = $null }; $script:pl = @{ status = 'vide' } }
+        '/api/addplaylist' {
+            if ($script:pl.status -eq 'ok') {
+                $ids = @($script:pl.ids)
+                if ($body.all) { Add-Urls @($ids | ForEach-Object { "https://www.youtube.com/watch?v=$_" }) }
+                elseif ($script:pl.single) { Add-Urls @($script:pl.url) }
+                if ($body.follow -and $script:pl.listId -and -not $script:pl.radio -and -not $script:pl.followed) {
+                    [void]$script:follows.Add([PSCustomObject]@{ listId = $script:pl.listId; url = "https://www.youtube.com/playlist?list=$($script:pl.listId)"; title = $script:pl.title; seen = $ids; last = (Get-Date).ToString('dd/MM HH:mm') })
+                    Save-Follows
+                }
+                $script:pl = @{ status = 'vide' }
+            }
+        }
+        '/api/unfollow' { foreach ($f in @($script:follows | Where-Object { $_.listId -eq [string]$body.listId })) { $script:follows.Remove($f) }; Save-Follows }
+        '/api/followcheck' { Start-FollowCheck }
+        '/api/split' {
+            $h = Find-Hist $id
+            if ($h -and -not (Find-Split $id)) { [void]$splitQueue.Add(@{ id = $id; status = 'attente'; progress = 0; done = 0; total = 0; error = '' }); Start-NextSplit }
+        }
+        '/api/splitcancel' {
+            $sp = Find-Split $id
+            if ($sp) {
+                if ($sp -eq $script:splitCur) { try { if (-not $sp.proc.HasExited) { $sp.proc.Kill() } } catch {}; Start-Sleep -Milliseconds 300; Remove-Item -LiteralPath $sp.tmp -Recurse -Force -ErrorAction SilentlyContinue; $script:splitCur = $null }
+                $splitQueue.Remove($sp)
+            }
+        }
+        '/api/pickdir' {
+            Add-Type -AssemblyName System.Windows.Forms
+            $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
+            $dlg.Description = 'Choisis la clé USB ou le dossier où copier les titres'
+            $dlg.ShowNewFolderButton = $true
+            $owner = New-Object System.Windows.Forms.Form; $owner.TopMost = $true
+            $dir = ''
+            if ($dlg.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK) { $dir = $dlg.SelectedPath }
+            $owner.Dispose()
+            Send-Json $ctx @{ dir = $dir }; return
+        }
+        '/api/export' {
+            if ($script:expJob) { Send-Json $ctx @{ error = 'Une copie est déjà en cours' }; return }
+            $err = Start-Export @($body.ids) ([string]$body.dest) ([bool]$body.numbered) ([bool]$body.ascii)
+            if ($err) { Send-Json $ctx @{ error = $err }; return }
+        }
+        '/api/exportdone' { if (-not $script:expJob) { $script:exp = @{ status = 'vide' } } }
         '/api/setup'   { if (-not ($script:setupJob -and $script:setupJob.State -eq 'Running')) { Start-Setup } }
         '/api/bye'     { $script:byeAt = Get-Date; Send $ctx 200 '{}' 'application/json'; return }
         default        { Send $ctx 404 '{}' 'application/json'; return }
@@ -3016,6 +3816,10 @@ while ($true) {
         try { Update-Sep } catch {}
         try { Update-UpdateCheck } catch {}
         try { Update-Recordings } catch {}
+        try { Update-PlInfo } catch {}
+        try { Update-Follows } catch {}
+        try { Update-Split } catch {}
+        try { Update-Export } catch {}
         if ($CanSelfUpdate -and ($now - $script:lastUpdCheck).TotalSeconds -gt $UpdateEvery) { try { Start-UpdateCheck } catch {} }
         # Mise à jour programmée « à la fin des téléchargements » : on l'installe dès que tout est terminé
         if ($script:updateWhenIdle -and -not (Test-Busy)) {
@@ -3026,7 +3830,7 @@ while ($true) {
 
         # Fermeture automatique quand la fenêtre est fermée et qu'il n'y a plus rien à faire
         $pending = @($queue | Where-Object { $_.status -eq 'attente' }).Count -gt 0 -and (Get-SetupState) -ne 'erreur'
-        if (-not $script:proc -and -not $pending -and -not $script:sepProc -and -not $script:searchProcs.Count -and -not $recQueue.Count) {
+        if (-not $script:proc -and -not $pending -and -not $script:sepProc -and -not $script:searchProcs.Count -and -not $recQueue.Count -and -not $script:splitCur -and -not $script:expJob) {
             if ($script:byeAt -and ($now - $script:byeAt).TotalSeconds -gt 5) { break }
             if (($now - $script:lastSeen).TotalSeconds -gt $IdleSeconds) { break }
         }
