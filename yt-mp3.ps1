@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.3 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.4 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.3'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.4'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -17,6 +17,10 @@ $IdleSeconds = 600
 # Dépôt GitHub d'où viennent les mises à jour
 $UpdateBase = 'https://raw.githubusercontent.com/Guils78440/yt-mp3/main'
 if ($env:YTMP3_BASE) { $UpdateBase = $env:YTMP3_BASE.TrimEnd('/') }
+# L'API GitHub donne toujours la dernière version déposée (raw.githubusercontent.com garde ~5 min de cache)
+$UpdateApi = 'https://api.github.com/repos/Guils78440/yt-mp3/contents'
+if ($env:YTMP3_BASE) { $UpdateApi = '' }
+if ($env:YTMP3_API) { $UpdateApi = $env:YTMP3_API.TrimEnd('/') }
 $SelfPath = $PSCommandPath   # vide en version portable (.bat)
 if ($env:YTMP3_IDLE_SEC) { $IdleSeconds = [int]$env:YTMP3_IDLE_SEC }
 # Version installée : les MP3 vont par défaut dans « Musique\YT MP3 »
@@ -348,8 +352,8 @@ body.dj-mode main{padding-bottom:60px}
 .dk-play svg{width:20px;height:20px}
 .dk-cue{color:#fbbf24}
 .dk-row .sp{flex:1}
-.dk-grid{display:grid;grid-template-columns:72px 1fr 52px;align-items:center;gap:6px 10px;font-size:12.5px;color:var(--muted)}
-.dk-grid output{font-variant-numeric:tabular-nums;text-align:right;color:var(--text);font-size:12px}
+.dk-grid{display:grid;grid-template-columns:72px 1fr 66px;align-items:center;gap:6px 10px;font-size:12.5px;color:var(--muted)}
+.dk-grid output{font-variant-numeric:tabular-nums;text-align:right;color:var(--text);font-size:12px;white-space:nowrap}
 .deck input[type=range],.xf input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;background:#2b303c;outline:0;cursor:pointer;width:100%}
 .deck input[type=range]::-webkit-slider-thumb,.xf input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 0 0 3px color-mix(in srgb,var(--dc,#fff) 45%,transparent)}
 .dk-sync{height:28px;padding:0 8px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);font-size:11.5px;font-weight:700;color:var(--text)}
@@ -365,6 +369,35 @@ body.dj-mode main{padding-bottom:60px}
 .ab{width:36px;height:32px;border-radius:9px;font-weight:700;font-size:13px;border:1px solid var(--line);background:var(--panel2)}
 .ab.a:hover{border-color:var(--a1);color:#ff8aa5}.ab.b:hover{border-color:var(--a2);color:#c4b5fd}
 .ab.on{color:#fff;border-color:transparent}.ab.a.on{background:var(--a1)}.ab.b.on{background:var(--a2)}
+.dk-bpm{min-width:64px}
+.dk-beats{display:flex;gap:3px;justify-content:flex-end;margin-top:5px}
+.dk-beats i{width:9px;height:5px;border-radius:2px;background:#2b303c;transition:background .08s}
+.dk-beats i.on{background:color-mix(in srgb,var(--dc) 55%,#2b303c)}
+.dk-beats i.hit{background:var(--dc);box-shadow:0 0 8px var(--dc)}
+.dk-sync,.dk-pfl{min-width:0;padding:0 11px;font-size:12px;color:var(--muted)}
+.dk-sync.on{color:#fff;background:#0ea5e9;border-color:transparent}
+.dk-pfl svg{width:18px;height:18px}
+.dk-pfl.on{color:#0b0c10;background:#fbbf24;border-color:transparent}
+.dk-row2{gap:6px}
+.dk-hots,.dk-loops{display:flex;gap:5px}
+.dk-hot{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font-weight:700;font-size:12.5px;color:var(--faint)}
+.dk-hot.set{background:var(--hc);color:#0b0c10;border-color:transparent}
+.dk-hot:hover{border-color:var(--hc)}
+.dk-lbl{color:var(--faint);display:flex}.dk-lbl svg{width:16px;height:16px}
+.dk-loop{width:34px;height:30px;border-radius:8px;border:1px solid var(--line);background:var(--panel2);font-weight:700;font-size:12.5px;color:var(--muted)}
+.dk-loop.on{background:#22c55e;color:#0b0c10;border-color:transparent}
+.recb{display:flex;align-items:center;gap:7px;font-size:13.5px}
+.recb svg{width:15px;height:15px}
+#recbtn svg{color:#f43f5e}
+#recbtn.on{background:#f43f5e;color:#fff;border-color:transparent;font-variant-numeric:tabular-nums}
+#recbtn.on svg{color:#fff;animation:blink 1s steps(2) infinite}
+@keyframes blink{50%{opacity:.25}}
+.keys .kgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;margin-top:12px;font-size:13.5px;color:var(--muted)}
+.keys .kgrid b{color:var(--text)}
+kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;color:var(--text);margin-right:3px}
+.outrow{display:flex;align-items:center;gap:12px;margin-top:10px}
+.outrow span{width:60px;color:var(--muted);font-size:13.5px}
+.outrow select{flex:1;max-width:460px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:14px}
 @media (max-width:900px){.dj{grid-template-columns:1fr}}
 
 /* ---- Onglets & paramètres ---- */
@@ -459,10 +492,12 @@ body.dj-mode main{padding-bottom:60px}
     <div class="xfrow">
       <div class="xf"><b>A</b><input type="range" id="xf" min="0" max="1000" value="500" title="Crossfader (double-clic : centre)"><b>B</b></div>
       <div class="mixctl">
-        <button class="go sm" id="automix"></button>
+        <button class="go sm" id="automix" title="Espace"></button>
         <div class="seg mini" id="mixlen" title="Durée de l'enchaînement">
           <button type="button" data-l="4">4 s</button><button type="button" data-l="8">8 s</button><button type="button" data-l="16">16 s</button>
         </div>
+        <button class="btn-ghost recb" id="recbtn"></button>
+        <button class="btn-ghost recb" id="keysbtn" title="Raccourcis clavier"></button>
       </div>
     </div>
     <section>
@@ -505,6 +540,15 @@ body.dj-mode main{padding-bottom:60px}
       <div class="opt" data-opt="trim"><div class="ot"><b>Ne garder que la musique</b><span>Retire les passages non musicaux des clips (intro parlée, scènes, générique) repérés par la communauté SponsorBlock, ainsi que les silences en début et en fin de morceau.</span></div><div class="sw"></div></div>
       <div class="opt" data-opt="normalize"><div class="ot"><b>Volume homogène</b><span>Ramène chaque morceau au même niveau sonore (-14 LUFS, la référence de Spotify et YouTube) : plus besoin de toucher au volume entre deux titres.</span></div><div class="sw"></div></div>
       <div class="opt" data-opt="clean"><div class="ot"><b>Noms et pochettes propres</b><span>Sépare l'artiste et le titre, retire « Clip Officiel », « HD », « Lyrics »… du nom et des tags, et recadre la pochette en carré pour le téléphone et l'autoradio.</span></div><div class="sw"></div></div>
+    </div>
+
+    <div class="card" id="djcard">
+      <h3>Mode DJ : sorties audio</h3>
+      <p>Choisis où part le son de la salle (tes enceintes) et celui de la pré-écoute (ton casque). Avec le bouton casque d'une platine, tu entends le morceau suivant dans le casque pendant que la salle écoute l'autre.</p>
+      <div class="outrow"><span>Salle</span><select id="outMain"></select></div>
+      <div class="outrow"><span>Casque</span><select id="outCue"></select></div>
+      <div class="row" style="margin-top:12px"><button class="btn-ghost" id="outNames">Afficher les noms</button><span class="lbl" id="outHint"></span></div>
+      <p style="margin:12px 0 0;font-size:12.5px">Windows ne donne le nom des sorties audio qu'après une autorisation d'accès au micro : il n'est jamais utilisé ni enregistré.</p>
     </div>
 
     <div class="card" id="sepcard">
@@ -551,6 +595,18 @@ body.dj-mode main{padding-bottom:60px}
 </main>
 
 <div class="overlay" id="ov"><div class="box" id="ovbox"></div></div>
+<div class="overlay" id="keyhelp"><div class="box dlg keys">
+  <h3>Raccourcis clavier de l'onglet Mix</h3>
+  <div class="kgrid">
+    <b>Platine A</b><b>Platine B</b>
+    <span><kbd>A</kbd> lecture / pause</span><span><kbd>P</kbd> lecture / pause</span>
+    <span><kbd>Z</kbd> CUE</span><span><kbd>O</kbd> CUE</span>
+    <span><kbd>E</kbd> SYNC</span><span><kbd>I</kbd> SYNC</span>
+    <span><kbd>1</kbd><kbd>2</kbd><kbd>3</kbd><kbd>4</kbd> hot cues</span><span><kbd>7</kbd><kbd>8</kbd><kbd>9</kbd><kbd>0</kbd> hot cues</span>
+  </div>
+  <p style="margin-top:14px"><kbd>Espace</kbd> enchaîner vers l'autre platine · <kbd>←</kbd> <kbd>→</kbd> crossfader · <kbd>Maj</kbd> + chiffre : effacer un hot cue (ou clic droit sur le repère)</p>
+  <div class="dlg-btns"><button class="go kclose">OK</button></div>
+</div></div>
 <div class="overlay" id="upddlg"><div class="box dlg">
   <div class="dlg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
   <h3 id="dlgTitle"></h3>
@@ -751,6 +807,8 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.4', '14/10/2026', ['Mix : pré-écoute au casque (sortie salle et sortie casque séparées)', 'SYNC aligne maintenant les temps et les garde calés, indicateur des 4 temps de la mesure', '4 hot cues par morceau (mémorisés), boucles de 4 et 8 temps, filtre passe-bas / passe-haut', 'Enregistrement du mix en MP3 directement dans ta bibliothèque', 'Raccourcis clavier (A/Z/E et P/O/I, 1-4 et 7-0, Espace, flèches)']],
+  ['2.3.1', '13/10/2026', ['Les nouvelles versions sont détectées dès leur dépôt sur GitHub (plus d\'attente de 5 minutes)']],
   ['2.3', '13/10/2026', ['Nouvel onglet Mix : deux platines A et B comme un logiciel DJ', 'BPM détecté automatiquement, tempo ±8 % sans changer la tonalité, bouton SYNC', 'Égaliseur 3 bandes avec coupure, volume par platine, crossfader et enchaînement automatique (4, 8 ou 16 s)', 'Voix / Instrumental au choix sur chaque platine pour mélanger deux morceaux']],
   ['2.2', '13/10/2026', ['Nouvelle version détectée même quand l\'application est déjà ouverte (vérification toutes les 30 min)', 'Fenêtre de proposition avec la liste des nouveautés : Installer maintenant / Plus tard', 'Si un téléchargement est en cours, la mise à jour attend qu\'il soit terminé puis s\'installe toute seule']],
   ['2.1', '13/10/2026', ['Mises à jour intégrées depuis GitHub : vérification au démarrage, installation en un clic, sans alerte Windows', 'Installation en une ligne de commande, sans .exe à télécharger']],
@@ -957,6 +1015,7 @@ $('#plStem').onclick = e => {
   load(P.id, { at: t }); if (!wasPlaying) A().pause();
 };
 document.addEventListener('keydown', e => {
+  if (!$('#v-dj').hidden) return;   // l'onglet Mix a ses propres raccourcis
   if (e.target.matches('input:not([type=range]), textarea') || !P.id) return;
   if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
   else if (e.code === 'ArrowRight') { A().currentTime = Math.min(A().duration || 0, A().currentTime + 5); }
@@ -1047,26 +1106,59 @@ $('#dlgLater').onclick = () => {
 };
 $('#newver').onclick = () => { show('set'); setTimeout(() => $('#updcard').scrollIntoView({behavior:'smooth'}), 50); };
 
-/* ===================== Mode DJ : deux platines, crossfader, enchaînement ===================== */
-const DJ = { ctx: null, master: null, xf: 0.5, len: 8, mix: null, d: [] };
-const DJ_MAX = 40 * 1048576;   // au-delà (mixtapes), pas de forme d'onde ni de BPM, la lecture reste possible
-function djBpmCache(){ try { return JSON.parse(localStorage.getItem('bpm') || '{}'); } catch { return {}; } }
-function djBpmSave(id, v){ try { const c = djBpmCache(); c[id] = v; localStorage.setItem('bpm', JSON.stringify(c)); } catch {} }
+/* ===================== Mode DJ : deux platines ===================== */
+// Graphe audio de chaque platine (contexte « salle ») :
+//   lecteur → graves → médiums → aigus → passe-bas → passe-haut ─┬→ volume → crossfader → sortie salle (+ enregistrement)
+//                                                                 └→ pré-écoute (0/1) → bus casque → 2e contexte audio → sortie casque
+const DJ = { ctx: null, master: null, cueBus: null, cueCtx: null, xf: 0.5, len: 8, mix: null, d: [], rec: null };
+const DJ_MAX = 40 * 1048576;   // au-delà (mixtapes), pas de forme d'onde ni d'analyse : lecture et mixage restent possibles
+const HOT_COL = ['#f43f5e', '#f59e0b', '#22c55e', '#38bdf8'];
+const LSJ = {
+  get(k, def){ try { const v = localStorage.getItem(k); return v === null ? def : JSON.parse(v); } catch { return def; } },
+  set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const djInfo = id => (LSJ.get('djinfo', {}))[id] || null;               // { bpm, b0 } : tempo et position d'un temps
+const djInfoSave = (id, v) => { const c = LSJ.get('djinfo', {}); c[id] = v; LSJ.set('djinfo', c); };
+const djCuesOf = id => (LSJ.get('djcues', {}))[id] || [null, null, null, null];
+const djCuesSave = (id, v) => { const c = LSJ.get('djcues', {}); c[id] = v; LSJ.set('djcues', c); };
+const djOut = () => LSJ.get('djout', { main: '', cue: '' });
+const fr1 = v => (+v).toFixed(1).replace('.', ',');
+
+const IC = {
+  phones: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg>',
+  loop: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>',
+  rec: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="6" fill="currentColor"/></svg>',
+  keys: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>'
+};
 
 function djDeckHtml(L){
+  const keys = L === 'A' ? ['A', 'Z', 'E', '1-4'] : ['P', 'O', 'I', '7-0'];
   return `<div class="dk-head"><div class="dk-cover"><span class="dk-letter">${L}</span></div>
     <div class="dk-meta"><div class="t dk-title">Platine ${L} vide</div><div class="s dk-sub">Charge un morceau avec le bouton ${L} de la bibliothèque</div></div>
-    <div class="dk-bpm"><b class="dk-bpmv">--</b><small>BPM</small></div></div>
+    <div class="dk-bpm"><b class="dk-bpmv">--</b><small>BPM</small><div class="dk-beats" title="Temps de la mesure"><i></i><i></i><i></i><i></i></div></div></div>
   <canvas class="dk-wave" title="Clique pour te déplacer dans le morceau"></canvas>
   <div class="dk-time"><span class="dk-cur">0:00</span><span class="dk-rem">-0:00</span></div>
   <div class="dk-row">
-    <button class="dk-btn dk-cue" title="À l'arrêt : place le point de départ. En lecture : revient au point de départ">CUE</button>
-    <button class="dk-btn dk-play" title="Lecture / pause"></button>
+    <button class="dk-btn dk-cue" title="CUE (${keys[1]}) : à l'arrêt, place le point de départ ; en lecture, y revient">CUE</button>
+    <button class="dk-btn dk-play" title="Lecture / pause (${keys[0]})"></button>
+    <button class="dk-btn dk-sync" title="SYNC (${keys[2]}) : cale le tempo ET les temps sur l'autre platine, et les garde alignés">SYNC</button>
+    <button class="dk-btn dk-pfl" title="Pré-écoute au casque : tu entends cette platine dans le casque, la salle ne l'entend que via le crossfader">${IC.phones}</button>
     <div class="sp"></div>
     <div class="seg mini dk-stem"><button type="button" data-s="orig">Original</button><button type="button" data-s="voix">Voix</button><button type="button" data-s="instru">Instru</button></div>
   </div>
+  <div class="dk-row dk-row2">
+    <div class="dk-hots" title="Hot cues (${keys[3]}) : clic sur un repère vide = le placer ; clic = y sauter ; clic droit = l'effacer">
+      ${[0, 1, 2, 3].map(n => `<button class="dk-hot" data-h="${n}" style="--hc:${HOT_COL[n]}">${n + 1}</button>`).join('')}
+    </div>
+    <div class="sp"></div>
+    <span class="dk-lbl">${IC.loop}</span>
+    <div class="dk-loops" title="Boucle de 4 ou 8 temps, calée sur le tempo (re-clic pour sortir)">
+      <button class="dk-loop" data-n="4">4</button><button class="dk-loop" data-n="8">8</button>
+    </div>
+  </div>
   <div class="dk-grid">
-    <span>Tempo</span><input type="range" class="dk-tempo" min="-8" max="8" step="0.1" value="0" title="Double-clic : 0 %"><button class="dk-sync" title="Cale le tempo sur l'autre platine">SYNC</button>
+    <span>Tempo</span><input type="range" class="dk-tempo" min="-8" max="8" step="0.1" value="0" title="Double-clic : 0 %"><output data-o="tempo">0,0 %</output>
+    <span>Filtre</span><input type="range" class="dk-filt" min="-100" max="100" step="1" value="0" title="À gauche : son étouffé (passe-bas) · à droite : son aigu (passe-haut) · double-clic : neutre"><output data-o="filt">—</output>
     <span>Aigus</span><input type="range" class="dk-eq" data-b="high" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="high">0 dB</output>
     <span>Médiums</span><input type="range" class="dk-eq" data-b="mid" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="mid">0 dB</output>
     <span>Graves</span><input type="range" class="dk-eq" data-b="low" min="-26" max="6" step="0.5" value="0" title="Double-clic : neutre"><output data-o="low">0 dB</output>
@@ -1074,30 +1166,56 @@ function djDeckHtml(L){
   </div>`;
 }
 
+/* ---------- Contexte audio, sorties salle / casque ---------- */
 function djCtx(){
   if (!DJ.ctx) {
-    DJ.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const C = window.AudioContext || window.webkitAudioContext;
+    DJ.ctx = new C({ latencyHint: 'interactive' });
     DJ.master = DJ.ctx.createGain(); DJ.master.connect(DJ.ctx.destination);
+    DJ.cueBus = DJ.ctx.createMediaStreamDestination();
     DJ.d.forEach(d => {
       const c = DJ.ctx, src = c.createMediaElementSource(d.el);
       const low = c.createBiquadFilter(); low.type = 'lowshelf'; low.frequency.value = 220;
       const mid = c.createBiquadFilter(); mid.type = 'peaking'; mid.frequency.value = 1000; mid.Q.value = 0.8;
       const high = c.createBiquadFilter(); high.type = 'highshelf'; high.frequency.value = 3500;
-      const vol = c.createGain(), xg = c.createGain();
-      src.connect(low).connect(mid).connect(high).connect(vol).connect(xg).connect(DJ.master);
-      d.nodes = { low, mid, high, vol, xg };
+      const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 20000; lp.Q.value = 1.1;
+      const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 10; hp.Q.value = 1.1;
+      const vol = c.createGain(), xg = c.createGain(), pfl = c.createGain();
+      src.connect(low).connect(mid).connect(high).connect(lp).connect(hp);
+      hp.connect(vol).connect(xg).connect(DJ.master);
+      hp.connect(pfl).connect(DJ.cueBus);
+      d.nodes = { low, mid, high, lp, hp, vol, xg, pfl };
       djApply(d);
     });
     djApplyXf();
+    djApplyOutputs();
   }
   if (DJ.ctx.state === 'suspended') DJ.ctx.resume();
   return DJ.ctx;
 }
+async function djApplyOutputs(){
+  const o = djOut();
+  try { if (DJ.ctx && DJ.ctx.setSinkId) await DJ.ctx.setSinkId(o.main || ''); } catch { toast('Sortie salle introuvable : sortie par défaut utilisée', 'err'); }
+  if (o.cue && DJ.ctx) {
+    if (!DJ.cueCtx) {
+      const C = window.AudioContext || window.webkitAudioContext;
+      DJ.cueCtx = new C({ latencyHint: 'interactive' });
+      DJ.cueCtx.createMediaStreamSource(DJ.cueBus.stream).connect(DJ.cueCtx.destination);
+    }
+    try { if (DJ.cueCtx.setSinkId) await DJ.cueCtx.setSinkId(o.cue); } catch { toast('Sortie casque introuvable : vérifie qu’il est allumé et connecté', 'err'); }
+    if (DJ.cueCtx.state === 'suspended') DJ.cueCtx.resume();
+  } else if (DJ.cueCtx) { DJ.cueCtx.close(); DJ.cueCtx = null; }
+}
 function djApply(d){
   if (!d.nodes) return;
-  const t = DJ.ctx.currentTime;
-  ['low', 'mid', 'high'].forEach(b => d.nodes[b].gain.setTargetAtTime(d.eq[b], t, 0.015));
-  d.nodes.vol.gain.setTargetAtTime(d.vol, t, 0.015);
+  const t = DJ.ctx.currentTime, n = d.nodes;
+  ['low', 'mid', 'high'].forEach(b => n[b].gain.setTargetAtTime(d.eq[b], t, 0.015));
+  n.vol.gain.setTargetAtTime(d.vol, t, 0.015);
+  // Filtre : à gauche passe-bas de 20 kHz à 200 Hz, à droite passe-haut de 20 Hz à 5 kHz (courbes exponentielles)
+  const f = d.filt / 100;
+  n.lp.frequency.setTargetAtTime(f < 0 ? 20000 * Math.pow(200 / 20000, -f) : 20000, t, 0.02);
+  n.hp.frequency.setTargetAtTime(f > 0 ? 20 * Math.pow(5000 / 20, f) : 10, t, 0.02);
+  n.pfl.gain.setTargetAtTime(d.pfl ? 1 : 0, t, 0.01);
 }
 function djApplyXf(){   // crossfader à puissance constante : pas de creux de volume au milieu
   if (!DJ.ctx) return;
@@ -1108,22 +1226,27 @@ function djApplyXf(){   // crossfader à puissance constante : pas de creux de v
 function djPauseAll(){ (DJ.d || []).forEach(d => { if (!d.el.paused) d.el.pause(); }); djStopMix(); }
 function djPauseMain(){ if (typeof P !== 'undefined' && P.id && !A().paused) { cancelFade(); A().pause(); } }
 
+/* ---------- Chargement et analyse (forme d'onde, tempo, grille des temps) ---------- */
 function djLoad(i, id, stem){
   const d = DJ.d[i], x = byId(id); if (!x) return;
   djStopMix();
   d.el.pause();
-  d.id = id; d.stem = stemFor(x, stem || 'orig'); d.cue = 0; d.peaks = null;
-  d.bpm = djBpmCache()[id] || null;
+  d.id = id; d.stem = stemFor(x, stem || 'orig'); d.cue = 0; d.peaks = null; d.loop = null; d.sync = false; d.nudge = 1;
+  const inf = djInfo(id); d.bpm = inf ? inf.bpm : null; d.b0 = inf ? inf.b0 : 0;
+  d.hot = djCuesOf(id);
   djSetSrc(d, 0, false);
   djMeta(d); djAnalyse(d); djRenderLib(true);
   toast(`${x.title} chargé sur la platine ${d.L}`);
 }
 function djSetSrc(d, at, play){
   d.el.src = url(d.id, d.stem);
-  d.el.defaultPlaybackRate = d.rate; d.el.preservesPitch = true;
-  d.el.addEventListener('loadedmetadata', () => { d.el.playbackRate = d.rate; if (at) d.el.currentTime = at; if (play) d.el.play().catch(() => {}); }, { once: true });
+  d.el.defaultPlaybackRate = d.rate * d.nudge; d.el.preservesPitch = true;
+  d.el.addEventListener('loadedmetadata', () => {
+    d.el.playbackRate = d.rate * d.nudge;
+    if (at) d.el.currentTime = at;
+    if (play) d.el.play().catch(() => {});
+  }, { once: true });
 }
-
 // Récupère tout le fichier par morceaux (le moteur envoie 2 Mo maximum par requête)
 async function djFetchAll(u){
   const parts = []; let got = 0, total = null;
@@ -1153,7 +1276,10 @@ async function djAnalyse(d){
     let mono = ab.getChannelData(0);
     if (ab.numberOfChannels > 1) { const r = ab.getChannelData(1); const m = new Float32Array(mono.length); for (let i = 0; i < m.length; i++) m[i] = (mono[i] + r[i]) / 2; mono = m; }
     d.peaks = djPeaks(mono, 1200);
-    if (!d.bpm) { d.bpm = djBpm(mono, ab.sampleRate); if (d.bpm) djBpmSave(id, d.bpm); }
+    if (!d.bpm) {   // le tempo se calcule sur le morceau original (les voix seules n'ont pas de rythme fiable)
+      const r = djRhythm(mono, ab.sampleRate);
+      if (r) { d.bpm = r.bpm; d.b0 = r.b0; djInfoSave(id, r); }
+    }
     djMeta(d); djRenderLib(true);
   } catch { if (d.id === id) d.peaks = 'x'; }
 }
@@ -1167,49 +1293,73 @@ function djPeaks(x, n){
   if (mx > 0) for (let i = 0; i < n; i++) p[i] /= mx;
   return p;
 }
-// Estimation du tempo : enveloppe d'attaques puis autocorrélation (sur 90 s au milieu du morceau)
-function djBpm(x, sr){
+// Tempo (autocorrélation de l'enveloppe d'attaques) et grille des temps (décalage qui aligne le mieux les attaques)
+function djRhythm(x, sr){
   const hop = 64, win = 256;
   const len = Math.min(x.length, Math.floor(sr * 90)), start = Math.max(0, Math.floor((x.length - len) / 2));
   const nF = Math.floor((len - win) / hop); if (nF < 400) return null;
   const env = new Float32Array(nF);
   for (let f = 0; f < nF; f++) { let s = 0; const o = start + f * hop; for (let j = 0; j < win; j++) { const v = x[o + j]; s += v * v; } env[f] = Math.sqrt(s / win); }
-  const on = new Float32Array(nF); let mean = 0;
+  const on = new Float32Array(nF), onc = new Float32Array(nF); let mean = 0;
   for (let f = 1; f < nF; f++) { const dv = env[f] - env[f - 1]; on[f] = dv > 0 ? dv : 0; mean += on[f]; }
-  mean /= nF; for (let f = 0; f < nF; f++) on[f] -= mean;
+  mean /= nF; for (let f = 0; f < nF; f++) onc[f] = on[f] - mean;
   const fd = hop / sr, minL = Math.floor(60 / 200 / fd), maxL = Math.ceil(60 / 60 / fd);
   const ac = new Float32Array(2 * maxL + 2);
-  for (let L = minL - 1; L <= Math.min(2 * maxL + 1, nF - 1); L++) { let s = 0; for (let f = 0; f + L < nF; f++) s += on[f] * on[f + L]; ac[L] = s / (nF - L); }
+  for (let L = minL - 1; L <= Math.min(2 * maxL + 1, nF - 1); L++) { let s = 0; for (let f = 0; f + L < nF; f++) s += onc[f] * onc[f + L]; ac[L] = s / (nF - L); }
   let best = -Infinity, bL = 0;
   for (let L = minL; L <= maxL; L++) { const sc = ac[L] + 0.5 * ac[2 * L]; if (sc > best) { best = sc; bL = L; } }
   if (!bL || best <= 0) return null;
   const a = ac[bL - 1], b = ac[bL], c = ac[bL + 1], den = a - 2 * b + c;
   let bpm = 60 / ((bL + (den ? 0.5 * (a - c) / den : 0)) * fd);
   while (bpm < 75) bpm *= 2; while (bpm >= 165) bpm /= 2;
-  return Math.round(bpm * 10) / 10;
+  bpm = Math.round(bpm * 10) / 10;
+  // Grille : on teste 96 décalages sur une période et on garde celui qui tombe le plus sur les attaques
+  const per = 60 / bpm / fd; let bo = 0, bs = -1;
+  for (let s = 0; s < 96; s++) {
+    const off = s / 96 * per; let sum = 0;
+    for (let k = off; k < nF - 1; k += per) { const i = Math.round(k); sum += on[i] + 0.5 * (on[i - 1] || 0) + 0.5 * on[i + 1]; }
+    if (sum > bs) { bs = sum; bo = off; }
+  }
+  const period = 60 / bpm;
+  let b0 = (start / sr + bo * fd) % period;
+  return { bpm, b0: Math.round(b0 * 10000) / 10000 };
 }
+// Position dans la grille : nombre de temps écoulés (décimal) à un instant du morceau
+const djBeatPos = (d, t) => d.bpm ? (t - d.b0) / (60 / d.bpm) : 0;
+const djBeatTime = (d, n) => d.b0 + n * 60 / d.bpm;   // instant du n-ième temps
+const djQuant = (d, t) => d.bpm ? djBeatTime(d, Math.round(djBeatPos(d, t))) : t;
 
+/* ---------- Affichage ---------- */
 function djMeta(d){
   const x = byId(d.id), q = s => d.root.querySelector(s);
+  djPlayIcon(d);
   if (!x) return;
   q('.dk-title').textContent = x.title;
   q('.dk-sub').textContent = x.uploader + (d.stem === 'voix' ? ' · Voix seules' : d.stem === 'instru' ? ' · Instrumental' : '');
   const cv = coverUrl(x.vid, x.thumb), cov = q('.dk-cover');
   cov.style.backgroundImage = cv ? `url('${cv.replace(/'/g, '%27')}')` : '';
-  q('.dk-bpmv').textContent = d.bpm ? (d.bpm * d.rate).toFixed(1).replace('.', ',') : '--';
+  q('.dk-bpmv').textContent = d.bpm ? fr1(d.bpm * d.rate) : '--';
   d.root.querySelectorAll('.dk-stem button').forEach(b => {
     b.disabled = b.dataset.s !== 'orig' && !x[b.dataset.s];
     b.classList.toggle('on', b.dataset.s === d.stem);
   });
-  djPlayIcon(d);
+  d.root.querySelectorAll('.dk-hot').forEach(b => b.classList.toggle('set', d.hot[+b.dataset.h] !== null));
+  d.root.querySelectorAll('.dk-loop').forEach(b => b.classList.toggle('on', !!d.loop && d.loop.n === +b.dataset.n));
+  q('.dk-sync').classList.toggle('on', d.sync);
+  q('.dk-pfl').classList.toggle('on', d.pfl);
 }
 function djPlayIcon(d){
   d.root.querySelector('.dk-play').innerHTML = d.el.paused ? I.play : I.pause;
   d.root.classList.toggle('on', !d.el.paused);
   if (!DJ.mix) djMixBtn();
 }
-
-// Dessin des formes d'onde (forme, partie jouée, point CUE, tête de lecture)
+function djSetTempoUI(d){
+  const v = (d.rate - 1) * 100, q = s => d.root.querySelector(s);
+  q('.dk-tempo').value = v;
+  q('output[data-o="tempo"]').textContent = `${v > 0.04 ? '+' : ''}${fr1(v)} %`;
+  q('.dk-bpmv').textContent = d.bpm ? fr1(d.bpm * d.rate) : '--';
+}
+// Forme d'onde : partie jouée, boucle, hot cues, point CUE, tête de lecture ; indicateur des 4 temps
 function djDraw(){
   if (!$('#v-dj').hidden) DJ.d.forEach(d => {
     const cv = d.root.querySelector('.dk-wave'), w = cv.clientWidth, h = cv.clientHeight, r = devicePixelRatio || 1;
@@ -1218,10 +1368,11 @@ function djDraw(){
     const g = cv.getContext('2d'); g.setTransform(r, 0, 0, r, 0, 0); g.clearRect(0, 0, w, h);
     const dur = d.el.duration || 0, cur = d.el.currentTime || 0, k = dur ? cur / dur : 0;
     const col = d.i ? '#8b5cf6' : '#ff3b6b';
+    if (dur && d.loop) { g.fillStyle = '#22c55e26'; g.fillRect(d.loop.in / dur * w, 0, Math.max(2, (d.loop.out - d.loop.in) / dur * w), h); }
     if (d.peaks instanceof Float32Array) {
       const n = d.peaks.length;
       for (let px = 0; px < w; px += 2) {
-        const v = d.peaks[Math.floor(px / w * n)], bh = Math.max(1, v * (h - 8));
+        const v = d.peaks[Math.floor(px / w * n)], bh = Math.max(1, v * (h - 10));
         g.fillStyle = px / w < k ? col : '#3a4050'; g.fillRect(px, (h - bh) / 2, 1.4, bh);
       }
     } else {
@@ -1230,19 +1381,106 @@ function djDraw(){
       if (d.id) { g.fillStyle = '#8a90a0'; g.font = '12px Segoe UI, system-ui'; g.fillText(d.peaks === 'x' ? 'Forme d’onde indisponible (fichier trop long)' : 'Analyse du morceau…', 10, 18); }
     }
     if (dur) {
-      g.fillStyle = '#fbbf24'; g.fillRect(d.cue / dur * w, 0, 2, h);
+      d.hot.forEach((t, n) => {
+        if (t === null) return;
+        const x = t / dur * w;
+        g.fillStyle = HOT_COL[n]; g.fillRect(x, 0, 2, h);
+        g.fillRect(x, 0, 12, 12); g.fillStyle = '#0b0c10'; g.font = 'bold 9px Segoe UI, system-ui'; g.fillText(n + 1, x + 3.5, 9.5);
+      });
+      g.fillStyle = '#fbbf24'; g.fillRect(d.cue / dur * w, h - 10, 2, 10);
       g.fillStyle = '#fff'; g.fillRect(k * w - 1, 0, 2, h);
     }
     d.root.querySelector('.dk-cur').textContent = fmtT(cur);
     d.root.querySelector('.dk-rem').textContent = '-' + fmtT(Math.max(0, dur - cur));
+    const beats = d.root.querySelectorAll('.dk-beats i'), bp = d.bpm && d.id ? djBeatPos(d, cur) : null;
+    const nb = bp === null ? -1 : ((Math.floor(bp) % 4) + 4) % 4, flash = bp !== null && bp - Math.floor(bp) < 0.25 && !d.el.paused;
+    beats.forEach((b, n) => { b.classList.toggle('on', n === nb); b.classList.toggle('hit', n === nb && flash); });
   });
   requestAnimationFrame(djDraw);
 }
 
-// ---- Enchaînement automatique : le crossfader glisse vers l'autre platine ----
+/* ---------- SYNC : tempo + temps alignés, puis maintenus (petites corrections de vitesse) ---------- */
+// Écart (en secondes réelles) entre le prochain temps de d et celui de l'autre platine o, ramené à ± une demi-période
+function djPhaseErr(d, o){
+  const pd = 60 / (d.bpm * d.el.playbackRate), po = 60 / (o.bpm * o.el.playbackRate);
+  const bd = djBeatPos(d, d.el.currentTime), bo = djBeatPos(o, o.el.currentTime);
+  let e = (Math.ceil(bd) - bd) * pd - (Math.ceil(bo) - bo) * po;
+  const p = Math.min(pd, po);
+  e = ((e % p) + p) % p; if (e > p / 2) e -= p;
+  return e;
+}
+function djSyncOn(d){
+  const o = DJ.d[1 - d.i];
+  if (!d.id || !o.id) { toast('Charge un morceau sur les deux platines', 'err'); return false; }
+  if (!d.bpm || !o.bpm) { toast('Tempo pas encore détecté sur les deux platines', 'err'); return false; }
+  let ratio = o.bpm * o.rate / d.bpm, f = 1;
+  [2, 0.5].forEach(m => { if (Math.abs(ratio * m - 1) < Math.abs(ratio - 1)) { ratio *= m; f = m; } });   // demi/double tempo
+  if (Math.abs(ratio - 1) > 0.08) { toast('Écart de tempo trop grand (plus de 8 %)', 'err'); return false; }
+  if (o.sync) { o.sync = false; djMeta(o); }   // une seule platine suit l'autre
+  d.sync = true; d.syncF = f; d.rate = ratio; d.nudge = 1;
+  d.el.playbackRate = d.rate; d.el.defaultPlaybackRate = d.rate;
+  djSetTempoUI(d); djAlign(d); djMeta(d);
+  return true;
+}
+function djAlign(d){   // saut immédiat pour aligner les temps (si les deux platines jouent)
+  const o = DJ.d[1 - d.i];
+  if (!d.sync || d.el.paused || o.el.paused || !d.el.duration) return;
+  const e = djPhaseErr(d, o);
+  if (Math.abs(e) > 0.004) d.el.currentTime = Math.max(0, d.el.currentTime + e * d.el.playbackRate);
+}
+setInterval(() => {
+  DJ.d.forEach(d => {
+    const o = DJ.d[1 - d.i];
+    if (!d.sync || !o.id || !o.bpm) return;
+    // suit le tempo de l'autre platine
+    const target = o.bpm * o.rate * d.syncF / d.bpm;
+    if (Math.abs(target - d.rate) > 0.0005) { d.rate = target; djSetTempoUI(d); }
+    if (d.el.paused || o.el.paused) { if (d.nudge !== 1) { d.nudge = 1; d.el.playbackRate = d.rate; } return; }
+    const e = djPhaseErr(d, o);
+    if (Math.abs(e) > 0.06) { d.nudge = 1; d.el.playbackRate = d.rate; djAlign(d); return; }
+    d.nudge = 1 + Math.max(-0.02, Math.min(0.02, e * 0.6));   // rattrape la dérive en douceur
+    d.el.playbackRate = d.rate * d.nudge;
+  });
+}, 100);
+
+/* ---------- Boucles ---------- */
+function djLoop(d, n){
+  if (!d.id) return;
+  if (d.loop && d.loop.n === n) { d.loop = null; djMeta(d); return; }
+  if (!d.bpm) { toast('Tempo pas encore détecté : boucle impossible', 'err'); return; }
+  const t = d.el.currentTime, i = Math.floor(djBeatPos(d, t) + 0.02);
+  const start = djBeatTime(d, i);
+  d.loop = { n, in: start, out: start + n * 60 / d.bpm };
+  djMeta(d);
+}
+setInterval(() => {
+  DJ.d.forEach(d => {
+    if (!d.loop || d.el.paused) return;
+    const t = d.el.currentTime;
+    if (t >= d.loop.out - 0.012) d.el.currentTime = d.loop.in + Math.max(0, t - d.loop.out);
+    else if (t < d.loop.in - 0.5) d.loop = null;   // déplacé avant la boucle : on en sort
+  });
+}, 8);
+
+/* ---------- Hot cues ---------- */
+function djHot(d, n, erase){
+  if (!d.id) return;
+  if (erase) { d.hot[n] = null; djCuesSave(d.id, d.hot); djMeta(d); return; }
+  if (d.hot[n] === null) {
+    d.hot[n] = Math.max(0, djQuant(d, d.el.currentTime));
+    djCuesSave(d.id, d.hot); djMeta(d);
+    toast(`Repère ${n + 1} placé sur la platine ${d.L}`);
+    return;
+  }
+  d.loop = null;
+  d.el.currentTime = d.hot[n];
+  if (d.el.paused) { djCtx(); d.el.play().catch(() => {}); }
+  djMeta(d);
+}
+
+/* ---------- Enchaînement automatique : le crossfader glisse vers l'autre platine ---------- */
 function djStopMix(){ if (DJ.mix) { clearInterval(DJ.mix.timer); DJ.mix = null; } djMixBtn(); }
-// Platine visée : celle qui ne joue pas ; si les deux (ou aucune) jouent, celle vers laquelle le crossfader n'est pas tourné
-function djMixTarget(){
+function djMixTarget(){   // platine visée : celle qui ne joue pas
   const pa = !DJ.d[0].el.paused, pb = !DJ.d[1].el.paused;
   if (pa && !pb) return 1;
   if (pb && !pa) return 0;
@@ -1267,32 +1505,85 @@ function djAutoMix(){
   djMixBtn();
 }
 
-// ---- Création des deux platines et de leurs commandes ----
+/* ---------- Enregistrement du mix (sortie salle) en MP3 ---------- */
+function djRecBtn(){
+  const b = $('#recbtn'); if (!b) return;
+  if (DJ.rec) {
+    const s = Math.floor((performance.now() - DJ.rec.t0) / 1000);
+    b.innerHTML = `${IC.rec}<span>${fmtT(s)}</span>`; b.classList.add('on'); b.title = 'Arrêter et enregistrer le mix en MP3';
+  } else { b.innerHTML = `${IC.rec}<span>Enregistrer</span>`; b.classList.remove('on'); b.title = 'Enregistrer ton mix (sortie salle) en MP3'; }
+}
+function djRecToggle(){
+  if (DJ.rec) { DJ.rec.mr.stop(); return; }
+  if (!window.MediaRecorder) { toast('Enregistrement non pris en charge', 'err'); return; }
+  djCtx();
+  const dest = DJ.ctx.createMediaStreamDestination(); DJ.master.connect(dest);
+  const type = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+  const mr = new MediaRecorder(dest.stream, type ? { mimeType: type, audioBitsPerSecond: 256000 } : {});
+  const chunks = [];
+  mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+  mr.onstop = async () => {
+    clearInterval(DJ.rec.timer); try { DJ.master.disconnect(dest); } catch {}
+    const secs = (performance.now() - DJ.rec.t0) / 1000; DJ.rec = null; djRecBtn();
+    if (secs < 2) { toast('Enregistrement trop court, ignoré'); return; }
+    const blob = new Blob(chunks, { type: type || 'audio/webm' });
+    toast('Mix enregistré, conversion en MP3…');
+    try {
+      const r = await fetch('/api/recording', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: blob });
+      if (!r.ok) throw new Error();
+    } catch { toast('Impossible d’enregistrer le mix', 'err'); }
+  };
+  mr.start(1000);
+  DJ.rec = { mr, t0: performance.now(), timer: setInterval(djRecBtn, 500) };
+  djRecBtn();
+  toast('Enregistrement du mix démarré');
+}
+
+/* ---------- Création des deux platines et de leurs commandes ---------- */
 ['A', 'B'].forEach((L, i) => {
   const root = $('#deck' + L); root.innerHTML = djDeckHtml(L);
   const el = new Audio(); el.preload = 'auto';
-  const d = { i, L, root, el, id: null, stem: 'orig', cue: 0, bpm: null, peaks: null, rate: 1, vol: 1, eq: { low: 0, mid: 0, high: 0 }, nodes: null };
+  const d = { i, L, root, el, id: null, stem: 'orig', cue: 0, bpm: null, b0: 0, peaks: null, rate: 1, nudge: 1, vol: 1,
+              eq: { low: 0, mid: 0, high: 0 }, filt: 0, pfl: false, sync: false, syncF: 1, loop: null, hot: [null, null, null, null], nodes: null };
   DJ.d.push(d);
   const q = s => root.querySelector(s);
   root.querySelectorAll('.dk-stem button').forEach(b => { b.disabled = b.dataset.s !== 'orig'; b.classList.toggle('on', b.dataset.s === 'orig'); });
   djPlayIcon(d);
   el.addEventListener('play', () => { djPlayIcon(d); djPauseMain(); });
+  el.addEventListener('playing', () => djAlign(d));
   el.addEventListener('pause', () => djPlayIcon(d));
   el.addEventListener('ended', () => djPlayIcon(d));
-  q('.dk-play').onclick = () => {
+  d.toggle = () => {
     if (!d.id) { toast(`Charge un morceau sur la platine ${L}`, 'err'); return; }
     djCtx();
     if (el.paused) el.play().catch(() => {}); else el.pause();
   };
-  q('.dk-cue').onclick = () => {
+  d.cueBtn = () => {
     if (!d.id) return;
-    if (!el.paused) { el.pause(); el.currentTime = d.cue; } else d.cue = el.currentTime;
+    if (!el.paused) { el.pause(); el.currentTime = d.cue; } else { d.cue = djQuant(d, el.currentTime); el.currentTime = d.cue; }
   };
+  d.syncBtn = () => { if (d.sync) { d.sync = false; d.nudge = 1; el.playbackRate = d.rate; djMeta(d); } else if (djSyncOn(d)) toast(`Platine ${L} synchronisée`); };
+  q('.dk-play').onclick = d.toggle;
+  q('.dk-cue').onclick = d.cueBtn;
+  q('.dk-sync').onclick = d.syncBtn;
+  q('.dk-pfl').onclick = () => {
+    if (!djOut().cue) {
+      toast('Choisis d’abord ta sortie casque dans Paramètres', 'err');
+      show('set'); setTimeout(() => $('#djcard').scrollIntoView({ behavior: 'smooth' }), 50); return;
+    }
+    djCtx(); djApplyOutputs();
+    d.pfl = !d.pfl; djApply(d); djMeta(d);
+  };
+  root.querySelectorAll('.dk-hot').forEach(b => {
+    b.onclick = e => djHot(d, +b.dataset.h, e.shiftKey);
+    b.oncontextmenu = e => { e.preventDefault(); djHot(d, +b.dataset.h, true); };
+  });
+  root.querySelectorAll('.dk-loop').forEach(b => { b.onclick = () => djLoop(d, +b.dataset.n); });
   const cv = q('.dk-wave'); let drag = false;
-  const seek = e => { if (!el.duration) return; const r = cv.getBoundingClientRect(); el.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * el.duration; };
+  const seek = e => { if (!el.duration) return; const r = cv.getBoundingClientRect(); d.loop = null; el.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * el.duration; };
   cv.addEventListener('pointerdown', e => { drag = true; cv.setPointerCapture(e.pointerId); seek(e); });
   cv.addEventListener('pointermove', e => { if (drag) seek(e); });
-  cv.addEventListener('pointerup', () => { drag = false; });
+  cv.addEventListener('pointerup', () => { drag = false; djAlign(d); djMeta(d); });
   q('.dk-stem').onclick = e => {
     const b = e.target.closest('button'); if (!b || b.disabled || !d.id || b.dataset.s === d.stem) return;
     d.stem = b.dataset.s; d.peaks = null;
@@ -1300,50 +1591,93 @@ function djAutoMix(){
     djMeta(d); djAnalyse(d);
   };
   const tempo = q('.dk-tempo');
-  const setTempo = v => {
-    tempo.value = v; d.rate = 1 + v / 100; el.playbackRate = d.rate; el.defaultPlaybackRate = d.rate;
-    tempo.title = `Tempo ${v > 0 ? '+' : ''}${(+v).toFixed(1).replace('.', ',')} % (double-clic : 0 %)`;
-    djMeta(d);
+  const setTempo = v => {   // réglage manuel : désactive SYNC
+    if (d.sync) { d.sync = false; djMeta(d); }
+    d.rate = 1 + v / 100; d.nudge = 1; el.playbackRate = d.rate; el.defaultPlaybackRate = d.rate;
+    djSetTempoUI(d);
   };
-  d.setTempo = setTempo;
   tempo.oninput = () => setTempo(+tempo.value);
   tempo.ondblclick = () => setTempo(0);
-  q('.dk-sync').onclick = () => {
-    const o = DJ.d[1 - i];
-    if (!d.bpm || !o.bpm) { toast('BPM pas encore détecté sur les deux platines', 'err'); return; }
-    let ratio = o.bpm * o.rate / d.bpm;
-    [2, 0.5].forEach(f => { if (Math.abs(ratio * f - 1) < Math.abs(ratio - 1)) ratio *= f; });   // demi/double tempo
-    const v = (ratio - 1) * 100;
-    if (Math.abs(v) > 8) { toast('Écart de tempo trop grand (plus de 8 %)', 'err'); return; }
-    setTempo(Math.round(v * 10) / 10);
-    toast(`Platine ${L} calée sur ${(o.bpm * o.rate).toFixed(1).replace('.', ',')} BPM`);
-  };
   root.querySelectorAll('.dk-eq').forEach(r => {
     const b = r.dataset.b, out = q(`output[data-o="${b}"]`);
     const set = v => { r.value = v; d.eq[b] = +v; out.textContent = +v <= -26 ? 'coupé' : `${v > 0 ? '+' : ''}${(+v).toFixed(1).replace('.0', '').replace('.', ',')} dB`; djApply(d); };
     r.oninput = () => set(r.value); r.ondblclick = () => set(0);
   });
+  const filt = q('.dk-filt'), fout = q('output[data-o="filt"]');
+  const setFilt = v => {
+    filt.value = v; d.filt = +v; djApply(d);
+    const hz = v < 0 ? 20000 * Math.pow(200 / 20000, -v / 100) : 20 * Math.pow(5000 / 20, v / 100);
+    fout.textContent = +v === 0 ? '—' : `${v < 0 ? 'PB' : 'PH'} ${hz >= 1000 ? fr1(hz / 1000) + ' k' : Math.round(hz) + ' '}Hz`;
+  };
+  filt.oninput = () => setFilt(+filt.value); filt.ondblclick = () => setFilt(0);
   const vol = q('.dk-vol');
   vol.oninput = () => { d.vol = vol.value / 100; q('output[data-o="vol"]').textContent = vol.value + ' %'; djApply(d); };
 });
 $('#xf').oninput = e => { djStopMix(); DJ.xf = e.target.value / 1000; djApplyXf(); djMixBtn(); };
 $('#xf').ondblclick = () => { djStopMix(); DJ.xf = 0.5; $('#xf').value = 500; djApplyXf(); djMixBtn(); };
 $('#automix').onclick = djAutoMix;
-try { DJ.len = +localStorage.getItem('mixlen') || 8; } catch {}
+$('#recbtn').onclick = djRecToggle;
+$('#keysbtn').innerHTML = IC.keys + '<span>Raccourcis</span>';
+$('#keysbtn').onclick = () => $('#keyhelp').classList.toggle('show');
+$('#keyhelp').onclick = e => { if (e.target === $('#keyhelp') || e.target.closest('.kclose')) $('#keyhelp').classList.remove('show'); };
+DJ.len = LSJ.get('mixlen', 8);
 const djLen = () => document.querySelectorAll('#mixlen button').forEach(b => b.classList.toggle('on', +b.dataset.l === DJ.len));
-$('#mixlen').onclick = e => { const b = e.target.closest('button'); if (!b) return; DJ.len = +b.dataset.l; try { localStorage.setItem('mixlen', DJ.len); } catch {} djLen(); };
-djLen(); djMixBtn(); requestAnimationFrame(djDraw);
+$('#mixlen').onclick = e => { const b = e.target.closest('button'); if (!b) return; DJ.len = +b.dataset.l; LSJ.set('mixlen', DJ.len); djLen(); };
+djLen(); djMixBtn(); djRecBtn(); requestAnimationFrame(djDraw);
 
-// ---- Bibliothèque de l'onglet Mix ----
+/* ---------- Raccourcis clavier de l'onglet Mix ----------
+   Platine A : A lecture · Z CUE · E SYNC · 1 2 3 4 hot cues     Platine B : P lecture · O CUE · I SYNC · 7 8 9 0 hot cues
+   Espace : enchaîner · ← → : crossfader · Maj + chiffre : effacer un hot cue */
+document.addEventListener('keydown', e => {
+  if ($('#v-dj').hidden || e.ctrlKey || e.altKey || e.metaKey || e.target.matches('input:not([type=range]), textarea, select')) return;
+  const k = e.key.toLowerCase(), [A_, B_] = DJ.d;
+  const map = { a: A_.toggle, z: A_.cueBtn, e: A_.syncBtn, p: B_.toggle, o: B_.cueBtn, i: B_.syncBtn };
+  const hot = { Digit1: [0, 0], Digit2: [0, 1], Digit3: [0, 2], Digit4: [0, 3], Digit7: [1, 0], Digit8: [1, 1], Digit9: [1, 2], Digit0: [1, 3] }[e.code];
+  if (map[k]) { e.preventDefault(); map[k](); }
+  else if (hot) { e.preventDefault(); djHot(DJ.d[hot[0]], hot[1], e.shiftKey); }
+  else if (e.code === 'Space') { e.preventDefault(); djAutoMix(); }
+  else if (e.code === 'ArrowLeft' || e.code === 'ArrowRight') {
+    e.preventDefault(); djStopMix();
+    DJ.xf = Math.max(0, Math.min(1, DJ.xf + (e.code === 'ArrowLeft' ? -0.05 : 0.05)));
+    $('#xf').value = Math.round(DJ.xf * 1000); djApplyXf(); djMixBtn();
+  }
+});
+
+/* ---------- Paramètres : sorties salle et casque ---------- */
+async function djListOutputs(){
+  const sm = $('#outMain'), sc = $('#outCue'); if (!sm) return;
+  let devs = [];
+  try { devs = (await navigator.mediaDevices.enumerateDevices()).filter(x => x.kind === 'audiooutput' && x.deviceId !== 'default' && x.deviceId !== 'communications'); } catch {}
+  const o = djOut(), named = devs.some(x => x.label);
+  const opts = devs.map((x, n) => `<option value="${esc(x.deviceId)}">${esc(x.label || `Sortie audio ${n + 1}`)}</option>`).join('');
+  sm.innerHTML = `<option value="">Sortie par défaut de Windows</option>` + opts;
+  sc.innerHTML = `<option value="">Aucune (pré-écoute désactivée)</option>` + opts;
+  sm.value = devs.some(x => x.deviceId === o.main) ? o.main : '';
+  sc.value = devs.some(x => x.deviceId === o.cue) ? o.cue : '';
+  $('#outNames').hidden = named || !devs.length;
+  $('#outHint').textContent = !devs.length ? 'Aucune sortie audio détectée.' : named ? '' : 'Clique sur « Afficher les noms » pour reconnaître tes appareils.';
+}
+const djSaveOut = () => { LSJ.set('djout', { main: $('#outMain').value, cue: $('#outCue').value }); djApplyOutputs(); toast('Sorties audio enregistrées'); };
+$('#outMain').onchange = djSaveOut;
+$('#outCue').onchange = () => { djSaveOut(); if (!$('#outCue').value) DJ.d.forEach(d => { d.pfl = false; djApply(d); djMeta(d); }); };
+$('#outNames').onclick = async () => {
+  try { const s = await navigator.mediaDevices.getUserMedia({ audio: true }); s.getTracks().forEach(t => t.stop()); }
+  catch { toast('Autorisation refusée : les sorties restent sans nom', 'err'); }
+  djListOutputs();
+};
+try { navigator.mediaDevices.addEventListener('devicechange', djListOutputs); } catch {}
+djListOutputs();
+
+/* ---------- Bibliothèque de l'onglet Mix ---------- */
 let djLibKey = '';
 function djRenderLib(force){
   if ($('#v-dj').hidden || !state) return;
-  const f = ($('#djq').value || '').toLowerCase(), bpm = djBpmCache();
+  const f = ($('#djq').value || '').toLowerCase(), info = LSJ.get('djinfo', {});
   const rows = (state.history || []).filter(x => x.exists && (!f || (x.title + ' ' + x.uploader).toLowerCase().includes(f)));
-  const key = JSON.stringify(rows.map(x => [x.id, x.voix, x.instru])) + f + DJ.d.map(d => d.id).join() + JSON.stringify(bpm);
+  const key = JSON.stringify(rows.map(x => [x.id, x.voix, x.instru])) + f + DJ.d.map(d => d.id).join() + JSON.stringify(info);
   if (!force && key === djLibKey) return; djLibKey = key;
   $('#djlib').innerHTML = rows.length ? rows.map(x => `<div class="item djrow">${thumb(x.vid, x.duration, false, x.thumb)}
-      <div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${bpm[x.id] ? `<span class="tag">${String(bpm[x.id]).replace('.', ',')} BPM</span>` : ''}${x.voix || x.instru ? '<span class="tag">Voix / Instru</span>' : ''}</div></div>
+      <div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${info[x.id] ? `<span class="tag">${fr1(info[x.id].bpm)} BPM</span>` : ''}${x.voix || x.instru ? '<span class="tag">Voix / Instru</span>' : ''}</div></div>
       <div class="acts"><button class="ab a ${DJ.d[0].id === x.id ? 'on' : ''}" data-load="0" data-id="${x.id}" title="Charger sur la platine A">A</button><button class="ab b ${DJ.d[1].id === x.id ? 'on' : ''}" data-load="1" data-id="${x.id}" title="Charger sur la platine B">B</button></div></div>`).join('')
     : `<div class="empty">${I.note}<div>${f ? 'Aucun résultat' : 'Télécharge des morceaux pour les mixer ici'}</div></div>`;
 }
@@ -2147,6 +2481,21 @@ function ConvertTo-Ver([string]$v) {
     while ($p.Count -lt 3) { $p += '0' }
     return [version]($p[0..2] -join '.')
 }
+# Récupère un fichier du dépôt : texte (DownloadString) ou fichier (si $Dest). API d'abord, sinon raw.
+function Get-RepoFile([string]$name, [string]$dest) {
+    foreach ($src in @('api', 'raw')) {
+        if ($src -eq 'api' -and -not $UpdateApi) { continue }
+        try {
+            $wc = New-WebClient
+            $wc.Encoding = [Text.Encoding]::UTF8
+            if ($src -eq 'api') { $wc.Headers['Accept'] = 'application/vnd.github.raw'; $u = "$UpdateApi/$($name)?ref=main" }
+            else { $u = "$UpdateBase/$($name)?t=" + [DateTime]::UtcNow.Ticks }
+            if ($dest) { $wc.DownloadFile($u, $dest); return $true }
+            return $wc.DownloadString($u)
+        } catch { if ($src -eq 'raw') { throw } }
+    }
+}
+
 function New-WebClient {
     try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 } catch {}
     $wc = New-Object Net.WebClient
@@ -2161,15 +2510,25 @@ function Start-UpdateCheck([switch]$Manual) {
     if ($script:updJob -and $script:updJob.State -eq 'Running') { return }
     $script:lastUpdCheck = Get-Date
     if ($Manual -or $script:upd.state -eq 'inconnu') { $script:upd.state = 'verif'; $script:upd.error = '' }
-    $script:updJob = Start-Job -ArgumentList $UpdateBase -ScriptBlock {
-        param($base)
+    $script:updJob = Start-Job -ArgumentList $UpdateBase, $UpdateApi, $AppVersion -ScriptBlock {
+        param($base, $api, $ver)
         try { [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12 } catch {}
-        $wc = New-Object Net.WebClient
-        $wc.Headers['Cache-Control'] = 'no-cache'
-        $t = [DateTime]::UtcNow.Ticks
-        $v = ($wc.DownloadString("$base/version.txt?t=$t")).Trim()
+        function Get-Txt([string]$name) {
+            foreach ($src in @('api', 'raw')) {
+                if ($src -eq 'api' -and -not $api) { continue }
+                try {
+                    $wc = New-Object Net.WebClient
+                    $wc.Encoding = [Text.Encoding]::UTF8
+                    $wc.Headers['Cache-Control'] = 'no-cache'
+                    $wc.Headers['User-Agent'] = "YT-MP3/$ver"
+                    if ($src -eq 'api') { $wc.Headers['Accept'] = 'application/vnd.github.raw'; return $wc.DownloadString("$api/$($name)?ref=main") }
+                    return $wc.DownloadString("$base/$($name)?t=" + [DateTime]::UtcNow.Ticks)
+                } catch { if ($src -eq 'raw') { throw } }
+            }
+        }
+        $v = (Get-Txt 'version.txt').Trim()
         $n = ''
-        try { $wc.Encoding = [Text.Encoding]::UTF8; $n = $wc.DownloadString("$base/notes.txt?t=$t") } catch {}   # nouveautés : facultatif
+        try { $n = Get-Txt 'notes.txt' } catch {}   # nouveautés : facultatif
         [PSCustomObject]@{ v = $v; notes = $n }
     }
 }
@@ -2208,8 +2567,7 @@ function Invoke-SelfUpdate {
     }
     $tmp = $SelfPath + '.new'
     try {
-        $wc = New-WebClient
-        $wc.DownloadFile("$UpdateBase/yt-mp3.ps1?t=" + [DateTime]::UtcNow.Ticks, $tmp)
+        [void](Get-RepoFile 'yt-mp3.ps1' $tmp)
         # Contrôles : c'est bien YT MP3, dans une version plus récente, et le script est valide
         $txt = [IO.File]::ReadAllText($tmp, [Text.Encoding]::UTF8)
         $m = [regex]::Match($txt, "(?m)^\`$AppVersion = '([0-9.]+)'")
@@ -2219,7 +2577,7 @@ function Invoke-SelfUpdate {
         [void][Management.Automation.Language.Parser]::ParseFile($tmp, [ref]$null, [ref]$errs)
         if ($errs -and $errs.Count) { throw 'le fichier reçu est incomplet ou abîmé, ta version actuelle est conservée. Réessaie dans quelques minutes.' }
         foreach ($f in @('app.ico', 'desinstaller.ps1')) {   # fichiers annexes : facultatifs
-            try { $wc.DownloadFile("$UpdateBase/$($f)?t=" + [DateTime]::UtcNow.Ticks, (Join-Path $Root "$f.new")); Move-Item -LiteralPath (Join-Path $Root "$f.new") -Destination (Join-Path $Root $f) -Force } catch {}
+            try { [void](Get-RepoFile $f (Join-Path $Root "$f.new")); Move-Item -LiteralPath (Join-Path $Root "$f.new") -Destination (Join-Path $Root $f) -Force } catch {}
         }
         Copy-Item -LiteralPath $SelfPath -Destination ($SelfPath + '.precedent') -Force
         Move-Item -LiteralPath $tmp -Destination $SelfPath -Force
@@ -2241,6 +2599,57 @@ function Restart-Self {
     $a = "-NoProfile -ExecutionPolicy Bypass -File `"$SelfPath`" silencieux"
     try { Start-Process -FilePath $exe -ArgumentList ("-WindowStyle Hidden " + $a) -WindowStyle Hidden -ErrorAction Stop }
     catch { Start-Process -FilePath $exe -ArgumentList $a }
+}
+
+# =====================================================================
+#  Enregistrement d'un mix (onglet Mix) : WebM/Opus reçu de la fenêtre -> MP3 dans la bibliothèque
+# =====================================================================
+$recQueue = New-Object System.Collections.ArrayList
+
+function Save-Recording($ctx) {
+    if ($ctx.Length -lt 1000) { return 'Enregistrement vide' }
+    $id = [guid]::NewGuid().ToString('N').Substring(0, 10)
+    $now = Get-Date
+    $title = 'Mix du ' + $now.ToString('dd/MM/yyyy') + ' à ' + $now.ToString('HH\hmm')
+    $src = Join-Path $Data "rec-$id.webm"
+    $fs = [IO.File]::Create($src)
+    try { $fs.Write($ctx.Bytes, 0, [int]$ctx.Length) } finally { $fs.Close() }
+    $name = Get-SafeName ('Mix ' + $now.ToString('yyyy-MM-dd HH\hmm'))
+    $out = Join-Path (Get-Out) ($name + '.mp3')
+    $k = 2; while (Test-Path -LiteralPath $out) { $out = Join-Path (Get-Out) ("$name ($k).mp3"); $k++ }
+    $a = @('-y', '-loglevel', 'error', '-i', $src, '-vn', '-c:a', 'libmp3lame', '-b:a', '256k',
+        '-metadata', "title=$title", '-metadata', 'artist=Mix YT MP3', '-id3v2_version', '3', $out)
+    $pr = Start-Proc $Ffmpeg $a (Join-Path $Data "rec-$id.log")
+    [void]$recQueue.Add([PSCustomObject]@{ id = $id; proc = $pr; src = $src; out = $out; title = $title })
+    return ''
+}
+
+function Update-Recordings {
+    foreach ($r in @($recQueue)) {
+        if (-not $r.proc.HasExited) { continue }
+        if ($r.proc.ExitCode -eq 0 -and (Test-Path -LiteralPath $r.out)) {
+            $fi = Get-Item -LiteralPath $r.out
+            $dur = ''
+            try {
+                $probe = Join-Path $Bin 'ffprobe.exe'
+                if (Test-Path -LiteralPath $probe) {
+                    $sec = [double]::Parse((& $probe -v error -show_entries format=duration -of csv=p=0 $r.out | Select-Object -First 1), $Inv)
+                    $dur = '{0}:{1:00}' -f [math]::Floor($sec / 60), [math]::Floor($sec % 60)
+                    if ($sec -ge 3600) { $dur = '{0}:{1:00}:{2:00}' -f [math]::Floor($sec / 3600), [math]::Floor(($sec % 3600) / 60), [math]::Floor($sec % 60) }
+                }
+            } catch {}
+            [void]$history.Insert(0, [PSCustomObject]@{
+                id = $r.id; vid = ''; title = $r.title; uploader = 'Mix YT MP3'; duration = $dur; file = $fi.Name; path = $fi.FullName
+                size = $fi.Length; quality = 256; srcAbr = 0; srcCodec = ''; thumb = ''; normalized = $false; trimmed = $false; cleaned = $false
+                date = (Get-Date).ToString('dd/MM/yyyy HH:mm')
+            })
+            Save-History
+        }
+        foreach ($f in @($r.src, (Join-Path $Data "rec-$($r.id).log"), (Join-Path $Data "rec-$($r.id).log.err"))) {
+            Remove-Item -LiteralPath $f -Force -ErrorAction SilentlyContinue
+        }
+        $recQueue.Remove($r)
+    }
 }
 
 function Stop-Current {
@@ -2279,22 +2688,30 @@ function Read-HttpRequest($client) {
         if ($i -gt 0) { $headers[$l.Substring(0, $i).Trim().ToLower()] = $l.Substring($i + 1).Trim() }
     }
     $len = 0
-    if ($headers['content-length']) { $len = [int]$headers['content-length'] }
+    if ($headers['content-length']) { $len = [int64]$headers['content-length'] }
+    if ($len -gt 600MB) { return $null }
     $bodyStart = $headEnd + 4
-    while (($all.Length - $bodyStart) -lt $len) {
-        $n = $ns.Read($buf, 0, $buf.Length)
+    $bytes = New-Object byte[] $len
+    $have = [math]::Min($len, $all.Length - $bodyStart)
+    if ($have -gt 0) { [Array]::Copy($all, $bodyStart, $bytes, 0, $have) }
+    if ($len -gt 1MB) { $client.ReceiveTimeout = 30000 }
+    while ($have -lt $len) {
+        $n = $ns.Read($bytes, $have, [int][math]::Min(1MB, $len - $have))
         if ($n -le 0) { break }
-        $ms.Write($buf, 0, $n)
-        $all = $ms.ToArray()
+        $have += $n
     }
     $body = ''
-    if ($len -gt 0) { $body = [Text.Encoding]::UTF8.GetString($all, $bodyStart, [math]::Min($len, $all.Length - $bodyStart)) }
+    if ($len -gt 0 -and $len -le 1MB) { $body = [Text.Encoding]::UTF8.GetString($bytes, 0, $have) }
+    $parts = $first[1] -split '\?', 2
     return @{
         Method = $first[0].ToUpper()
-        Path   = ($first[1] -split '\?')[0]
+        Path   = $parts[0]
+        Query  = $(if ($parts.Count -gt 1) { $parts[1] } else { '' })
         Origin = $headers['origin']
         Range  = $headers['range']
         Body   = $body
+        Bytes  = $bytes
+        Length = $have
         Stream = $ns
     }
 }
@@ -2473,6 +2890,11 @@ function Invoke-Request($ctx) {
             }
         }
         '/api/forget'  { $h = Find-Hist $id; if ($h) { $history.Remove($h); Save-History } }
+        '/api/recording' {
+            $err = Save-Recording $ctx
+            if ($err) { Send-Json $ctx @{ error = $err }; return }
+            Send-Json $ctx @{ ok = $true }; return
+        }
         '/api/checkupdate' { Start-UpdateCheck -Manual }
         '/api/cancelupdate' { $script:updateWhenIdle = $false }
         '/api/update' {
@@ -2593,6 +3015,7 @@ while ($true) {
         try { Update-Search } catch {}
         try { Update-Sep } catch {}
         try { Update-UpdateCheck } catch {}
+        try { Update-Recordings } catch {}
         if ($CanSelfUpdate -and ($now - $script:lastUpdCheck).TotalSeconds -gt $UpdateEvery) { try { Start-UpdateCheck } catch {} }
         # Mise à jour programmée « à la fin des téléchargements » : on l'installe dès que tout est terminé
         if ($script:updateWhenIdle -and -not (Test-Busy)) {
@@ -2603,7 +3026,7 @@ while ($true) {
 
         # Fermeture automatique quand la fenêtre est fermée et qu'il n'y a plus rien à faire
         $pending = @($queue | Where-Object { $_.status -eq 'attente' }).Count -gt 0 -and (Get-SetupState) -ne 'erreur'
-        if (-not $script:proc -and -not $pending -and -not $script:sepProc -and -not $script:searchProcs.Count) {
+        if (-not $script:proc -and -not $pending -and -not $script:sepProc -and -not $script:searchProcs.Count -and -not $recQueue.Count) {
             if ($script:byeAt -and ($now - $script:byeAt).TotalSeconds -gt 5) { break }
             if (($now - $script:lastSeen).TotalSeconds -gt $IdleSeconds) { break }
         }
