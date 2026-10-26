@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.8 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.9 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.8'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.9'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -348,6 +348,67 @@ body.dj-mode main{padding-bottom:60px}
 .deck{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0;--dc:var(--a1)}
 #deckB{--dc:var(--a2)}
 .deck.on{border-color:color-mix(in srgb,var(--dc) 55%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--dc) 25%,transparent),0 10px 30px #0006}
+/* ---------- Platines vinyle (design original, inspiration vintage) ---------- */
+.tt-plinth{position:relative;display:flex;align-items:stretch;gap:14px;padding:12px 14px;border-radius:14px;
+  background:linear-gradient(180deg,#3a3d44 0%,#2a2c31 48%,#232529 100%);
+  box-shadow:inset 0 1px 0 #ffffff26,inset 0 -2px 0 #0006,0 10px 24px #0007;overflow:hidden}
+.tt-plinth::before{content:'';position:absolute;inset:0;pointer-events:none;opacity:.35;
+  background:repeating-linear-gradient(90deg,#ffffff08 0 1px,transparent 1px 3px)}
+.tt.flip .tt-plinth{flex-direction:row-reverse}
+.tt-stage{position:relative;width:340px;height:250px;flex:none}
+.tt-platter{position:absolute;left:9px;top:9px;width:232px;height:232px;border-radius:50%;
+  background:radial-gradient(circle,#55585f 0 60%,#2d2f34 61%,#1b1c20 100%);
+  box-shadow:0 0 0 2px #15161a,0 6px 18px #000a,inset 0 0 0 3px #4a4d54;transition:box-shadow .4s}
+.deck.on .tt-platter{box-shadow:0 0 0 2px #15161a,0 6px 18px #000a,inset 0 0 0 3px #4a4d54,0 0 26px color-mix(in srgb,var(--dc) 55%,transparent)}
+.tt-rec{position:absolute;inset:9px;border-radius:50%;cursor:grab;touch-action:none;
+  background:radial-gradient(circle,transparent 0 30%,#0c0c0e 30.5%),
+             repeating-radial-gradient(circle,#141416 0 1.2px,#0a0a0c 1.2px 2.6px);
+  box-shadow:inset 0 0 0 4px #050506,inset 0 0 0 26px #0d0d0f}
+.tt-rec:active{cursor:grabbing}
+.tt-rec::after{content:'';position:absolute;inset:0;border-radius:50%;
+  background:repeating-radial-gradient(circle at 50% 50%,transparent 0 8px,#ffffff06 8px 9px)}
+.tt-label{position:absolute;left:50%;top:50%;width:84px;height:84px;margin:-42px 0 0 -42px;border-radius:50%;
+  background-image:var(--lbl,none),radial-gradient(circle,transparent 0 22%,#0003 23% 24%,transparent 25%),linear-gradient(135deg,var(--dc),#8b5cf6 60%,#1e1b4b);background-position:center;background-size:cover;background-repeat:no-repeat;box-shadow:0 0 0 3px #111,0 0 0 4px #2a2a2e;
+  display:grid;place-items:center;overflow:hidden}
+.tt-label i{position:absolute;left:0;right:0;top:9px;text-align:center;font-style:normal;font-size:8px;font-weight:800;letter-spacing:1.5px;color:#fff;text-shadow:0 1px 2px #000;opacity:.9}
+.tt-label.nocover i{top:16px;font-size:8.5px;padding:0 8px}
+.tt-shine{position:absolute;inset:18px;border-radius:50%;pointer-events:none;
+  background:conic-gradient(from 20deg,transparent 0 30deg,#ffffff16 45deg,transparent 60deg 200deg,#ffffff10 215deg,transparent 232deg)}
+.tt-spindle{position:absolute;left:50%;top:50%;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#f4f4f5,#8a8d94 60%,#45484e);box-shadow:0 1px 2px #000;pointer-events:none}
+.tt-post{position:absolute;left:249px;top:208px;width:16px;height:16px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#6b6e75,#26282c);box-shadow:0 2px 3px #0009}
+.tt-arm{position:absolute;left:240px;top:4px;width:60px;height:240px;transform-origin:30px 30px;
+  transform:rotate(var(--a,4deg));transition:transform .55s cubic-bezier(.3,.7,.3,1);pointer-events:none;filter:drop-shadow(3px 6px 4px #000a)}
+.tt-arm svg{width:60px;height:240px;overflow:visible}
+.tt.flip .tt-platter{left:99px}.tt.flip .tt-post{left:75px}.tt.flip .tt-arm{left:40px}
+.tt.flip .tt-arm svg{transform:scaleX(-1)}
+.tt-side{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:10px;position:relative}
+.tt.flip .tt-side{align-items:flex-end}
+.tt-lcd{background:linear-gradient(180deg,#0f1a12,#0b130d);border:1px solid #000;border-radius:7px;padding:7px 10px;
+  box-shadow:inset 0 2px 6px #000c,0 1px 0 #ffffff14;font-family:'Courier New',ui-monospace,monospace;color:#7dffa0;
+  text-shadow:0 0 6px #3dff7a99;min-width:118px}
+.tt-lcd b{display:block;font-size:20px;letter-spacing:1px;font-weight:700;font-variant-numeric:tabular-nums}
+.tt-lcd span{font-size:11px;opacity:.85;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px}
+.tt-row{display:flex;align-items:flex-end;gap:14px}
+.tt.flip .tt-row{flex-direction:row-reverse}
+.tt-start{width:64px;height:42px;border-radius:7px;font-size:10px;font-weight:800;letter-spacing:1px;color:#d4d4d8;
+  background:linear-gradient(180deg,#4b4e55,#2e3035);box-shadow:inset 0 1px 0 #ffffff30,0 3px 0 #15161a,0 5px 8px #0008}
+.tt-start:active{transform:translateY(2px);box-shadow:inset 0 1px 0 #ffffff30,0 1px 0 #15161a}
+.tt-start i{display:block;width:6px;height:6px;border-radius:50%;margin:0 auto 4px;background:#3a1a1a;box-shadow:inset 0 0 2px #000}
+.deck.on .tt-start i{background:var(--dc);box-shadow:0 0 8px var(--dc)}
+.tt-pitch{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:9px;font-weight:800;letter-spacing:1px;color:#a1a1aa}
+.tt-slot{position:relative;width:22px;height:132px;border-radius:5px;background:#121316;box-shadow:inset 0 2px 5px #000,0 1px 0 #ffffff12;cursor:ns-resize;touch-action:none}
+.tt-slot::before{content:'';position:absolute;left:50%;top:6px;bottom:6px;width:2px;margin-left:-1px;background:#000}
+.tt-slot::after{content:'';position:absolute;left:-5px;right:-5px;top:50%;height:1px;background:#71717a}
+.tt-knob{position:absolute;left:-4px;width:30px;height:16px;margin-top:-8px;border-radius:3px;top:50%;
+  background:linear-gradient(180deg,#d4d4d8,#71717a 45%,#a1a1aa 55%,#52525b);box-shadow:0 2px 4px #000b}
+.tt-knob::after{content:'';position:absolute;left:3px;right:3px;top:7px;height:2px;background:var(--dc)}
+.tt-pv{font-family:'Courier New',monospace;font-size:11px;color:#e4e4e7;letter-spacing:0}
+.tt-badge{position:absolute;top:0;font-size:11px;font-weight:800;letter-spacing:2px;color:#a1a1aa}
+.tt-badge b{color:var(--dc)}
+@media (max-width:1180px){.tt-stage{transform:scale(.82);transform-origin:top left;width:279px;height:205px}.tt.flip .tt-stage{transform-origin:top right}}
+.deck .dk-cover{display:none}
 .dk-head{display:flex;align-items:center;gap:12px;min-width:0}
 .dk-cover{width:52px;height:52px;border-radius:10px;background:var(--panel2) center/cover no-repeat;flex:none;display:grid;place-items:center;color:var(--faint);position:relative}
 .dk-letter{position:absolute;left:-6px;top:-6px;width:22px;height:22px;border-radius:7px;background:var(--dc);color:#fff;font-weight:700;font-size:12px;display:grid;place-items:center}
@@ -1001,6 +1062,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.9', '26/10/2026', ['Onglet Mix : deux vraies platines vinyle qui tournent avec la musique, la pochette du morceau au centre du disque', 'Bras de lecture qui se pose et avance sur le disque, fader de pitch, bouton START et petit écran rétro (BPM, temps restant, tonalité)', 'Fais tourner le disque à la main pour te déplacer dans le morceau']],
   ['2.8', '22/10/2026', ['Nouvel onglet Mixtape : choisis un dossier (un ou plusieurs artistes) ou des titres de ta bibliothèque, YT MP3 crée un seul MP3 enchaîné', 'Morceaux rangés par tempo (ou tempo + tonalité), enchaînements calés sur le rythme avec accélération / ralentissement progressif', 'Style sound system : rewind (wheel up), sortie en écho, coupure, avec sirènes, corne, laser, bombe et tes propres sons', 'Pré-écoute de chaque enchaînement, chapitres et liste des morceaux dans la mixtape finale']],
   ['2.7.1', '14/10/2026', ['Mix : protection contre les coupures, si tu charges un morceau sur la platine qui joue, YT MP3 te propose de le mettre sur l\'autre platine']],
   ['2.7', '14/10/2026', ['Enchaînement calé sur le rythme : le morceau suivant prend le tempo du morceau en cours et démarre pile sur le premier temps d\'une mesure', 'Durée de l\'enchaînement arrondie à des mesures entières, échange des basses à mi-parcours (pas de grosses caisses qui se chevauchent)', 'Bouton « Calé » pour revenir au fondu simple si tu préfères']],
@@ -1345,7 +1407,23 @@ const IC = {
 
 function djDeckHtml(L){
   const keys = L === 'A' ? ['A', 'Z', 'E', '1-4'] : ['P', 'O', 'I', '7-0'];
-  return `<div class="dk-head"><div class="dk-cover"><span class="dk-letter">${L}</span></div>
+  return `<div class="tt ${L === 'B' ? 'flip' : ''}"><div class="tt-plinth">
+    <div class="tt-stage">
+      <div class="tt-platter"><div class="tt-rec" title="Fais tourner le disque à la main pour te déplacer dans le morceau"><div class="tt-label"><i></i></div></div><div class="tt-shine"></div><div class="tt-spindle"></div></div>
+      <div class="tt-post"></div>
+      <div class="tt-arm"><svg viewBox="0 0 60 240"><defs><linearGradient id="tm${L}" x1="0" x2="1"><stop offset="0" stop-color="#9ca3af"/><stop offset=".45" stop-color="#f4f4f5"/><stop offset="1" stop-color="#6b7280"/></linearGradient></defs><rect x="20" y="2" width="20" height="20" rx="4" fill="#2a2c31" stroke="#55585f"/><rect x="22" y="-8" width="16" height="13" rx="3" fill="url(#tm${L})"/><circle cx="30" cy="30" r="17" fill="#1d1f23" stroke="#5b5e66" stroke-width="2"/><circle cx="30" cy="30" r="9" fill="url(#tm${L})"/><rect x="27.5" y="30" width="5" height="160" rx="2.5" fill="url(#tm${L})"/><g transform="rotate(18 30 196)"><rect x="21" y="186" width="18" height="30" rx="3" fill="#2b2d31" stroke="#8a8d94"/><rect x="25" y="212" width="10" height="5" fill="#d4d4d8"/></g></svg></div>
+    </div>
+    <div class="tt-side">
+      <div class="tt-badge">PLATINE <b>${L}</b></div>
+      <div style="height:18px"></div>
+      <div class="tt-lcd"><b class="tt-lbpm">---.-</b><span class="tt-ltime">--:--</span><span class="tt-lkey">&nbsp;</span></div>
+      <div class="tt-row">
+        <button class="tt-start" title="Lecture / pause (${keys[0]})"><i></i>START</button>
+        <div class="tt-pitch" title="Pitch : glisse pour changer le tempo (double-clic : 0 %)">PITCH<div class="tt-slot"><div class="tt-knob"></div></div><span class="tt-pv">0,0</span></div>
+      </div>
+    </div>
+  </div></div>
+  <div class="dk-head"><div class="dk-cover"><span class="dk-letter">${L}</span></div>
     <div class="dk-meta"><div class="t dk-title">Platine ${L} vide</div><div class="s dk-sub">Charge un morceau avec le bouton ${L} de la bibliothèque</div></div>
     <div class="dk-bpm"><b class="dk-bpmv">--</b><small>BPM</small><div class="dk-beats" title="Temps de la mesure"><i></i><i></i><i></i><i></i></div><div class="dk-key" title="Tonalité (notation Camelot). En vert : compatible avec l'autre platine"></div></div></div>
   <canvas class="dk-wave" title="Clique pour te déplacer dans le morceau"></canvas>
@@ -1654,8 +1732,12 @@ function djMeta(d){
   if (!x) return;
   q('.dk-title').textContent = x.title;
   q('.dk-sub').textContent = x.uploader + (d.stem === 'voix' ? ' · Voix seules' : d.stem === 'instru' ? ' · Instrumental' : '');
-  const cv = coverUrl(x.vid, x.thumb), cov = q('.dk-cover');
+  const cv = coverUrl(x.vid, x.thumb), cov = q('.dk-cover'), lbl = q('.tt-label');
   cov.style.backgroundImage = cv ? `url('${cv.replace(/'/g, '%27')}')` : '';
+  lbl.style.removeProperty('--lbl'); lbl.classList.add('nocover');
+  lbl.querySelector('i').textContent = (x.uploader || '').slice(0, 14).toUpperCase();
+  if (cv) { const im = new Image(); im.onload = () => { if (d.id !== x.id) return; lbl.style.setProperty('--lbl', `url('${cv.replace(/'/g, '%27')}')`); lbl.classList.remove('nocover'); lbl.querySelector('i').textContent = ''; }; im.src = cv; }
+  q('.tt-lkey').textContent = (d.key && d.key.cam ? d.key.cam + ' · ' : '') + (d.stem === 'voix' ? 'VOIX' : d.stem === 'instru' ? 'INSTRU' : 'ORIGINAL');
   q('.dk-bpmv').textContent = d.bpm ? fr1(d.bpm * d.rate) : '--';
   d.root.querySelectorAll('.dk-stem button').forEach(b => {
     b.disabled = b.dataset.s !== 'orig' && !x[b.dataset.s];
@@ -1677,11 +1759,25 @@ function djPlayIcon(d){
 function djSetTempoUI(d){
   const v = (d.rate - 1) * 100, q = s => d.root.querySelector(s);
   q('.dk-tempo').value = v;
+  q('.tt-knob').style.top = (50 + Math.max(-8, Math.min(8, v)) / 8 * 44) + '%';
+  q('.tt-pv').textContent = (v > 0.04 ? '+' : '') + fr1(v);
   q('output[data-o="tempo"]').textContent = `${v > 0.04 ? '+' : ''}${fr1(v)} %`;
   q('.dk-bpmv').textContent = d.bpm ? fr1(d.bpm * d.rate) : '--';
 }
 // Forme d'onde : partie jouée, boucle, hot cues, point CUE, tête de lecture ; indicateur des 4 temps
+function djTurntable(d){
+  const q = s => d.root.querySelector(s), el = d.el, dur = el.duration || 0, cur = el.currentTime || 0;
+  q('.tt-rec').style.transform = `rotate(${(cur * 200) % 360}deg)`;   // 33 ⅓ tours/min = 200°/s
+  const onRec = d.id && (!el.paused || cur > 0.05 || d.jog);
+  const th = !onRec ? 4 : 25.5 + 15.5 * (dur ? Math.min(1, cur / dur) : 0);
+  q('.tt-arm').style.setProperty('--a', (d.i ? -th : th) + 'deg');
+  const bpm = d.bpm ? (d.bpm * el.playbackRate).toFixed(1) : '---.-';
+  const lb = q('.tt-lbpm'); if (lb.textContent !== bpm) lb.textContent = bpm;
+  const tm = d.id ? '-' + fmtT(Math.max(0, dur - cur)) + '  ' + (d.loop ? 'LOOP' : el.paused ? 'PAUSE' : 'PLAY') : 'NO DISC';
+  const lt = q('.tt-ltime'); if (lt.textContent !== tm) lt.textContent = tm;
+}
 function djDraw(){
+  if (!$('#v-dj').hidden) DJ.d.forEach(djTurntable);
   if (!$('#v-dj').hidden) DJ.d.forEach(d => {
     const cv = d.root.querySelector('.dk-wave'), w = cv.clientWidth, h = cv.clientHeight, r = devicePixelRatio || 1;
     if (!w) return;
@@ -1933,6 +2029,29 @@ function djRecToggle(){
   };
   d.syncBtn = () => { if (d.sync) { d.sync = false; d.nudge = 1; el.playbackRate = d.rate; djMeta(d); } else if (djSyncOn(d)) toast(`Platine ${L} synchronisée`); };
   q('.dk-play').onclick = d.toggle;
+  q('.tt-start').onclick = d.toggle;
+  // Fader de pitch : vers le bas = plus rapide, comme sur une platine
+  const slot = q('.tt-slot'), tIn = q('.dk-tempo');
+  const pitchAt = e => { const r = slot.getBoundingClientRect(); let v = ((e.clientY - r.top) / r.height - 0.5) / 0.44 * 8; v = Math.round(Math.max(-8, Math.min(8, v)) * 10) / 10; tIn.value = v; tIn.dispatchEvent(new Event('input', { bubbles: true })); };
+  slot.addEventListener('pointerdown', e => { slot.setPointerCapture(e.pointerId); pitchAt(e); slot.onpointermove = pitchAt; });
+  slot.addEventListener('pointerup', () => { slot.onpointermove = null; });
+  slot.addEventListener('dblclick', () => { tIn.value = 0; tIn.dispatchEvent(new Event('input', { bubbles: true })); });
+  // Disque à la main : tourner le vinyle déplace la lecture (la platine reprend à la main relâchée)
+  const rec = q('.tt-rec');
+  const ang = e => { const r = rec.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+  rec.addEventListener('pointerdown', e => {
+    if (!d.id) return;
+    rec.setPointerCapture(e.pointerId);
+    d.jog = { a: ang(e), play: !el.paused };
+    if (!el.paused) el.pause();
+  });
+  rec.addEventListener('pointermove', e => {
+    if (!d.jog) return;
+    const a = ang(e); let da = a - d.jog.a; if (da > 180) da -= 360; if (da < -180) da += 360;
+    d.jog.a = a; el.currentTime = Math.max(0, Math.min((el.duration || 0) - 0.05, el.currentTime + da / 200));
+  });
+  const jogEnd = () => { if (!d.jog) return; const pl = d.jog.play; d.jog = null; if (pl) { djCtx(); el.play().catch(() => {}); } };
+  rec.addEventListener('pointerup', jogEnd); rec.addEventListener('pointercancel', jogEnd);
   q('.dk-cue').onclick = d.cueBtn;
   q('.dk-sync').onclick = d.syncBtn;
   q('.dk-pfl').onclick = () => {

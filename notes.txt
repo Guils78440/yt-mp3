@@ -1,4 +1,3 @@
-- Nouvel onglet Mixtape : choisis un dossier (un ou plusieurs artistes) ou des titres de ta bibliothèque, YT MP3 crée un seul MP3 enchaîné
-- Morceaux rangés par tempo (ou tempo + tonalité), enchaînements calés sur le rythme avec accélération / ralentissement progressif
-- Style sound system : rewind (wheel up), sortie en écho, coupure, avec sirènes, corne, laser, bombe et tes propres sons
-- Pré-écoute de chaque enchaînement, chapitres et liste des morceaux dans la mixtape finale
+- Onglet Mix : deux vraies platines vinyle qui tournent avec la musique, la pochette du morceau au centre du disque
+- Bras de lecture qui se pose et avance sur le disque, fader de pitch, bouton START et petit écran rétro (BPM, temps restant, tonalité)
+- Fais tourner le disque à la main pour te déplacer dans le morceau
