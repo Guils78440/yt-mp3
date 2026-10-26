@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.7.1 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.8 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.7.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.8'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -341,7 +341,7 @@ body.has-player{--toast-b:112px}
 @media (max-width:820px){.player{grid-template-columns:1fr auto;}.pl-right{display:none}}
 
 /* ---- Mode DJ ---- */
-body.dj-mode main{max-width:1240px}
+body.dj-mode main,body.mx-mode main{max-width:1240px}
 body.dj-mode .player{display:none}
 body.dj-mode main{padding-bottom:60px}
 .dj{display:grid;grid-template-columns:1fr 1fr;gap:14px}
@@ -431,6 +431,39 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
 .exdest input{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:14px}
 .usbb{display:inline-flex;align-items:center;gap:6px;margin-right:10px}
 .usbb svg{width:16px;height:16px}
+.mxgrid{display:grid;grid-template-columns:1fr 420px;gap:20px;align-items:start}
+@media (max-width:980px){.mxgrid{grid-template-columns:1fr}}
+.mxside .card{margin-bottom:14px}.mxside p{font-size:13px}
+.btn-ghost.sm2{padding:7px 12px;font-size:13px;margin-left:6px}
+.mxrow{display:flex;align-items:center;gap:10px;margin-top:12px;font-size:13px}
+.mxrow>span{width:92px;flex:none;color:var(--muted)}
+.mxrow select{flex:1;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:9px;padding:7px 8px;font:inherit;font-size:13px}
+.mxrow input[type=range]{flex:1}.mxrow output{width:44px;text-align:right;color:var(--muted)}
+.seg.mini button{padding:6px 9px;font-size:12.5px;white-space:nowrap}
+.mxrow .seg{flex-wrap:nowrap}
+.mxsounds{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.mxsnd{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;font-size:13px;background:var(--bg)}
+.mxsnd svg{width:13px;height:13px}.mxsnd.user{border-style:dashed}.mxsnd.on{border-color:#ff3b6b;color:#fff}
+.mxtitle{width:100%;margin-top:12px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
+.mxsum{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.5}
+.mxlist{gap:0}
+.mxtrk{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;cursor:grab}
+.mxtrk.drag{opacity:.4}.mxtrk.over{border-color:#ff3b6b}
+.mxtrk .num{width:22px;text-align:center;color:var(--muted);font-size:12.5px;flex:none}
+.mxtrk .meta{flex:1;min-width:0}.mxtrk .t{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mxtrk .s{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mxtrk .bad{color:var(--err)}
+.mxtr{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 42px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.mxtr::before{content:'';width:2px;height:22px;background:linear-gradient(#ff3b6b,#8b5cf6);border-radius:2px;margin-right:4px}
+.mxtr select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font:inherit;font-size:12.5px}
+.mxtr .pv{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--text)}
+.mxtr .pv svg{width:12px;height:12px}.mxtr .pv.on{border-color:#ff3b6b}
+.mxtr .note{flex-basis:100%;padding-left:10px}
+.mxana{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin:0 0 12px}
+.mxana .bar{flex:1;max-width:260px;margin:0}
+.mxempty{border:1px dashed var(--line);border-radius:14px;padding:30px;text-align:center;color:var(--muted);font-size:14px;line-height:1.6}
+.mxlh{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--panel2);font-size:13px;font-weight:600;border-top:1px solid var(--line)}
+.mxlh:first-child{border-top:0}.mxlh em{font-style:normal;color:var(--muted);font-weight:400}
 .outrow{display:flex;align-items:center;gap:12px;margin-top:10px}
 .outrow span{width:84px;color:var(--muted);font-size:13.5px}
 .outrow select{flex:1;max-width:460px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:14px}
@@ -508,6 +541,7 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
     <nav class="tabs">
       <button data-tab="main" class="on">Convertir</button>
       <button data-tab="dj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="7" cy="12" r="4.5"/><circle cx="17" cy="12" r="4.5"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/></svg>Mix</button>
+      <button data-tab="mx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="16" cy="12" r="2.5"/><path d="M8 9.5h8M8 14.5h8"/></svg>Mixtape</button>
       <button data-tab="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Paramètres</button>
     </nav>
     <button class="btn-ghost" id="folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Dossier MP3</button>
@@ -581,6 +615,49 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
           <label class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="djq" placeholder="Rechercher…"></label></div>
         <div class="list" id="djlib"></div>
       </section>
+    </div>
+  </div>
+
+  <div id="v-mx" hidden>
+    <div class="mxgrid">
+      <section class="mxmain">
+        <div class="sh"><h2>Mixtape</h2><span class="count" id="mxcount"></span><div class="sp"></div>
+          <button class="btn-ghost sm2" id="mxdir">Ajouter un dossier…</button>
+          <button class="btn-ghost sm2" id="mxlib">Depuis la bibliothèque…</button>
+          <button class="lnk" id="mxclear">Vider</button></div>
+        <div id="mxana"></div>
+        <div class="list mxlist" id="mxlist"></div>
+      </section>
+      <aside class="mxside">
+        <div class="card">
+          <h3>Réglages</h3>
+          <div class="mxrow"><span>Ordre</span><div class="seg mini" id="mxorder"><button type="button" data-v="tempo" title="Du plus lent au plus rapide : l'énergie monte petit à petit">Tempo</button><button type="button" data-v="harmo" title="Tempo proche et tonalités compatibles">Tempo + tonalité</button><button type="button" data-v="manuel" title="L'ordre de la liste (glisser-déposer)">Mon ordre</button></div></div>
+          <div class="mxrow"><span>Chaque morceau</span><div class="seg mini" id="mxdur"><button type="button" data-v="full">En entier</button><button type="button" data-v="180">≈ 3 min</button><button type="button" data-v="120">≈ 2 min</button></div></div>
+          <div class="mxrow"><span>Enchaînement</span><div class="seg mini" id="mxlen"><button type="button" data-v="8">8 temps</button><button type="button" data-v="16">16 temps</button><button type="button" data-v="32">32 temps</button></div></div>
+          <div class="mxrow"><span>Style</span><select id="mxstyle">
+            <option value="auto">Sound system (calé ou rewind)</option>
+            <option value="fade">Toujours calé (fondu sur le rythme)</option>
+            <option value="rewind">Toujours rewind (wheel up)</option>
+            <option value="echo">Sortie en écho</option>
+            <option value="cut">Coupure + effet</option></select></div>
+          <div class="mxrow"><span>Effets</span><div class="seg mini" id="mxfx"><button type="button" data-v="auto">Automatiques</button><button type="button" data-v="none">Aucun</button></div></div>
+          <div class="mxrow"><span>Intro</span><select id="mxintro"></select></div>
+          <div class="mxrow"><span>Volume effets</span><input type="range" id="mxfxvol" min="-18" max="0" step="1"><output id="mxfxvolv"></output></div>
+        </div>
+        <div class="card">
+          <h3>Sons</h3>
+          <p>Clique pour écouter. Tu peux ajouter tes propres sons (ton nom de sound system, des dubplates…) dans le dossier « Sons perso ».</p>
+          <div class="mxsounds" id="mxsounds"></div>
+          <button class="lnk" id="mxuser" style="margin-top:10px">Ouvrir le dossier « Sons perso »</button>
+        </div>
+        <div class="card">
+          <h3>Créer la mixtape</h3>
+          <input id="mxtitle" class="mxtitle" spellcheck="false" placeholder="Nom de la mixtape">
+          <div class="mxsum" id="mxsum"></div>
+          <button class="go" id="mxgo" style="width:100%;justify-content:center;margin-top:12px">Créer la mixtape</button>
+          <div id="mxprog"></div>
+        </div>
+      </aside>
     </div>
   </div>
 
@@ -709,6 +786,13 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
   <h3 id="ldTitle"></h3>
   <p id="ldSub"></p>
   <div class="dlg-choice" id="ldBtns"></div>
+</div></div>
+<div class="overlay" id="mxlibdlg"><div class="box dlg wide">
+  <h3 style="margin-top:0">Ajouter depuis la bibliothèque</h3>
+  <p>Coche des artistes entiers ou des titres un par un.</p>
+  <div class="exdest" style="margin-top:12px"><input id="mxlq" placeholder="Rechercher un artiste ou un titre…" spellcheck="false"></div>
+  <div class="exlist" id="mxllist" style="max-height:340px"></div>
+  <div class="dlg-btns"><span class="lbl" id="mxlsum" style="margin-right:auto"></span><button class="btn-ghost" id="mxlclose">Annuler</button><button class="go" id="mxladd">Ajouter</button></div>
 </div></div>
 <div class="overlay" id="upddlg"><div class="box dlg">
   <div class="dlg-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg></div>
@@ -917,6 +1001,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.8', '22/10/2026', ['Nouvel onglet Mixtape : choisis un dossier (un ou plusieurs artistes) ou des titres de ta bibliothèque, YT MP3 crée un seul MP3 enchaîné', 'Morceaux rangés par tempo (ou tempo + tonalité), enchaînements calés sur le rythme avec accélération / ralentissement progressif', 'Style sound system : rewind (wheel up), sortie en écho, coupure, avec sirènes, corne, laser, bombe et tes propres sons', 'Pré-écoute de chaque enchaînement, chapitres et liste des morceaux dans la mixtape finale']],
   ['2.7.1', '14/10/2026', ['Mix : protection contre les coupures, si tu charges un morceau sur la platine qui joue, YT MP3 te propose de le mettre sur l\'autre platine']],
   ['2.7', '14/10/2026', ['Enchaînement calé sur le rythme : le morceau suivant prend le tempo du morceau en cours et démarre pile sur le premier temps d\'une mesure', 'Durée de l\'enchaînement arrondie à des mesures entières, échange des basses à mi-parcours (pas de grosses caisses qui se chevauchent)', 'Bouton « Calé » pour revenir au fondu simple si tu préfères']],
   ['2.6', '14/10/2026', ['Séparation voix / instrumental 10 à 20 fois plus rapide avec une carte graphique NVIDIA (activation en un clic dans Paramètres)', 'Sans carte NVIDIA : séparation environ 15 % plus rapide sur le processeur', 'Durée de chaque séparation affichée à la fin']],
@@ -1401,14 +1486,14 @@ function djSetSrc(d, at, play){
   }, { once: true });
 }
 // Récupère tout le fichier par morceaux (le moteur envoie 2 Mo maximum par requête)
-async function djFetchAll(u){
+async function djFetchAll(u, max = DJ_MAX){
   const parts = []; let got = 0, total = null;
   while (total === null || got < total) {
     const r = await fetch(u, { headers: { Range: `bytes=${got}-` } });
     if (!r.ok) return null;
     const m = (r.headers.get('Content-Range') || '').match(/\/(\d+)$/);
     total = m ? +m[1] : null;
-    if (total && total > DJ_MAX) return null;
+    if (total && total > max) return null;
     const b = new Uint8Array(await r.arrayBuffer());
     if (!b.length) break;
     parts.push(b); got += b.length;
@@ -1419,8 +1504,8 @@ async function djFetchAll(u){
   return out.buffer;
 }
 // Décode un fichier en 11 kHz mono (léger) ; null si trop long ou illisible
-async function djDecode(u){
-  const buf = await djFetchAll(u);
+async function djDecode(u, max){
+  const buf = await djFetchAll(u, max);
   if (!buf) return null;
   const ab = await new OfflineAudioContext(1, 1, 11025).decodeAudioData(buf);
   let mono = ab.getChannelData(0);
@@ -1981,7 +2066,7 @@ function autoNextId(curId){
   if (fromSet) return fromSet;
   // choix automatique mémorisé, pour ne pas changer d'avis à chaque instant
   if (SET.pick && SET.pick.for === curId && !SET.played.has(SET.pick.id) && byId(SET.pick.id)) return SET.pick.id;
-  const cur = djInfo(curId), cand = (state.history || []).filter(x => x.exists && x.id !== curId && !SET.played.has(x.id) && x.uploader !== 'Mix YT MP3');
+  const cur = djInfo(curId), cand = (state.history || []).filter(x => x.exists && x.id !== curId && !SET.played.has(x.id) && x.uploader !== 'Mix YT MP3' && x.uploader !== 'Mixtape YT MP3');
   if (!cand.length) return null;
   const score = x => {
     const inf = djInfo(x.id); let sc = Math.random() * 0.3;
@@ -2102,7 +2187,7 @@ autoBtn();
 let anaBusy = false;
 async function djAnalyseLibrary(){
   if (anaBusy || $('#v-dj').hidden || !state) return;
-  const todo = (state.history || []).filter(x => x.exists && x.uploader !== 'Mix YT MP3' && !LSJ.get('anaskip', {})[x.id] && !((djInfo(x.id) || {}).v === 2));
+  const todo = (state.history || []).filter(x => x.exists && x.uploader !== 'Mix YT MP3' && x.uploader !== 'Mixtape YT MP3' && !LSJ.get('anaskip', {})[x.id] && !((djInfo(x.id) || {}).v === 2));
   $('#anacount').textContent = todo.length ? `analyse du tempo et de la tonalité… (${todo.length} restant${todo.length > 1 ? 's' : ''})` : '';
   if (!todo.length) return;
   anaBusy = true;
@@ -2173,6 +2258,9 @@ function show(tab){
   $('#v-main').hidden = tab !== 'main';
   $('#v-set').hidden = tab !== 'set';
   $('#v-dj').hidden = tab !== 'dj';
+  $('#v-mx').hidden = tab !== 'mx';
+  document.body.classList.toggle('mx-mode', tab === 'mx');
+  if (tab === 'mx') { mxSoundsLoad(); mxKey = ''; mxRender(); }
   document.body.classList.toggle('dj-mode', tab === 'dj');
   if (tab === 'dj') { djRenderLib(true); setKey = ''; djRenderSet(); }
 }
@@ -2265,6 +2353,7 @@ function render(s){
   maybeOfferUpdate(s);
   if (s.appVersion) renderAbout(s.appVersion);
   renderSepCard(s.separation || {});
+  mxState(s.mixtape || {});
   renderPl(s.playlist || {}); renderFollows(s); renderNews(s.news || []); renderExport(s.export || {});
   renderSearch(s.search);
   djRenderLib(false); djRenderSet();
@@ -2445,11 +2534,493 @@ function renderExport(x, force){
     : `<p style="margin-top:14px;color:var(--err)">${esc(x.error)}</p>`;
 }
 
+
+/* ===================== Mode Mixtape ===================== */
+const MXDEF = { order: 'tempo', len: 16, dur: 'full', style: 'auto', fx: 'auto', fxVol: -6, title: '', intro: 'sirene' };
+const MX = Object.assign({ items: [], tr: {} }, LSJ.get('mxproj', {}));
+MX.opts = Object.assign({}, MXDEF, MX.opts || {});
+const mxSave = () => LSJ.set('mxproj', { items: MX.items, opts: MX.opts, tr: MX.tr });
+const MXI = () => LSJ.get('mxinfo', {});
+const mxInfoSave = (id, v) => { const c = MXI(); c[id] = v; LSJ.set('mxinfo', c); };
+const mxUrl = it => it.kind === 'h' ? url(it.id, 'orig') : `/mxmedia/${it.id}`;
+const mxName = it => { if (it.kind === 'h') { const x = byId(it.id); return x ? { t: x.title, a: x.uploader } : { t: '(retiré de la bibliothèque)', a: '' }; } return { t: it.title, a: it.artist }; };
+const mxOk = it => { const i = MXI()[it.id]; return i && i.v === 1 && !i.bad; };
+let mxSounds = [], mxKey = '', mxBusy = false, mxPrev = null;
+const mxAudio = new Audio(); mxAudio.preload = 'auto';
+const PLAY_IC = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>';
+const STOP_IC = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="1.5"/></svg>';
+
+// Les fichiers de dossiers sont réenregistrés auprès du moteur à chaque lancement (identifiant stable)
+(async () => {
+  const paths = MX.items.filter(it => it.kind === 'm').map(it => it.path);
+  if (!paths.length) return;
+  try {
+    const r = await api('/api/mxscan', { paths });
+    const byPath = Object.fromEntries((r.files || []).map(f => [f.path, f]));
+    MX.items = MX.items.filter(it => it.kind !== 'm' || byPath[it.path]).map(it => it.kind === 'm' ? Object.assign(it, { id: byPath[it.path].id }) : it);
+    mxSave(); mxKey = ''; mxRender();
+  } catch {}
+})();
+
+/* --- Grille des temps précise sur tout le morceau (indispensable pour caler un rendu sans correction en direct) --- */
+function mxGrid(x, sr, bpm){
+  const hop = 32, n = Math.floor(x.length / hop); if (n < 2000) return null;
+  const w = 2 * Math.PI * 150 / sr, al = Math.sin(w) / (2 * 0.707), c = Math.cos(w), a0 = 1 + al;
+  const B0 = (1 - c) / 2 / a0, B1 = (1 - c) / a0, A1 = -2 * c / a0, A2 = (1 - al) / a0;
+  let x1 = 0, x2 = 0, y1 = 0, y2 = 0;
+  const eL = new Float32Array(n), eF = new Float32Array(n);
+  for (let f = 0; f < n; f++) {
+    let sl = 0, sf = 0;
+    for (let k = f * hop, e = k + hop; k < e; k++) { const v = x[k], y = B0 * v + B1 * x1 + B0 * x2 - A1 * y1 - A2 * y2; x2 = x1; x1 = v; y2 = y1; y1 = y; sl += y * y; sf += v * v; }
+    eL[f] = Math.log1p(sl * 1e4); eF[f] = Math.log1p(sf * 1e4);
+  }
+  const raw = new Float32Array(n);
+  for (let f = 1; f < n; f++) raw[f] = Math.max(0, eL[f] - eL[f - 1]) + 0.5 * Math.max(0, eF[f] - eF[f - 1]);
+  const on = new Float32Array(n);   // lissage triangulaire (± 3 trames ≈ ± 9 ms)
+  for (let f = 3; f < n - 3; f++) on[f] = raw[f] * 4 + (raw[f - 1] + raw[f + 1]) * 3 + (raw[f - 2] + raw[f + 2]) * 2 + raw[f - 3] + raw[f + 3];
+  const fps = sr / hop, P = 60 / bpm * fps, W = Math.round(12 * fps), step = Math.round(5 * fps);
+  const at = k => { const i = Math.floor(k), fr = k - i; return on[i] * (1 - fr) + on[i + 1] * fr; };
+  const anchors = [];
+  for (let st = 0; st + W < n - 2; st += step) {
+    let best = -1, bphi = 0, tot = 0, cnt = 0;
+    for (let phi = 0; phi < P; phi += 0.5) {
+      let sc = 0; for (let k = st + phi; k < st + W; k += P) sc += at(k);
+      tot += sc; cnt++; if (sc > best) { best = sc; bphi = phi; }
+    }
+    const mean = tot / cnt;
+    if (mean > 0 && best / mean > 1.35) anchors.push({ t: (st + bphi) / fps, w: best / mean });
+  }
+  if (anchors.length < 3) return null;
+  // Déroulé progressif : chaque repère est rattaché au temps le plus proche de la grille estimée, puis la grille est réajustée
+  const p0 = 60 / bpm;
+  let ref = anchors.reduce((a, b) => b.w > a.w ? b : a), Bv = ref.t, Pv = p0;
+  const pts = [{ n: 0, t: ref.t }];
+  const fit = () => {
+    if (pts.length < 2) return;
+    const mn = pts.reduce((a, q) => a + q.n, 0) / pts.length, mt = pts.reduce((a, q) => a + q.t, 0) / pts.length;
+    let num = 0, den = 0; pts.forEach(q => { num += (q.n - mn) * (q.t - mt); den += (q.n - mn) ** 2; });
+    if (den > 0) { Pv = num / den; Bv = mt - Pv * mn; }
+  };
+  const order = anchors.filter(a => a !== ref).sort((a, b) => Math.abs(a.t - ref.t) - Math.abs(b.t - ref.t));
+  for (const a of order) {
+    const k = Math.round((a.t - Bv) / Pv), r = a.t - (Bv + k * Pv);
+    if (Math.abs(r) < 0.03) { pts.push({ n: k, t: a.t }); fit(); }
+  }
+  if (pts.length < 3 || Math.abs(Pv / p0 - 1) > 0.02) return null;
+  // Affinage final sur les attaques (plein spectre, sans lissage large) : la basse « monte » lentement, l'attaque est nette
+  const rf = new Float32Array(n), onF = new Float32Array(n);
+  for (let f = 1; f < n; f++) rf[f] = Math.max(0, eF[f] - eF[f - 1]);
+  for (let f = 1; f < n - 1; f++) onF[f] = 2 * rf[f] + rf[f - 1] + rf[f + 1];
+  const atF = k => { const i = Math.floor(k), fr = k - i; return onF[i] * (1 - fr) + onF[i + 1] * fr; };
+  const Pf = Pv * fps, D = Math.round(0.035 * fps);
+  let bestD = 0, bestS = -1;
+  for (let d = -D; d <= D; d += 0.25) {
+    let k = (Bv * fps + d) % Pf; if (k < 0) k += Pf;
+    let sc = 0; for (; k < n - 2; k += Pf) sc += atF(k);
+    if (sc > bestS) { bestS = sc; bestD = d; }
+  }
+  Bv += bestD / fps;
+  return { bpm: 60 / Pv, b0: ((Bv % Pv) + Pv) % Pv, pts: pts.length };
+}
+async function mxAnalyse(){
+  if (mxBusy || $('#v-mx').hidden || !state) return;
+  const it = MX.items.find(x => { const i = MXI()[x.id]; return !i || i.v !== 1; });
+  if (!it) return;
+  mxBusy = true;
+  let inf = { v: 1, bad: true };
+  try {
+    const r = await djDecode(mxUrl(it), 160 * 1048576);
+    if (r) {
+      const { mono, sr } = r, base = djRhythm(mono, sr);
+      if (base) {
+        const g = mxGrid(mono, sr, base.bpm) || base;
+        const dj = djInfo(it.id) || {};
+        const key = dj.key || djKey(mono, sr);
+        // Volume moyen (dB) et début / fin de la musique (fenêtres de 0,5 s)
+        const win = Math.floor(sr / 2), nw = Math.floor(mono.length / win), lv = new Float32Array(nw);
+        let all = 0; for (let k = 0; k < nw; k++) { let s2 = 0; for (let j = k * win; j < (k + 1) * win; j++) s2 += mono[j] * mono[j]; lv[k] = s2 / win; all += s2; }
+        const rms = 10 * Math.log10(all / Math.max(1, mono.length) + 1e-12), thr = Math.pow(10, (rms - 20) / 10);
+        let fi = 0; while (fi < nw && lv[fi] < thr) fi++;
+        let la = nw - 1; while (la > 0 && lv[la] < thr) la--;
+        inf = { v: 1, bpm: Math.round(g.bpm * 1000) / 1000, b0: Math.round(g.b0 * 10000) / 10000, key, rms: Math.round(rms * 10) / 10, dur: mono.length / sr, first: fi / 2, last: (la + 1) / 2, fine: !!g.pts };
+      }
+    }
+  } catch {}
+  mxInfoSave(it.id, inf);
+  mxBusy = false;
+  if (MX.opts.order !== 'manuel') mxSort();
+  mxKey = ''; mxRender();
+}
+setInterval(() => { mxAnalyse().catch(() => { mxBusy = false; }); }, 600);
+
+/* --- Ordre automatique --- */
+const mxFold = b => { while (b < 75) b *= 2; while (b >= 150) b /= 2; return b; };
+function mxSort(){
+  const inf = MXI(), ok = MX.items.filter(mxOk), rest = MX.items.filter(it => !mxOk(it));
+  let out = [];
+  if (MX.opts.order === 'tempo') out = ok.slice().sort((a, b) => mxFold(inf[a.id].bpm) - mxFold(inf[b.id].bpm));
+  else {
+    const pool = ok.slice().sort((a, b) => mxFold(inf[a.id].bpm) - mxFold(inf[b.id].bpm));
+    if (pool.length) out.push(pool.shift());
+    while (pool.length) {
+      const c = inf[out[out.length - 1].id];
+      let bi = 0, bs = Infinity;
+      pool.forEach((it, i) => {
+        const o = inf[it.id], dt = Math.log(mxFold(o.bpm) / mxFold(c.bpm));
+        const sc = Math.abs(dt) * 100 + (dt < -0.01 ? 3 : 0) + (c.key && c.key.cam && o.key && o.key.cam ? (djKeyOk(c.key, o.key) ? 0 : 6) : 2);
+        if (sc < bs) { bs = sc; bi = i; }
+      });
+      out.push(pool.splice(bi, 1)[0]);
+    }
+  }
+  MX.items = out.concat(rest); mxSave();
+}
+
+/* --- Plan de la mixtape : segments, tempos, placements, effets --- */
+const FXLEAD = { sirene: 1.6, montante: 1.5 };
+function mxSegLen(c, s){   // durée de sortie de la source c.in → s
+  let acc = 0;
+  for (let k = 0; k < c.segs.length; k++) {
+    const a = c.segs[k].s, b = Math.min(k + 1 < c.segs.length ? c.segs[k + 1].s : c.out, s);
+    if (b > a) acc += (b - a) / c.segs[k].r;
+  }
+  return acc;
+}
+function mxSrcAt(c, rel){   // instant source correspondant à rel secondes de sortie
+  let acc = 0;
+  for (let k = 0; k < c.segs.length; k++) {
+    const a = c.segs[k].s, b = k + 1 < c.segs.length ? c.segs[k + 1].s : c.out, d = (b - a) / c.segs[k].r;
+    if (acc + d >= rel) return a + (rel - acc) * c.segs[k].r;
+    acc += d;
+  }
+  return c.out;
+}
+function mxPlan(){
+  const inf = MXI(), its = MX.items.filter(mxOk);
+  if (!its.length) return null;
+  const L = MX.opts.len, fxv = MX.opts.fxVol;
+  const T = its.map(it => {
+    const I = inf[it.id], p = 60 / I.bpm, nm = mxName(it);
+    const fN = Math.max(0, Math.ceil((I.first - I.b0) / p - 0.05));
+    const lN = Math.floor((Math.min(I.last, I.dur - 0.05) - I.b0) / p);
+    let eN = fN + Math.floor((lN - fN) / 4) * 4;                          // fin sur une mesure
+    if (MX.opts.dur !== 'full') eN = Math.min(eN, fN + Math.max(32, Math.round(+MX.opts.dur / p / 16) * 16));
+    return { it, I, p, bpm: I.bpm, s: I.b0 + fN * p, e: I.b0 + eN * p, beats: eN - fN, name: nm };
+  }).filter(t => t.beats >= 16);
+  if (!T.length) return null;
+  const rl = T.map(t => t.I.rms).sort((a, b) => a - b), med = rl[Math.floor(rl.length / 2)];
+  // Transitions
+  const TR = [];
+  for (let i = 0; i < T.length - 1; i++) {
+    const a = T[i], b = T[i + 1], q = b.bpm / a.bpm;
+    let f = 1; [2, 0.5].forEach(m => { if (Math.abs(Math.log(q * m)) < Math.abs(Math.log(q * f))) f = m; });
+    const diff = Math.abs(q * f - 1), ov = MX.tr[a.it.id + '>' + b.it.id] || {};
+    let style = ov.style || (MX.opts.style === 'auto' ? (diff <= 0.08 ? 'fade' : 'rewind') : MX.opts.style), forced = false;
+    const inA = i > 0 && TR[i - 1].style === 'fade' ? L / TR[i - 1].f : 0;
+    if (style === 'fade' && (diff > 0.1 || a.beats - inA - L < 24 || b.beats < L / f + 24)) { style = 'rewind'; forced = true; }
+    const M = Math.sqrt(a.bpm * b.bpm * f);
+    TR.push({ i, style, forced, f, diff, M, rOut: M / a.bpm, rIn: M / (b.bpm * f), fx: ov.fx === undefined ? 'auto' : ov.fx, fromBpm: a.bpm, toBpm: b.bpm });
+  }
+  // Tempo de chaque morceau : il entre au tempo commun avec le précédent, puis rejoint au milieu (sur une phrase,
+  // là où il joue seul) le tempo commun avec le suivant. 1 ou 2 changements seulement : chaque changement de
+  // vitesse décale légèrement le son, trop de petits paliers finiraient par décaler les temps.
+  T.forEach((t, i) => {
+    const tin = TR[i - 1], tout = TR[i];
+    const rIn = tin && tin.style === 'fade' ? tin.rIn : 1, rOut = tout && tout.style === 'fade' ? tout.rOut : 1;
+    const inEnd = tin && tin.style === 'fade' ? t.s + (L / tin.f) * t.p : t.s;
+    const outStart = tout && tout.style === 'fade' ? t.e - L * t.p : t.e;
+    const ev = [{ s: t.s, r: rIn }];
+    if (Math.abs(rOut - rIn) > 1e-4) {
+      const steps = Math.abs(rOut - rIn) > 0.02 ? 2 : 1, span = (steps - 1) * 16 * t.p;
+      const lo = inEnd + 4 * t.p, hi = outStart - 4 * t.p - span;
+      let m = t.s + Math.round(((inEnd + outStart) / 2 - span / 2 - t.s) / t.p / 16) * 16 * t.p;
+      if (m < lo || m > hi) m = t.s + Math.round(((lo + hi) / 2 - t.s) / t.p) * t.p;
+      for (let k = 1; k <= steps; k++) ev.push({ s: m + (k - 1) * 16 * t.p, r: rIn + (rOut - rIn) * k / steps });
+    }
+    t.segs = ev; t.rIn = rIn; t.rOut = rOut;
+  });
+  const clips = [], chapters = [], marks = [];
+  const fxClip = (id, at) => { if (!id) return; clips.push({ src: { kind: 's', id }, at: Math.max(0, at - (FXLEAD[id] || 0)), gain: fxv }); };
+  let fxn = 0;
+  const autoFx = st => st === 'fade' ? ['sirene', 'corne', 'montante', 'laser'][fxn++ % 4] : st === 'rewind' ? ['bombe', 'corne'][fxn++ % 2] : st === 'echo' ? 'laser' : 'bombe';
+  const pick = tr => tr.fx === 'auto' ? (MX.opts.fx === 'none' ? '' : autoFx(tr.style)) : tr.fx;
+  let at = 0;
+  T.forEach((t, i) => {
+    const c = { src: { kind: t.it.kind, id: t.it.id }, in: t.s, out: t.e, segs: t.segs, at, gain: Math.max(-12, Math.min(12, med - t.I.rms)), fin: null, fout: null, bass: [], track: i };
+    t.clip = c; clips.push(c);
+  });
+  // Placement de chaque morceau d'après la transition précédente
+  T[0].clip.at = 0;
+  if (MX.opts.intro) fxClip(MX.opts.intro, 0.3 + (FXLEAD[MX.opts.intro] || 0));
+  chapters.push({ s: 0, i: 0 });
+  TR.forEach(tr => {
+    const a = T[tr.i], b = T[tr.i + 1], A = a.clip, B = b.clip;
+    const len = mxSegLen(A, A.out), tEnd = A.at + len;
+    let anchor;
+    if (tr.style === 'fade') {
+      const o = a.e - L * a.p, midS = a.e - (L / 2) * a.p;
+      const tO = A.at + mxSegLen(A, o), tMid = A.at + mxSegLen(A, midS);
+      B.at = tO;
+      A.fout = [tMid - A.at, len - (tMid - A.at)];
+      B.fin = [0, mxSegLen(B, b.s + (L / tr.f / 2) * b.p)];
+      B.bass.push([B.at, tMid]); A.bass.push([tMid, tEnd + 0.05]);
+      anchor = tMid;
+    } else if (tr.style === 'rewind') {
+      A.fout = [len - 0.04, 0.04];
+      const back = Math.min(2.4, a.e - a.s - 1), sp = 2.2;
+      clips.push({ src: A.src, in: a.e - back, out: a.e, rev: true, speed: sp, at: tEnd, gain: A.gain - 1, fout: [back / sp - 0.15, 0.15] });
+      B.at = tEnd + back / sp + 0.3; B.fin = [0, 0.01];
+      anchor = B.at;
+    } else if (tr.style === 'echo') {
+      A.fout = [len - 0.03, 0.03];
+      clips.push({ src: A.src, in: a.e - a.p, out: a.e, at: tEnd, gain: A.gain, echo: { d: Math.round(a.p * 1000) }, fout: [a.p, 4 * a.p] });
+      B.at = tEnd + 4 * a.p; B.fin = [0, 0.01];
+      anchor = tEnd;
+    } else {
+      A.fout = [len - 0.03, 0.03];
+      B.at = tEnd; B.fin = [0, 0.01];
+      anchor = tEnd;
+    }
+    tr.anchor = anchor; tr.tStart = B.at;
+    fxClip(pick(tr), anchor);
+    chapters.push({ s: tr.style === 'fade' ? anchor : B.at, i: tr.i + 1 });
+  });
+  const last = T[T.length - 1].clip, lastLen = mxSegLen(last, last.out);
+  last.fout = [Math.max(0, lastLen - 8 * T[T.length - 1].p), 8 * T[T.length - 1].p];
+  const duration = last.at + lastLen;
+  T.forEach(t => { t.clip.len = mxSegLen(t.clip, t.clip.out); });
+  const ch = chapters.map((c, k) => ({ s: c.s, e: k + 1 < chapters.length ? chapters[k + 1].s : duration, title: (T[c.i].name.a ? T[c.i].name.a + ' - ' : '') + T[c.i].name.t }));
+  return { T, TR, clips, duration, chapters: ch };
+}
+// Conversion vers le format du moteur (+ découpe d'une fenêtre pour la pré-écoute)
+function mxExport(plan, t0, t1){
+  const out = [];
+  for (const c0 of plan.clips) {
+    const c = JSON.parse(JSON.stringify(c0));
+    const len = c.segs ? c.len : c.rev ? (c.out - c.in) / c.speed : c.echo ? 5 * c.echo.d / 1000 + (c.out - c.in) : 4;
+    if (t0 != null && (c.at >= t1 || c.at + len <= t0)) continue;
+    if (t0 != null) {
+      if (c.at < t0) {
+        const rel = t0 - c.at;
+        if (c.segs) {
+          const ns = mxSrcAt(c, rel); let k = 0; while (k + 1 < c.segs.length && c.segs[k + 1].s <= ns) k++;
+          c.segs = [{ s: ns, r: c.segs[k].r }].concat(c.segs.slice(k + 1)); c.in = ns;
+        } else if (c.src.kind === 's') { c.in = rel; c.out = 600; }
+        else continue;   // rewind / écho commencés avant la fenêtre : ignorés
+        c.at = t0;
+        ['fin', 'fout'].forEach(k2 => { if (!c[k2]) return; let [st, d] = c[k2]; st -= rel; if (st + d <= 0) { c[k2] = null; return; } if (st < 0) { d += st; st = 0; } c[k2] = [st, d]; });
+      }
+      if (c.segs && c.at + mxSegLen(c, c.out) > t1 + 1) c.out = mxSrcAt(c, t1 + 1 - c.at);
+      c.at -= t0; c.bass = (c.bass || []).map(([a, b]) => [a - t0, b - t0]).filter(([, b]) => b > 0);
+    }
+    const r = { src: c.src, at: Math.round(c.at * 1000) / 1000, gain: c.gain || 0 };
+    if (c.in != null) { r.in = c.in; r.out = c.out; }
+    if (c.segs) { r.r0 = c.segs[0].r; r.cmds = c.segs.slice(1).map(g => [Math.round((g.s - c.in) * 10000) / 10000, Math.round(g.r * 100000) / 100000]); }
+    ['rev', 'speed', 'echo', 'fin', 'fout'].forEach(k => { if (c[k]) r[k] = c[k]; });
+    if (c.bass && c.bass.length) r.bass = c.bass;
+    out.push(r);
+  }
+  return out;
+}
+
+/* --- Rendu de l'interface --- */
+const fmtL = s => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; return h ? `${h} h ${String(m).padStart(2, '0')}` : `${m} min ${String(x).padStart(2, '0')}`; };
+const pct = r => (r >= 1 ? '+' : '−') + Math.abs((r - 1) * 100).toFixed(1).replace('.', ',') + ' %';
+function mxSoundOpts(sel, withAuto){
+  return (withAuto ? `<option value="auto" ${sel === 'auto' ? 'selected' : ''}>Effet auto</option>` : '') + `<option value="" ${sel === '' ? 'selected' : ''}>${withAuto ? 'Sans effet' : 'Aucune'}</option>`
+    + mxSounds.map(x => `<option value="${esc(x.id)}" ${sel === x.id ? 'selected' : ''}>${esc(x.label)}${x.user ? ' (perso)' : ''}</option>`).join('');
+}
+async function mxSoundsLoad(){
+  try { const r = await api('/api/mxsounds', {}); mxSounds = r.sounds || []; } catch { return; }
+  $('#mxsounds').innerHTML = mxSounds.map(x => `<button class="mxsnd ${x.user ? 'user' : ''}" data-snd="${esc(x.id)}">${PLAY_IC}${esc(x.label)}</button>`).join('');
+  $('#mxintro').innerHTML = mxSoundOpts(MX.opts.intro, false);
+  mxKey = ''; mxRender();
+}
+function mxRender(){
+  if (!state || $('#v-mx').hidden) return;
+  const inf = MXI(), plan = mxPlan();
+  const key = JSON.stringify([MX.items, MX.opts, MX.tr, inf, mxSounds.length, mxPrev, (state.history || []).length]);
+  if (key === mxKey) return; mxKey = key;
+  document.querySelectorAll('#v-mx .seg[id]').forEach(sg => { const k = { mxorder: 'order', mxdur: 'dur', mxlen: 'len', mxfx: 'fx' }[sg.id]; sg.querySelectorAll('button').forEach(b => b.classList.toggle('on', String(MX.opts[k]) === b.dataset.v)); });
+  $('#mxstyle').value = MX.opts.style; $('#mxfxvol').value = MX.opts.fxVol; $('#mxfxvolv').textContent = MX.opts.fxVol + ' dB';
+  if ($('#mxintro').options.length) $('#mxintro').value = MX.opts.intro;
+  if (document.activeElement !== $('#mxtitle')) $('#mxtitle').value = MX.opts.title;
+  const n = MX.items.length, todo = MX.items.filter(it => { const i = inf[it.id]; return !i || i.v !== 1; }).length;
+  $('#mxcount').textContent = n ? `${n} morceau${n > 1 ? 'x' : ''}` : '';
+  $('#mxana').innerHTML = todo ? `<div class="mxana">Analyse du tempo, de la tonalité et du volume… ${n - todo} / ${n}<div class="bar"><i style="width:${Math.round((n - todo) * 100 / n)}%"></i></div></div>` : '';
+  if (!n) { $('#mxlist').innerHTML = `<div class="mxempty">Ajoute un dossier de MP3 (un artiste, plusieurs artistes, sous-dossiers compris)<br>ou des morceaux de ta bibliothèque.<br><br>YT MP3 analyse chaque morceau, les range par tempo, les enchaîne calés sur le rythme<br>et crée un seul fichier MP3, avec sirènes, rewinds et effets si tu le souhaites.</div>`; }
+  else {
+    const T = plan ? plan.T : [], TR = plan ? plan.TR : [], idx = Object.fromEntries(T.map((t, i) => [t.it.id, i]));
+    let html = '';
+    MX.items.forEach((it, k) => {
+      const nm = mxName(it), I = inf[it.id], ti = idx[it.id];
+      const tin = ti > 0 ? TR[ti - 1] : null;
+      const info = !I || I.v !== 1 ? 'analyse en attente…' : I.bad ? '<span class="bad">illisible ou sans rythme : ignoré</span>'
+        : ti === undefined ? '<span class="bad">trop court : ignoré</span>'
+        : `${fr1(I.bpm)} BPM${I.key && I.key.cam ? ' · ' + I.key.cam : ''} · ${fmtT(T[ti].e - T[ti].s)}${tin && tin.style === 'fade' && Math.abs(tin.rIn - 1) > 0.002 ? ` · entre à ${pct(tin.rIn)}` : ''}`;
+      html += `<div class="mxtrk" draggable="true" data-k="${k}"><span class="num">${ti === undefined ? '–' : ti + 1}</span>
+        <div class="meta"><div class="t">${esc(nm.t)}</div><div class="s">${esc(nm.a)}${nm.a ? ' · ' : ''}${info}</div></div>
+        <button class="ib" data-mxrm="${k}" title="Retirer">${I_X}</button></div>`;
+      const tr = ti !== undefined && ti < TR.length ? TR[ti] : null;
+      if (tr && MX.items.slice(k + 1).some(x => idx[x.id] === ti + 1)) {
+        const pair = T[ti].it.id + '>' + T[ti + 1].it.id, ov = MX.tr[pair] || {};
+        const note = tr.style === 'fade' ? `tempo commun ${fr1(tr.M)} BPM (${fr1(tr.fromBpm)} → ${fr1(tr.toBpm * tr.f)})` : tr.forced ? `tempos trop éloignés (${fr1(tr.fromBpm)} → ${fr1(tr.toBpm)}) : rewind` : '';
+        html += `<div class="mxtr"><select data-mxst="${pair}"><option value="" ${!ov.style ? 'selected' : ''}>Style auto (${({ fade: 'calé', rewind: 'rewind', echo: 'écho', cut: 'coupure' })[tr.style]})</option>
+          <option value="fade" ${ov.style === 'fade' ? 'selected' : ''}>Fondu calé</option><option value="rewind" ${ov.style === 'rewind' ? 'selected' : ''}>Rewind</option>
+          <option value="echo" ${ov.style === 'echo' ? 'selected' : ''}>Sortie en écho</option><option value="cut" ${ov.style === 'cut' ? 'selected' : ''}>Coupure + effet</option></select>
+          <select data-mxfx="${pair}">${mxSoundOpts(ov.fx === undefined ? 'auto' : ov.fx, true)}</select>
+          <button class="pv ${mxPrev === ti ? 'on' : ''}" data-mxpv="${ti}">${mxPrev === ti ? STOP_IC + 'Arrêter' : PLAY_IC + 'Écouter'}</button>
+          ${note ? `<span class="note">${note}</span>` : ''}</div>`;
+      }
+    });
+    $('#mxlist').innerHTML = html;
+  }
+  $('#mxsum').innerHTML = plan ? `${plan.T.length} morceau${plan.T.length > 1 ? 'x' : ''} · durée ${fmtL(plan.duration)}<br>${plan.TR.filter(t => t.style === 'fade').length} enchaînement(s) calé(s), ${plan.TR.filter(t => t.style !== 'fade').length} rewind / écho / coupure`
+    : (n ? 'En attente de l’analyse des morceaux…' : 'Ajoute des morceaux pour commencer.');
+  $('#mxgo').disabled = !plan || !!todo || !!(state.mixtape && state.mixtape.status === 'rendu' && !state.mixtape.preview);
+}
+const I_X = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+
+/* --- Actions --- */
+function mxAdd(files){
+  const have = new Set(MX.items.map(it => it.kind + ':' + (it.path || it.id)));
+  let n = 0;
+  files.forEach(f => { const k = f.kind + ':' + (f.path || f.id); if (!have.has(k)) { MX.items.push(f); have.add(k); n++; } });
+  mxSave(); mxKey = ''; mxRender();
+  toast(n ? `${n} morceau${n > 1 ? 'x' : ''} ajouté${n > 1 ? 's' : ''} à la mixtape` : 'Ces morceaux sont déjà dans la mixtape');
+}
+$('#mxdir').onclick = async () => {
+  try {
+    const r = await api('/api/pickdir', {}); if (!r.dir) return;
+    const s2 = await api('/api/mxscan', { dir: r.dir, recursive: true });
+    if (s2.error) return toast(s2.error, 'err');
+    if (!s2.files.length) return toast('Aucun fichier audio dans ce dossier', 'err');
+    mxAdd(s2.files.map(f => ({ kind: 'm', id: f.id, path: f.path, title: f.title, artist: f.artist })));
+    if (!MX.opts.title) { MX.opts.title = 'Mixtape ' + r.dir.split(/[\\/]/).filter(Boolean).pop(); mxSave(); mxKey = ''; mxRender(); }
+  } catch(err){ toast(err.message, 'err'); }
+};
+$('#mxclear').onclick = () => { if (!MX.items.length || !confirm('Retirer tous les morceaux de la mixtape ? (les fichiers ne sont pas touchés)')) return; MX.items = []; MX.tr = {}; mxSave(); mxKey = ''; mxRender(); };
+$('#mxlist').addEventListener('click', e => {
+  const rm = e.target.closest('[data-mxrm]'); if (rm) { MX.items.splice(+rm.dataset.mxrm, 1); mxSave(); mxKey = ''; mxRender(); return; }
+  const pv = e.target.closest('[data-mxpv]'); if (pv) mxPreview(+pv.dataset.mxpv);
+});
+$('#mxlist').addEventListener('change', e => {
+  const st = e.target.closest('[data-mxst]'), fx = e.target.closest('[data-mxfx]');
+  if (st) { const o = MX.tr[st.dataset.mxst] || {}; if (st.value) o.style = st.value; else delete o.style; MX.tr[st.dataset.mxst] = o; }
+  if (fx) { const o = MX.tr[fx.dataset.mxfx] || {}; if (fx.value === 'auto') delete o.fx; else o.fx = fx.value; MX.tr[fx.dataset.mxfx] = o; }
+  mxSave(); mxKey = ''; mxRender();
+});
+let mxDrag = null;
+$('#mxlist').addEventListener('dragstart', e => { const t = e.target.closest('.mxtrk'); if (!t) return; mxDrag = +t.dataset.k; t.classList.add('drag'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'mx'); });
+$('#mxlist').addEventListener('dragend', e => { const t = e.target.closest('.mxtrk'); if (t) t.classList.remove('drag'); });
+$('#mxlist').addEventListener('dragover', e => { const t = e.target.closest('.mxtrk'); if (mxDrag === null || !t) return; e.preventDefault(); e.stopPropagation(); document.querySelectorAll('.mxtrk.over').forEach(x => x.classList.remove('over')); t.classList.add('over'); });
+$('#mxlist').addEventListener('drop', e => {
+  const t = e.target.closest('.mxtrk'); if (mxDrag === null || !t) return;
+  e.preventDefault(); e.stopPropagation();
+  const [m] = MX.items.splice(mxDrag, 1); MX.items.splice(+t.dataset.k, 0, m); mxDrag = null;
+  MX.opts.order = 'manuel'; mxSave(); mxKey = ''; mxRender();
+});
+const mxSeg = (id, k, num) => $('#' + id).onclick = e => { const b = e.target.closest('button'); if (!b) return; MX.opts[k] = num ? +b.dataset.v : b.dataset.v; if (k === 'order' && MX.opts.order !== 'manuel') mxSort(); mxSave(); mxKey = ''; mxRender(); };
+mxSeg('mxorder', 'order'); mxSeg('mxdur', 'dur'); mxSeg('mxlen', 'len', true); mxSeg('mxfx', 'fx');
+$('#mxstyle').onchange = e => { MX.opts.style = e.target.value; mxSave(); mxKey = ''; mxRender(); };
+$('#mxintro').onchange = e => { MX.opts.intro = e.target.value; mxSave(); mxKey = ''; mxRender(); };
+$('#mxfxvol').oninput = e => { MX.opts.fxVol = +e.target.value; mxSave(); mxKey = ''; mxRender(); };
+$('#mxtitle').oninput = e => { MX.opts.title = e.target.value; mxSave(); };
+$('#mxuser').onclick = async () => { try { await api('/api/mxuserdir', {}); toast('Dépose tes sons (MP3, WAV…) dans ce dossier puis reviens ici'); setTimeout(mxSoundsLoad, 4000); } catch {} };
+$('#mxsounds').onclick = e => {
+  const b = e.target.closest('[data-snd]'); if (!b) return;
+  if (mxPrev !== null) mxStopPrev();
+  djPauseAll(); djPauseMain();
+  const on = b.classList.contains('on');
+  document.querySelectorAll('.mxsnd.on').forEach(x => x.classList.remove('on'));
+  if (on) { mxAudio.pause(); return; }
+  b.classList.add('on'); mxAudio.src = '/son/' + encodeURIComponent(b.dataset.snd); mxAudio.play().catch(() => {});
+  mxAudio.onended = () => b.classList.remove('on');
+};
+// Pré-écoute d'un enchaînement : rendu rapide d'une fenêtre d'environ 35 s autour du passage
+let mxWantPrev = null, mxLastN = null;
+function mxStopPrev(){ mxAudio.pause(); mxPrev = null; mxWantPrev = null; mxKey = ''; mxRender(); }
+async function mxPreview(i){
+  if (mxPrev === i) { mxStopPrev(); return; }
+  const plan = mxPlan(); if (!plan || !plan.TR[i]) return;
+  const tr = plan.TR[i], A = plan.T[i].clip;
+  const t0 = Math.max(0, Math.min(tr.anchor - 22, A.at + A.len - (MX.opts.len + 20) * plan.T[i].p)), t1 = tr.anchor + 14;
+  mxAudio.pause(); document.querySelectorAll('.mxsnd.on').forEach(x => x.classList.remove('on'));
+  try {
+    const r = await api('/api/mxrender', { preview: true, plan: { title: 'Aperçu', clips: mxExport(plan, t0, t1), duration: t1 - t0, chapters: [] } });
+    if (r.error) return toast(r.error, 'err');
+    mxPrev = i; mxWantPrev = { i, seek: Math.max(0, tr.anchor - t0 - 10) }; mxKey = ''; mxRender(); render(r);
+  } catch(err){ toast(err.message, 'err'); }
+}
+$('#mxgo').onclick = async () => {
+  const plan = mxPlan(); if (!plan) return;
+  if (!MX.opts.title.trim()) { MX.opts.title = 'Mixtape du ' + new Date().toLocaleDateString('fr-FR'); mxSave(); $('#mxtitle').value = MX.opts.title; }
+  mxStopPrev();
+  try {
+    const r = await api('/api/mxrender', { preview: false, plan: { title: MX.opts.title.trim(), clips: mxExport(plan), duration: plan.duration, chapters: plan.chapters } });
+    if (r.error) return toast(r.error, 'err');
+    render(r);
+  } catch(err){ toast(err.message, 'err'); }
+};
+let mxLastSt = '';
+function mxState(m){
+  const box = $('#mxprog'); if (!box) return;
+  const st = (m.status || '') + (m.preview ? 'p' : '') + (m.n || 0);
+  if (st !== mxLastSt) { mxLastSt = st; mxKey = ''; setTimeout(mxRender, 0); }
+  if (m.status === 'fini' && m.preview && mxWantPrev && m.n !== mxLastN) {
+    mxLastN = m.n; const w = mxWantPrev; mxWantPrev = null;
+    djPauseAll(); djPauseMain();
+    mxAudio.src = '/mxapercu.mp3?n=' + m.n; mxAudio.currentTime = 0;
+    mxAudio.onloadedmetadata = () => { mxAudio.currentTime = w.seek; };
+    mxAudio.onended = () => { mxPrev = null; mxKey = ''; mxRender(); };
+    mxAudio.play().catch(() => {});
+  }
+  if (m.status === 'rendu' && !m.preview) box.innerHTML = `<div class="sepline" style="margin-top:12px">Création… ${m.progress} %<div class="bar"><i style="width:${m.progress}%"></i></div><button class="lnk" id="mxcancel">Annuler</button></div>`;
+  else if (m.status === 'rendu') box.innerHTML = `<div class="sepline" style="margin-top:12px">Préparation de l’aperçu…<div class="bar ind"><i></i></div></div>`;
+  else if (m.status === 'erreur') box.innerHTML = `<p class="st err" style="white-space:normal;margin-top:12px">${esc(m.error)}</p>`;
+  else if (m.status === 'fini' && !m.preview && m.id) box.innerHTML = `<p style="margin:12px 0 0;color:var(--ok);font-size:13.5px">✓ Mixtape créée en ${m.secs} s et ajoutée à ta bibliothèque, avec un chapitre par morceau.</p>
+    <div class="row" style="margin-top:10px"><button class="btn-ghost" id="mxplay">${PLAY_IC} Écouter</button><button class="btn-ghost" id="mxshow">Afficher le fichier</button></div>`;
+  else box.innerHTML = '';
+  $('#mxgo').textContent = m.status === 'rendu' && !m.preview ? 'Création en cours…' : 'Créer la mixtape';
+  if (m.status === 'rendu' && !m.preview) $('#mxgo').disabled = true;
+}
+$('#mxprog').addEventListener('click', async e => {
+  if (e.target.closest('#mxcancel')) { try { render(await api('/api/mxcancel', {})); } catch {} }
+  if (e.target.closest('#mxshow')) api('/api/mxreveal', {}).catch(() => {});
+  if (e.target.closest('#mxplay') && state.mixtape && state.mixtape.id) { show('main'); playFrom(state.mixtape.id, 'orig'); }
+});
+// Ajout depuis la bibliothèque : groupé par artiste
+let mxSel = new Set();
+function mxLibRender(){
+  const q = ($('#mxlq').value || '').toLowerCase(), groups = {};
+  (state.history || []).filter(x => x.exists && x.uploader !== 'Mixtape YT MP3' && x.uploader !== 'Mix YT MP3' && (!q || (x.title + ' ' + x.uploader).toLowerCase().includes(q)))
+    .forEach(x => (groups[x.uploader || 'Inconnu'] = groups[x.uploader || 'Inconnu'] || []).push(x));
+  $('#mxllist').innerHTML = Object.keys(groups).sort((a, b) => a.localeCompare(b, 'fr')).map(a => {
+    const g = groups[a], all = g.every(x => mxSel.has(x.id));
+    return `<div class="mxlh"><input type="checkbox" data-mxart="${esc(a)}" ${all ? 'checked' : ''}>${esc(a)} <em>${g.length} titre${g.length > 1 ? 's' : ''}</em></div>`
+      + g.map(x => `<label><input type="checkbox" data-mxid="${x.id}" ${mxSel.has(x.id) ? 'checked' : ''}><span>${esc(x.title)}</span><em>${esc(x.duration || '')}</em></label>`).join('');
+  }).join('') || '<div class="empty" style="padding:20px">Aucun titre</div>';
+  $('#mxlsum').textContent = mxSel.size ? `${mxSel.size} sélectionné${mxSel.size > 1 ? 's' : ''}` : '';
+}
+$('#mxlib').onclick = () => { mxSel = new Set(); $('#mxlq').value = ''; mxLibRender(); $('#mxlibdlg').classList.add('show'); };
+$('#mxlq').oninput = mxLibRender;
+$('#mxllist').addEventListener('change', e => {
+  const a = e.target.closest('[data-mxart]'), c = e.target.closest('[data-mxid]');
+  if (a) (state.history || []).filter(x => x.exists && (x.uploader || 'Inconnu') === a.dataset.mxart).forEach(x => a.checked ? mxSel.add(x.id) : mxSel.delete(x.id));
+  if (c) c.checked ? mxSel.add(c.dataset.mxid) : mxSel.delete(c.dataset.mxid);
+  mxLibRender();
+});
+$('#mxlclose').onclick = () => $('#mxlibdlg').classList.remove('show');
+$('#mxladd').onclick = () => {
+  $('#mxlibdlg').classList.remove('show');
+  if (mxSel.size) mxAdd((state.history || []).filter(x => mxSel.has(x.id)).map(x => ({ kind: 'h', id: x.id })));
+};
+
 /* --- Notifications de fin --- */
 let known = null;
 function notifyDone(s){
   const ids = new Set((s.history || []).map(x => x.id));
-  if (known) for (const x of s.history || []) if (!known.has(x.id) && !x.fromMix) toast('✓ ' + x.title, 'ok');
+  if (known) for (const x of s.history || []) if (!known.has(x.id) && !x.fromMix && x.uploader !== 'Mixtape YT MP3') toast('✓ ' + x.title, 'ok');
   known = ids;
 }
 
@@ -3139,7 +3710,7 @@ $script:lastUpdCheck = [datetime]::MinValue
 $script:updateWhenIdle = $false   # « installer à la fin des téléchargements »
 $UpdateEvery = 1800               # vérification toutes les 30 min tant que l'application est ouverte
 if ($env:YTMP3_UPDATE_EVERY_SEC) { $UpdateEvery = [int]$env:YTMP3_UPDATE_EVERY_SEC }
-function Test-Busy { return [bool]($script:proc -or $script:sepProc -or $script:splitCur -or $script:expJob -or @($queue | Where-Object { $_.status -eq 'attente' }).Count) }
+function Test-Busy { return [bool]($script:proc -or $script:sepProc -or $script:splitCur -or $script:expJob -or $script:mxRun -or @($queue | Where-Object { $_.status -eq 'attente' }).Count) }
 $script:updJob = $null
 $script:restartAfter = $false
 $CanSelfUpdate = [bool]($Installed -and $SelfPath)
@@ -3588,6 +4159,185 @@ function Add-Urls($urls) {
     Start-Next
 }
 
+# =====================================================================
+#  Mode Mixtape : enchaînement calé de tout un dossier, rendu en un seul MP3 avec effets sound system
+# =====================================================================
+$SonsDir = Join-Path $Data 'sons'
+# Effets synthétisés par YT MP3 (aucun sample extérieur) : source aevalsrc + traitement
+$Sounds = [ordered]@{
+    sirene   = @{ label = 'Sirène dub'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(620+420*sin(2*PI*2.4*t))/44100)\;0.32*tanh(3*sin(ld(0)))*min(1\,t*8)*min(1\,(3.2-t)*3):d=3.2:s=44100'; af = 'aecho=0.8:0.6:300|600:0.45|0.25,highpass=f=200' }
+    montante = @{ label = 'Sirène montante'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(260*pow(2\,2.6*mod(t\,0.62)/0.62))/44100)\;0.3*tanh(2.5*sin(ld(0)))*min(1\,t*10)*min(1\,(3.1-t)*3):d=3.1:s=44100'; af = 'aecho=0.8:0.55:310:0.4,highpass=f=150' }
+    corne    = @{ label = 'Corne'; src = 'aevalsrc=st(1\,ld(1)+2*PI*(466*(1-0.03*mod(t\,0.25)))/44100)\;st(2\,ld(2)+2*PI*587/44100)\;st(3\,ld(3)+2*PI*698/44100)\;0.22*tanh(2.2*((mod(ld(1)/(2*PI)\,1)*2-1)+(mod(ld(2)/(2*PI)\,1)*2-1)*0.8+(mod(ld(3)/(2*PI)\,1)*2-1)*0.6))*(between(t\,0\,0.17)+between(t\,0.24\,0.41)+between(t\,0.48\,1.45)*min(1\,(1.45-t)*6)):d=1.6:s=44100'; af = 'lowpass=f=4200,aecho=0.7:0.4:120:0.25' }
+    laser    = @{ label = 'Laser'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(180+3200*exp(-14*mod(t\,0.21)))/44100)\;0.35*sin(ld(0))*exp(-6*mod(t\,0.21))*lt(t\,0.84):d=1.2:s=44100'; af = 'aecho=0.6:0.5:210:0.3' }
+    bombe    = @{ label = 'Bombe'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(30+110*exp(-3*t))/44100)\;(0.75*sin(ld(0))+0.5*(random(1)*2-1)*exp(-5*t))*exp(-1.6*t)*min(1\,t*200):d=2.6:s=44100'; af = 'lowpass=f=900,alimiter=limit=0.9' }
+}
+$AudioExt = @('.mp3', '.m4a', '.aac', '.wav', '.flac', '.ogg', '.opus', '.wma')
+function Get-UserSoundsDir { return (Join-Path (Get-Out) 'Sons perso') }
+function Initialize-Sounds {
+    if (-not (Test-Path -LiteralPath $SonsDir)) { [void](New-Item -ItemType Directory -Path $SonsDir) }
+    foreach ($k in $Sounds.Keys) {
+        $f = Join-Path $SonsDir "$k.wav"
+        if (Test-Path -LiteralPath $f) { continue }
+        & $Ffmpeg -v error -y -f lavfi -i $Sounds[$k].src -af ($Sounds[$k].af + ',apad=pad_dur=0.5,loudnorm=I=-16:TP=-1.5:LRA=20,aresample=44100') -ac 2 -c:a pcm_s16le $f 2>$null
+    }
+}
+function Get-SoundList {
+    Initialize-Sounds
+    $l = @(foreach ($k in $Sounds.Keys) { @{ id = $k; label = $Sounds[$k].label; user = $false } })
+    $ud = Get-UserSoundsDir
+    if (Test-Path -LiteralPath $ud) {
+        $l += @(Get-ChildItem -LiteralPath $ud -File | Where-Object { $AudioExt -contains $_.Extension.ToLower() } | Sort-Object Name |
+            ForEach-Object { @{ id = 'u:' + $_.Name; label = [IO.Path]::GetFileNameWithoutExtension($_.Name); user = $true } })
+    }
+    return $l
+}
+function Get-SoundPath([string]$sid) {
+    if ($sid.StartsWith('u:')) { $n = $sid.Substring(2); if ($n -match '[\\/:]' ) { return $null }; return (Join-Path (Get-UserSoundsDir) $n) }
+    if ($Sounds.Contains($sid)) { Initialize-Sounds; return (Join-Path $SonsDir "$sid.wav") }
+    return $null
+}
+
+# Fichiers d'un dossier : identifiant stable (chemin + taille + date) pour garder l'analyse en mémoire
+$script:mxFiles = @{}
+function Register-MxFile([IO.FileInfo]$fi) {
+    $md5 = [Security.Cryptography.MD5]::Create()
+    $h = -join ($md5.ComputeHash([Text.Encoding]::UTF8.GetBytes($fi.FullName + '|' + $fi.Length + '|' + $fi.LastWriteTimeUtc.Ticks)) | Select-Object -First 6 | ForEach-Object { $_.ToString('x2') })
+    $id = 'm' + $h
+    $script:mxFiles[$id] = $fi.FullName
+    $n = [IO.Path]::GetFileNameWithoutExtension($fi.Name) -replace '^\d{1,3}\s*[-._)]\s*', ''
+    $artist = ''; $title = $n
+    $m = [regex]::Match($n, '^(.+?)\s+[-–—]\s+(.+)$')
+    if ($m.Success) { $artist = $m.Groups[1].Value.Trim(); $title = $m.Groups[2].Value.Trim() }
+    if (-not $artist) { $artist = $fi.Directory.Name }
+    return @{ id = $id; kind = 'm'; path = $fi.FullName; title = $title; artist = $artist; size = $fi.Length }
+}
+function Get-MxPath($src) {
+    switch ([string]$src.kind) {
+        'h' { $h = Find-Hist ([string]$src.id); if ($h) { return (Get-HistPath $h) } }
+        'm' { return $script:mxFiles[[string]$src.id] }
+        's' { return (Get-SoundPath ([string]$src.id)) }
+    }
+    return $null
+}
+
+# Rendu : un « clip » par morceau / effet, placés et transformés dans un seul graphe ffmpeg
+$script:mx = @{ status = 'vide' }
+$script:mxRun = $null
+$script:ffMajor = $null
+function Get-FfMajor {
+    if ($null -eq $script:ffMajor) {
+        $script:ffMajor = 99   # versions « master » (N-xxxxx) : options récentes
+        try { $v = (& $Ffmpeg -version 2>$null | Select-Object -First 1); $m = [regex]::Match([string]$v, 'version (\d+)\.'); if ($m.Success) { $script:ffMajor = [int]$m.Groups[1].Value } } catch {}
+    }
+    return $script:ffMajor
+}
+function F([double]$x) { return $x.ToString('0.######', $Inv) }
+
+function Start-MxRender($plan, [bool]$preview) {
+    if ($script:mxRun) { return 'Un rendu est déjà en cours' }
+    $clips = @($plan.clips)
+    if (-not $clips.Count) { return 'Rien à mixer' }
+    $dir = Join-Path $Data 'mixtape'
+    if (-not (Test-Path -LiteralPath $dir)) { [void](New-Item -ItemType Directory -Path $dir) }
+    $inputs = New-Object System.Collections.ArrayList
+    $lines = New-Object System.Collections.ArrayList
+    $labels = ''
+    $n = 0
+    foreach ($c in $clips) {
+        $path = Get-MxPath $c.src
+        if (-not $path -or -not (Test-Path -LiteralPath $path)) { return "Fichier introuvable : $($c.src.id)" }
+        [void]$inputs.Add($path)
+        $f = "[$($n):a]"
+        $parts = @()
+        if ($null -ne $c.in -and $null -ne $c.out) { $parts += ('atrim=start={0}:end={1}' -f (F $c.in), (F $c.out)) }
+        $parts += 'asetpts=PTS-STARTPTS'
+        $parts += 'aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo'
+        if ($c.rev) { $parts += 'areverse' }
+        if ($c.speed -and [double]$c.speed -ne 1) { $parts += ('asetrate={0},aresample=44100' -f (F (44100 * [double]$c.speed))) }
+        $cm = @(); if ($c.cmds) { $cm = @($c.cmds | Where-Object { $null -ne $_ }) }
+        if ($cm.Count -or ($c.r0 -and [double]$c.r0 -ne 1)) {
+            if ($cm.Count) { $parts += ("asendcmd=c='" + ((@($cm | ForEach-Object { '{0} atempo@t{1} tempo {2}' -f (F $_[0]), $n, (F $_[1]) })) -join ';') + "'") }
+            $r0 = $(if ($c.r0) { [double]$c.r0 } else { 1 })
+            $parts += ('atempo@t{0}={1}' -f $n, (F $r0))
+        }
+        if ($c.gain) { $parts += ('volume={0}dB' -f (F $c.gain)) }
+        if ($c.echo) { $parts += ('apad=pad_dur={0},aecho=0.8:0.75:{1}|{2}|{3}:0.55|0.35|0.2' -f (F ([double]$c.echo.d * 5 / 1000)), (F $c.echo.d), (F (2 * [double]$c.echo.d)), (F (3 * [double]$c.echo.d))) }
+        if ($c.fin) { $parts += ('afade=t=in:st={0}:d={1}:curve=qsin' -f (F $c.fin[0]), (F ([math]::Max(0.005, [double]$c.fin[1])))) }
+        if ($c.fout) { $parts += ('afade=t=out:st={0}:d={1}:curve=qsin' -f (F $c.fout[0]), (F ([math]::Max(0.005, [double]$c.fout[1])))) }
+        $ms = [math]::Max(0, [math]::Round([double]$c.at * 1000))
+        if ($ms -gt 0) { $parts += "adelay=delays=$($ms):all=1" }
+        $b = @(); if ($c.bass) { $b = @($c.bass | Where-Object { $null -ne $_ }) }
+        if ($b.Count) {
+            $en = (@($b | ForEach-Object { 'between(t,{0},{1})' -f (F $_[0]), (F $_[1]) })) -join '+'
+            $parts += ("bass@b{0}=g=-30:f=160:enable='{1}'" -f $n, $en)
+        }
+        [void]$lines.Add($f + ($parts -join ',') + "[c$n];")
+        $labels += "[c$n]"
+        $n++
+    }
+    $dur = [double]$plan.duration
+    [void]$lines.Add(('{0}amix=inputs={1}:normalize=0:dropout_transition=0,atrim=end={2},alimiter=limit=0.95:level=false,afade=t=out:st={3}:d=1.5[out]' -f $labels, $n, (F $dur), (F ([math]::Max(0, $dur - 1.5)))))
+    $graph = Join-Path $dir 'graphe.txt'
+    [IO.File]::WriteAllText($graph, ($lines -join "`n"), (New-Object Text.UTF8Encoding $false))
+    $meta = Join-Path $dir 'meta.txt'
+    $mt = ";FFMETADATA1`ntitle=$($plan.title -replace '[=;#\\\n]', ' ')`nartist=Mixtape YT MP3`n"
+    foreach ($ch in @($plan.chapters | Where-Object { $null -ne $_ })) { $mt += "[CHAPTER]`nTIMEBASE=1/1000`nSTART=$([math]::Round([double]$ch.s * 1000))`nEND=$([math]::Round([double]$ch.e * 1000))`ntitle=$(([string]$ch.title) -replace '[=;#\\\n]', ' ')`n" }
+    [IO.File]::WriteAllText($meta, $mt, (New-Object Text.UTF8Encoding $false))
+    if ($preview) { $out = Join-Path $dir 'apercu.mp3' }
+    else {
+        $od = Join-Path (Get-Out) 'Mixtapes'
+        if (-not (Test-Path -LiteralPath $od)) { [void](New-Item -ItemType Directory -Path $od) }
+        $base = Get-SafeName ([string]$plan.title); if (-not $base) { $base = 'Mixtape' }
+        $out = Join-Path $od ($base + '.mp3'); $k = 2
+        while (Test-Path -LiteralPath $out) { $out = Join-Path $od ("$base ($k).mp3"); $k++ }
+    }
+    $a = @('-v', 'error', '-y')
+    foreach ($i in $inputs) { $a += @('-i', $i) }
+    $a += @('-i', $meta)
+    $a += $(if ((Get-FfMajor) -lt 7) { @('-filter_complex_script', $graph) } else { @('-/filter_complex', $graph) })
+    $a += @('-map', '[out]', '-map_metadata', [string]$inputs.Count, '-c:a', 'libmp3lame', '-b:a', $(if ($preview) { '192k' } else { '320k' }), '-id3v2_version', '3',
+        '-progress', (Join-Path $dir 'progression.txt'), '-nostats', $out)
+    Remove-Item -LiteralPath (Join-Path $dir 'progression.txt') -Force -ErrorAction SilentlyContinue
+    $script:mxRun = @{ proc = (Start-Proc $Ffmpeg $a (Join-Path $dir 'ffmpeg.log')); out = $out; preview = $preview; dur = $dur; plan = $plan; t0 = Get-Date }
+    $script:mx = @{ status = 'rendu'; preview = $preview; progress = 0; error = ''; out = ''; n = [int]$script:mx.n }
+    return ''
+}
+function Update-Mx {
+    $r = $script:mxRun; if (-not $r) { return }
+    $dir = Join-Path $Data 'mixtape'
+    $pt = Read-Shared (Join-Path $dir 'progression.txt') | Where-Object { $_ -like 'out_time=*' } | Select-Object -Last 1
+    if ($pt -and $pt -match 'out_time=(\d+):(\d+):([\d.]+)') {
+        $sec = [int]$Matches[1] * 3600 + [int]$Matches[2] * 60 + [double]::Parse($Matches[3], $Inv)
+        if ($r.dur -gt 0) { $script:mx.progress = [math]::Min(99, [math]::Round($sec * 100 / $r.dur)) }
+    }
+    if (-not $r.proc.HasExited) { return }
+    $script:mxRun = $null
+    if ($r.proc.ExitCode -ne 0 -or -not (Test-Path -LiteralPath $r.out)) {
+        $err = (Read-Shared (Join-Path $dir 'ffmpeg.log.err')) | Where-Object { $_ } | Select-Object -Last 1
+        $script:mx.status = 'erreur'; $script:mx.error = $(if ($err) { "Le rendu a échoué : $err" } else { 'Le rendu a échoué' })
+        return
+    }
+    $script:mx.progress = 100; $script:mx.status = 'fini'; $script:mx.n = [int]$script:mx.n + 1
+    $script:mx.secs = [int]((Get-Date) - $r.t0).TotalSeconds
+    if ($r.preview) { return }
+    # Mixtape finale : liste des morceaux à côté du MP3 et ajout à la bibliothèque
+    $plan = $r.plan
+    $txt = @("$($plan.title)", '') + @(@($plan.chapters | Where-Object { $null -ne $_ }) | ForEach-Object { '{0}  {1}' -f ([TimeSpan]::FromSeconds([math]::Floor([double]$_.s)).ToString($(if ($r.dur -ge 3600) { 'h\:mm\:ss' } else { 'mm\:ss' }))), $_.title })
+    [IO.File]::WriteAllLines(([IO.Path]::ChangeExtension($r.out, $null).TrimEnd('.') + ' - liste des morceaux.txt'), [string[]]$txt, (New-Object Text.UTF8Encoding $true))
+    $fi = Get-Item -LiteralPath $r.out
+    $sec = $r.dur
+    $d = $(if ($sec -ge 3600) { '{0}:{1:00}:{2:00}' -f [math]::Floor($sec / 3600), [math]::Floor(($sec % 3600) / 60), [math]::Floor($sec % 60) } else { '{0}:{1:00}' -f [math]::Floor($sec / 60), [math]::Floor($sec % 60) })
+    $id = [guid]::NewGuid().ToString('N').Substring(0, 10)
+    [void]$history.Insert(0, [PSCustomObject]@{
+        id = $id; vid = ''; title = [string]$plan.title; uploader = 'Mixtape YT MP3'; duration = $d; file = $fi.Name; path = $fi.FullName
+        size = $fi.Length; quality = 320; srcAbr = 0; srcCodec = ''; thumb = ''; normalized = $true; trimmed = $false; cleaned = $false
+        date = (Get-Date).ToString('dd/MM/yyyy HH:mm')
+    })
+    Save-History
+    $script:mx.out = $fi.FullName; $script:mx.id = $id
+    Add-News "Mixtape « $($plan.title) » créée ($d)"
+}
+
 function Stop-Current {
     if ($script:proc -and -not $script:proc.HasExited) {
         try { & taskkill.exe /PID $script:proc.Id /T /F | Out-Null } catch { try { $script:proc.Kill() } catch {} }
@@ -3740,6 +4490,7 @@ function Get-State {
         followBusy = [bool]($script:followRun -or $script:followQueue.Count)
         news = @($script:news)
         export = $script:exp
+        mixtape = $script:mx
         separation = @{ state = (Get-SepState); step = (Get-SepStep); error = $script:sepInstallError
             gpu = (Get-GpuState); gpuName = (Get-GpuName); gpuError = $script:gpuError }
         search = @{
@@ -3763,6 +4514,21 @@ function Invoke-Request($ctx) {
                 switch ($Matches[2]) { 'orig' { $f = Get-HistPath $h } 'voix' { $f = $h.voix } 'instru' { $f = $h.instru } }
             }
             if ($f -and (Test-Path -LiteralPath $f)) { Send-File $ctx $f 'audio/mpeg' } else { Send $ctx 404 'Introuvable' 'text/plain; charset=utf-8' }
+            return
+        }
+        if ($path -match '^/mxmedia/(m[0-9a-f]{12})$') {
+            $f = $script:mxFiles[$Matches[1]]
+            if ($f -and (Test-Path -LiteralPath $f)) { Send-File $ctx $f 'audio/mpeg' } else { Send $ctx 404 'Introuvable' 'text/plain; charset=utf-8' }
+            return
+        }
+        if ($path -match '^/son/(.+)$') {
+            $f = Get-SoundPath ([Uri]::UnescapeDataString($Matches[1]))
+            if ($f -and (Test-Path -LiteralPath $f)) { Send-File $ctx $f 'audio/wav' } else { Send $ctx 404 'Introuvable' 'text/plain; charset=utf-8' }
+            return
+        }
+        if ($path -eq '/mxapercu.mp3') {
+            $f = Join-Path $Data 'mixtape\apercu.mp3'
+            if (Test-Path -LiteralPath $f) { Send-File $ctx $f 'audio/mpeg' } else { Send $ctx 404 'Introuvable' 'text/plain; charset=utf-8' }
             return
         }
         if ($path -eq '/api/state') {
@@ -3941,6 +4707,29 @@ function Invoke-Request($ctx) {
             if ($err) { Send-Json $ctx @{ error = $err }; return }
         }
         '/api/exportdone' { if (-not $script:expJob) { $script:exp = @{ status = 'vide' } } }
+        '/api/mxscan' {
+            $res = New-Object System.Collections.ArrayList
+            if ($body.dir) {
+                $d = [string]$body.dir
+                if (-not (Test-Path -LiteralPath $d)) { Send-Json $ctx @{ error = 'Dossier introuvable' }; return }
+                $files = @(Get-ChildItem -LiteralPath $d -File -Recurse:([bool]$body.recursive) -ErrorAction SilentlyContinue | Where-Object { $AudioExt -contains $_.Extension.ToLower() } | Sort-Object FullName | Select-Object -First 400)
+                foreach ($fi in $files) { [void]$res.Add((Register-MxFile $fi)) }
+            }
+            foreach ($pth in @($body.paths)) { if ($pth -and (Test-Path -LiteralPath ([string]$pth))) { [void]$res.Add((Register-MxFile (Get-Item -LiteralPath ([string]$pth)))) } }
+            Send-Json $ctx @{ files = @($res) }; return
+        }
+        '/api/mxsounds' { Send-Json $ctx @{ sounds = @(Get-SoundList); userDir = (Get-UserSoundsDir) }; return }
+        '/api/mxuserdir' {
+            $ud = Get-UserSoundsDir
+            if (-not (Test-Path -LiteralPath $ud)) { [void](New-Item -ItemType Directory -Path $ud -Force) }
+            Start-Process explorer.exe -ArgumentList ('"' + $ud + '"')
+        }
+        '/api/mxrender' {
+            $err = Start-MxRender $body.plan ([bool]$body.preview)
+            if ($err) { Send-Json $ctx @{ error = $err }; return }
+        }
+        '/api/mxcancel' { if ($script:mxRun) { try { $script:mxRun.proc.Kill() } catch {}; $script:mxRun = $null }; $script:mx = @{ status = 'vide'; n = [int]$script:mx.n } }
+        '/api/mxreveal' { if ($script:mx.out -and (Test-Path -LiteralPath $script:mx.out)) { Start-Process explorer.exe -ArgumentList ('/select,"' + $script:mx.out + '"') } }
         '/api/setup'   { if (-not ($script:setupJob -and $script:setupJob.State -eq 'Running')) { Start-Setup } }
         '/api/bye'     { $script:byeAt = Get-Date; Send $ctx 200 '{}' 'application/json'; return }
         default        { Send $ctx 404 '{}' 'application/json'; return }
@@ -3994,6 +4783,7 @@ while ($true) {
         try { Update-Follows } catch {}
         try { Update-Split } catch {}
         try { Update-Export } catch {}
+        try { Update-Mx } catch {}
         if ($CanSelfUpdate -and ($now - $script:lastUpdCheck).TotalSeconds -gt $UpdateEvery) { try { Start-UpdateCheck } catch {} }
         # Mise à jour programmée « à la fin des téléchargements » : on l'installe dès que tout est terminé
         if ($script:updateWhenIdle -and -not (Test-Busy)) {
@@ -4004,7 +4794,7 @@ while ($true) {
 
         # Fermeture automatique quand la fenêtre est fermée et qu'il n'y a plus rien à faire
         $pending = @($queue | Where-Object { $_.status -eq 'attente' }).Count -gt 0 -and (Get-SetupState) -ne 'erreur'
-        if (-not $script:proc -and -not $pending -and -not $script:sepProc -and -not $script:searchProcs.Count -and -not $recQueue.Count -and -not $script:splitCur -and -not $script:expJob) {
+        if (-not $script:proc -and -not $pending -and -not $script:sepProc -and -not $script:searchProcs.Count -and -not $recQueue.Count -and -not $script:splitCur -and -not $script:expJob -and -not $script:mxRun) {
             if ($script:byeAt -and ($now - $script:byeAt).TotalSeconds -gt 5) { break }
             if (($now - $script:lastSeen).TotalSeconds -gt $IdleSeconds) { break }
         }
