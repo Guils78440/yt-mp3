@@ -1,7 +1,3 @@
-- Correction : YT MP3 ne se bloque plus pendant le choix d'un dossier (la musique continue de jouer)
-- Correction : « Relancer YT MP3 » remplace un moteur bloqué au lieu de démarrer à côté sans être retrouvé
-- La lecture d'un très gros dossier pour une mixtape est limitée pour rester rapide
-- Journal du moteur (fichier moteur.log) pour diagnostiquer un éventuel plantage
-- Onglet Mix : deux vraies platines vinyle qui tournent avec la musique, la pochette du morceau au centre du disque
-- Bras de lecture qui se pose et avance sur le disque, fader de pitch, bouton START et petit écran rétro (BPM, temps restant, tonalité)
-- Fais tourner le disque à la main pour te déplacer dans le morceau
+- Nouvel onglet Mix façon logiciel DJ : formes d’onde zoomées qui défilent, molettes, table de mix centrale avec boutons rotatifs, faders et vumètres
+- Pads en caoutchouc sur chaque platine : repères, boucles, effets à maintenir (écho, réverb, filtres, gate, roll, sans basses, frein) et sampler (sirènes, corne… et tes sons perso)
+- Télécommande sur téléphone : scanne un QR code et pilote platines, crossfader, Auto-DJ, pads et chargement des morceaux depuis le canapé
