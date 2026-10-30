@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v2.9 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v2.9.1 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '2.9'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '2.9.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -13,7 +13,7 @@ $Installed = Test-Path -LiteralPath (Join-Path $Root 'installe.txt')
 # « silencieux » : relance demandée depuis la fenêtre déjà ouverte (lien ytmp3://), pas de nouvelle fenêtre
 $Silent = @($args) -contains 'silencieux'
 # Délai d'inactivité avant arrêt automatique (fenêtre fermée sans prévenir)
-$IdleSeconds = 600
+$IdleSeconds = 3600   # fenêtre muette (endormie par Windows / Edge) : on attend 1 h avant de s'arrêter
 # Dépôt GitHub d'où viennent les mises à jour
 $UpdateBase = 'https://raw.githubusercontent.com/Guils78440/yt-mp3/main'
 if ($env:YTMP3_BASE) { $UpdateBase = $env:YTMP3_BASE.TrimEnd('/') }
@@ -81,6 +81,22 @@ function Get-Out {
     return $d
 }
 [void](Get-Out)
+# Journal du moteur : démarrage, arrêts et erreurs imprévues (pour comprendre un plantage après coup)
+function Write-Log([string]$msg) {
+    try {
+        $lf = Join-Path $Data 'moteur.log'
+        if ((Test-Path -LiteralPath $lf) -and (Get-Item -LiteralPath $lf).Length -gt 300KB) { Move-Item -LiteralPath $lf -Destination ($lf + '.ancien') -Force }
+        Add-Content -LiteralPath $lf -Value ((Get-Date).ToString('yyyy-MM-dd HH:mm:ss') + '  ' + $msg) -Encoding UTF8
+    } catch {}
+}
+$script:logSeen = @{}
+function Write-LogOnce([string]$key, $e) {
+    $m = Format-Err $e; $k = $key + $m
+    if ($script:logSeen[$k] -and ((Get-Date) - $script:logSeen[$k]).TotalSeconds -lt 60) { return }
+    $script:logSeen[$k] = Get-Date; Write-Log "Erreur dans $key : $m"
+}
+function Format-Err($e) { try { return "$($e.Exception.Message) (ligne $($e.InvocationInfo.ScriptLineNumber) : $(([string]$e.InvocationInfo.Line).Trim()))" } catch { return [string]$e } }
+
 # yt-dlp trouve ffmpeg et deno (nécessaire pour YouTube) via le PATH
 $env:PATH = "$Bin;$env:PATH"
 $env:TORCH_HOME = Join-Path $Bin 'modeles'   # modèle de séparation rangé avec les outils
@@ -103,19 +119,36 @@ function Show-Error([string]$msg) {
 # Pour chaque port de 8765 à 8780 : si YT MP3 y tourne déjà, on rouvre sa fenêtre ;
 # s'il est libre, on le prend ; s'il est occupé par un autre programme, on passe au suivant.
 $listener = $null
-foreach ($p in 8765..8780) {
-    $Url = "http://127.0.0.1:$p/"
-    try {
-        $r = Invoke-RestMethod -Uri ($Url + 'api/state') -TimeoutSec 2
-        if ($r.appVersion) { Open-Window; exit }
-    } catch {}
+function Start-Listen([int]$p) {
     try {
         $l = New-Object System.Net.Sockets.TcpListener([Net.IPAddress]::Loopback, $p)
         $l.ExclusiveAddressUse = $true
         $l.Start()
-        $listener = $l; $Port = $p
-        break
+        return $l
+    } catch { return $null }
+}
+$script:replaced = $false
+foreach ($p in 8765..8780) {
+    $Url = "http://127.0.0.1:$p/"
+    try {
+        $r = Invoke-RestMethod -Uri ($Url + 'api/state') -TimeoutSec 4
+        if ($r.appVersion) { Open-Window; exit }
     } catch {}
+    $listener = Start-Listen $p
+    if (-not $listener) {
+        # Port occupé sans réponse : si c'est un ancien moteur YT MP3 bloqué, on l'arrête et on reprend sa place
+        # (sinon la fenêtre déjà ouverte, qui appelle ce port, ne retrouverait jamais le nouveau moteur)
+        try {
+            $own = @(Get-NetTCPConnection -LocalPort $p -State Listen -ErrorAction Stop)[0].OwningProcess
+            $cmd = [string](Get-CimInstance Win32_Process -Filter "ProcessId=$own" -ErrorAction Stop).CommandLine
+            if ($own -ne $PID -and $cmd -match 'yt-mp3\.ps1|YTMP3') {
+                Stop-Process -Id $own -Force -ErrorAction Stop
+                $script:replaced = $true
+                for ($k = 0; $k -lt 20 -and -not $listener; $k++) { Start-Sleep -Milliseconds 250; $listener = Start-Listen $p }
+            }
+        } catch {}
+    }
+    if ($listener) { $Port = $p; break }
 }
 if (-not $listener) {
     Show-Error "Impossible de démarrer YT MP3 : aucun port libre entre 8765 et 8780.`n`nRedémarre le PC puis relance l'application."
@@ -961,6 +994,18 @@ function toast(msg, cls=''){
   const t = document.createElement('div'); t.className = 'toast ' + cls; t.textContent = msg;
   $('#toasts').appendChild(t); setTimeout(() => t.remove(), 3500);
 }
+// Ouvre la fenêtre Windows de choix de dossier (processus séparé) et attend la réponse sans bloquer YT MP3
+async function pickDir(kind){
+  const r0 = await api(kind === 'out' ? '/api/pickfolder' : '/api/pickdir', { kind });
+  const n = r0.pick ? r0.pick.n : -1;
+  for (let i = 0; i < 1500; i++) {
+    await new Promise(r => setTimeout(r, 400));
+    let s; try { s = await api('/api/state'); } catch { return ''; }
+    if (!s.pick || s.pick.n !== n) return '';
+    if (s.pick.status === 'fini') { render(s); return s.pick.dir || ''; }
+  }
+  return '';
+}
 async function api(path, body){
   let r;
   try { r = await fetch(path, body === undefined ? {} : {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)}); }
@@ -1062,6 +1107,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['2.9.1', '30/10/2026', ['Correction : YT MP3 ne se bloque plus pendant le choix d\'un dossier (la musique continue de jouer)', 'Correction : « Relancer YT MP3 » remplace un moteur bloqué au lieu de démarrer à côté sans être retrouvé', 'La lecture d\'un très gros dossier pour une mixtape est limitée pour rester rapide', 'Journal du moteur (fichier moteur.log) pour diagnostiquer un éventuel plantage']],
   ['2.9', '26/10/2026', ['Onglet Mix : deux vraies platines vinyle qui tournent avec la musique, la pochette du morceau au centre du disque', 'Bras de lecture qui se pose et avance sur le disque, fader de pitch, bouton START et petit écran rétro (BPM, temps restant, tonalité)', 'Fais tourner le disque à la main pour te déplacer dans le morceau']],
   ['2.8', '22/10/2026', ['Nouvel onglet Mixtape : choisis un dossier (un ou plusieurs artistes) ou des titres de ta bibliothèque, YT MP3 crée un seul MP3 enchaîné', 'Morceaux rangés par tempo (ou tempo + tonalité), enchaînements calés sur le rythme avec accélération / ralentissement progressif', 'Style sound system : rewind (wheel up), sortie en écho, coupure, avec sirènes, corne, laser, bombe et tes propres sons', 'Pré-écoute de chaque enchaînement, chapitres et liste des morceaux dans la mixtape finale']],
   ['2.7.1', '14/10/2026', ['Mix : protection contre les coupures, si tu charges un morceau sur la platine qui joue, YT MP3 te propose de le mettre sur l\'autre platine']],
@@ -2399,7 +2445,7 @@ $('#resetDir').onclick = () => saveSettings({reset: true}, 'Dossier par défaut 
 $('#openDir').onclick = () => api('/api/folder', {});
 $('#pick').onclick = async () => {
   const before = state && state.settings.outDir;
-  try { const s = await api('/api/pickfolder', {}); render(s); if (s.settings.outDir !== before) toast('Dossier enregistré', 'ok'); }
+  try { const d = await pickDir('out'); if (d && d !== before) toast('Dossier enregistré', 'ok'); }
   catch(e){ toast(e.message, 'err'); }
 };
 $('#qmode').onclick = e => {
@@ -2634,7 +2680,7 @@ document.querySelector('.expre').addEventListener('click', e => {
   if (b.dataset.ex === 'set' && !exSel.length) toast('Ta liste de soirée est vide (onglet Mix)', 'err');
   exRender();
 });
-$('#expick').onclick = async () => { try { const r = await api('/api/pickdir', {}); if (r.dir) $('#exdir').value = r.dir; } catch(err){ toast(err.message, 'err'); } };
+$('#expick').onclick = async () => { try { const d = await pickDir('usb'); if (d) $('#exdir').value = d; } catch(err){ toast(err.message, 'err'); } };
 $('#exclose').onclick = async () => { $('#expdlg').classList.remove('show'); if (state.export && /fini|erreur/.test(state.export.status)) try { render(await api('/api/exportdone', {})); } catch {} };
 $('#exgo').onclick = async () => {
   const dest = $('#exdir').value.trim().replace(/^"|"$/g, '');
@@ -3010,7 +3056,8 @@ function mxAdd(files){
 }
 $('#mxdir').onclick = async () => {
   try {
-    const r = await api('/api/pickdir', {}); if (!r.dir) return;
+    const r = { dir: await pickDir('mx') }; if (!r.dir) return;
+    toast('Lecture du dossier…');
     const s2 = await api('/api/mxscan', { dir: r.dir, recursive: true });
     if (s2.error) return toast(s2.error, 'err');
     if (!s2.files.length) return toast('Aucun fichier audio dans ce dossier', 'err');
@@ -3952,6 +3999,38 @@ function Invoke-SelfUpdate {
     }
 }
 
+$script:pick = @{ status = 'vide'; n = 0; kind = ''; dir = '' }
+$script:pickProc = $null
+function Start-Pick([string]$kind, [string]$desc, [string]$start) {
+    if ($script:pickProc -and -not $script:pickProc.HasExited) { try { $script:pickProc.Kill() } catch {} }
+    $out = Join-Path $Data 'choix-dossier.txt'
+    Remove-Item -LiteralPath $out -Force -ErrorAction SilentlyContinue
+    $q = { param($t) "'" + ([string]$t -replace "'", "''") + "'" }
+    $ps = "Add-Type -AssemblyName System.Windows.Forms`n" +
+        "`$f = New-Object System.Windows.Forms.Form; `$f.TopMost = `$true; `$f.ShowInTaskbar = `$false; `$f.Opacity = 0; `$f.StartPosition = 'CenterScreen'; `$f.Show(); `$f.Activate()`n" +
+        "`$d = New-Object System.Windows.Forms.FolderBrowserDialog; `$d.Description = $(& $q $desc); `$d.ShowNewFolderButton = `$true`n" +
+        $(if ($start) { "`$d.SelectedPath = $(& $q $start)`n" } else { '' }) +
+        "`$r = ''; if (`$d.ShowDialog(`$f) -eq [System.Windows.Forms.DialogResult]::OK) { `$r = `$d.SelectedPath }`n" +
+        "[IO.File]::WriteAllText($(& $q $out), 'ok|' + `$r, (New-Object Text.UTF8Encoding `$false))"
+    $enc = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($ps))
+    $script:pick = @{ status = 'ouvert'; n = [int]$script:pick.n + 1; kind = $kind; dir = '' }
+    try {
+        $exe = (Get-Process -Id $PID).Path
+        $script:pickProc = Start-Process -FilePath $exe -ArgumentList "-NoProfile -STA -ExecutionPolicy Bypass -WindowStyle Hidden -EncodedCommand $enc" -PassThru -ErrorAction Stop
+        $null = $script:pickProc.Handle
+    } catch { $script:pick.status = 'fini'; $script:pickProc = $null; Write-Log ('Choix de dossier impossible : ' + $_.Exception.Message) }
+}
+function Update-Pick {
+    $pp = $script:pickProc; if (-not $pp -or -not $pp.HasExited) { return }
+    $script:pickProc = $null
+    $out = Join-Path $Data 'choix-dossier.txt'
+    $dir = ''
+    try { $t = [IO.File]::ReadAllText($out); if ($t.StartsWith('ok|')) { $dir = $t.Substring(3).Trim() } } catch {}
+    Remove-Item -LiteralPath $out -Force -ErrorAction SilentlyContinue
+    if ($dir -and $script:pick.kind -eq 'out') { $script:settings.outDir = $dir; Save-Settings }
+    $script:pick.dir = $dir; $script:pick.status = 'fini'
+}
+
 function Restart-Self {
     $exe = (Get-Process -Id $PID).Path
     $a = "-NoProfile -ExecutionPolicy Bypass -File `"$SelfPath`" silencieux"
@@ -4610,6 +4689,7 @@ function Get-State {
         news = @($script:news)
         export = $script:exp
         mixtape = $script:mx
+        pick = @{ status = $script:pick.status; n = $script:pick.n; kind = $script:pick.kind; dir = $script:pick.dir }
         separation = @{ state = (Get-SepState); step = (Get-SepStep); error = $script:sepInstallError
             gpu = (Get-GpuState); gpuName = (Get-GpuName); gpuError = $script:gpuError }
         search = @{
@@ -4768,20 +4848,7 @@ function Invoke-Request($ctx) {
             if ($body.reset) { $script:settings.outDir = $DefaultOut }
             Save-Settings
         }
-        '/api/pickfolder' {
-            Add-Type -AssemblyName System.Windows.Forms
-            $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-            $dlg.Description = 'Choisis le dossier où enregistrer les MP3'
-            $dlg.ShowNewFolderButton = $true
-            $dlg.SelectedPath = (Get-Out)
-            $owner = New-Object System.Windows.Forms.Form
-            $owner.TopMost = $true
-            if ($dlg.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK) {
-                $script:settings.outDir = $dlg.SelectedPath
-                Save-Settings
-            }
-            $owner.Dispose()
-        }
+        '/api/pickfolder' { Start-Pick 'out' 'Choisis le dossier où enregistrer les MP3' (Get-Out) }
         '/api/plinfo' { Start-PlInfo ([string]$body.url) }
         '/api/plclose' { if ($script:plProc) { try { $script:plProc.proc.Kill() } catch {}; $script:plProc = $null }; $script:pl = @{ status = 'vide' } }
         '/api/addplaylist' {
@@ -4810,15 +4877,8 @@ function Invoke-Request($ctx) {
             }
         }
         '/api/pickdir' {
-            Add-Type -AssemblyName System.Windows.Forms
-            $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-            $dlg.Description = 'Choisis la clé USB ou le dossier où copier les titres'
-            $dlg.ShowNewFolderButton = $true
-            $owner = New-Object System.Windows.Forms.Form; $owner.TopMost = $true
-            $dir = ''
-            if ($dlg.ShowDialog($owner) -eq [System.Windows.Forms.DialogResult]::OK) { $dir = $dlg.SelectedPath }
-            $owner.Dispose()
-            Send-Json $ctx @{ dir = $dir }; return
+            $k = [string]$body.kind
+            Start-Pick $k $(if ($k -eq 'mx') { 'Choisis le dossier de MP3 à mixer (les sous-dossiers sont inclus)' } else { 'Choisis la clé USB ou le dossier où copier les titres' }) ''
         }
         '/api/export' {
             if ($script:expJob) { Send-Json $ctx @{ error = 'Une copie est déjà en cours' }; return }
@@ -4831,7 +4891,16 @@ function Invoke-Request($ctx) {
             if ($body.dir) {
                 $d = [string]$body.dir
                 if (-not (Test-Path -LiteralPath $d)) { Send-Json $ctx @{ error = 'Dossier introuvable' }; return }
-                $files = @(Get-ChildItem -LiteralPath $d -File -Recurse:([bool]$body.recursive) -ErrorAction SilentlyContinue | Where-Object { $AudioExt -contains $_.Extension.ToLower() } | Sort-Object FullName | Select-Object -First 400)
+                # Parcours borné (400 fichiers, 6 s) : choisir « C:\ » ou un énorme dossier ne doit pas figer le moteur
+                $found = New-Object System.Collections.ArrayList
+                $todo = New-Object System.Collections.Queue; $todo.Enqueue($d)
+                $sw = [Diagnostics.Stopwatch]::StartNew()
+                while ($todo.Count -and $found.Count -lt 400 -and $sw.ElapsedMilliseconds -lt 6000) {
+                    $cur = $todo.Dequeue()
+                    try { foreach ($f in [IO.Directory]::EnumerateFiles($cur)) { if ($AudioExt -contains [IO.Path]::GetExtension($f).ToLower()) { [void]$found.Add($f); if ($found.Count -ge 400) { break } } } } catch {}
+                    if ($body.recursive) { try { foreach ($sd in [IO.Directory]::EnumerateDirectories($cur)) { $todo.Enqueue($sd) } } catch {} }
+                }
+                $files = @($found | Sort-Object | ForEach-Object { New-Object IO.FileInfo $_ })
                 foreach ($fi in $files) { [void]$res.Add((Register-MxFile $fi)) }
             }
             foreach ($pth in @($body.paths)) { if ($pth -and (Test-Path -LiteralPath ([string]$pth))) { [void]$res.Add((Register-MxFile (Get-Item -LiteralPath ([string]$pth)))) } }
@@ -4861,6 +4930,10 @@ function Invoke-Request($ctx) {
 # =====================================================================
 $script:lastSeen = Get-Date
 $script:byeAt = $null
+$script:stopWhy = 'inconnu'
+Write-Log ("Démarrage v$AppVersion (port $Port, processus $PID" + $(if ($script:replaced) { ', ancien moteur bloqué remplacé' } else { '' }) + $(if ($Silent) { ', relance' } else { '' }) + ')')
+# Relance discrète sur un autre port que celui attendu : la fenêtre déjà ouverte ne le trouverait pas, on en ouvre une
+if ($Silent -and $Port -ne 8765) { $Silent = $false }
 Start-Setup
 Start-UpdateCheck
 Open-Window
@@ -4876,11 +4949,11 @@ while ($true) {
                 $ctx = Read-HttpRequest $client
                 if ($ctx) {
                     try { Invoke-Request $ctx }
-                    catch { try { Send $ctx 500 (ConvertTo-Json @{ error = $_.Exception.Message } -Compress) 'application/json' } catch {} }
+                    catch { Write-Log ("Erreur sur $($ctx.Path) : " + (Format-Err $_)); try { Send $ctx 500 (ConvertTo-Json @{ error = $_.Exception.Message } -Compress) 'application/json' } catch {} }
                 }
             } catch {}
             finally { try { $client.Close() } catch {} }
-            if ($script:restartAfter) { break }
+            if ($script:restartAfter) { $script:stopWhy = 'mise à jour'; break }
             continue
         }
         Start-Sleep -Milliseconds 60
@@ -4893,34 +4966,37 @@ while ($true) {
 
         if ($tick.ElapsedMilliseconds -lt 400) { continue }
         $tick.Restart()
-        try { Update-Job } catch {}
-        try { Update-Search } catch {}
-        try { Update-Sep } catch {}
-        try { Update-UpdateCheck } catch {}
-        try { Update-Recordings } catch {}
-        try { Update-PlInfo } catch {}
-        try { Update-Follows } catch {}
-        try { Update-Split } catch {}
-        try { Update-Export } catch {}
-        try { Update-Mx } catch {}
+        try { Update-Job } catch { Write-LogOnce 'Update-Job' $_ }
+        try { Update-Search } catch { Write-LogOnce 'Update-Search' $_ }
+        try { Update-Sep } catch { Write-LogOnce 'Update-Sep' $_ }
+        try { Update-UpdateCheck } catch { Write-LogOnce 'Update-UpdateCheck' $_ }
+        try { Update-Recordings } catch { Write-LogOnce 'Update-Recordings' $_ }
+        try { Update-PlInfo } catch { Write-LogOnce 'Update-PlInfo' $_ }
+        try { Update-Follows } catch { Write-LogOnce 'Update-Follows' $_ }
+        try { Update-Split } catch { Write-LogOnce 'Update-Split' $_ }
+        try { Update-Export } catch { Write-LogOnce 'Update-Export' $_ }
+        try { Update-Mx } catch { Write-LogOnce 'Update-Mx' $_ }
+        try { Update-Pick } catch { Write-LogOnce 'Update-Pick' $_ }
         if ($CanSelfUpdate -and ($now - $script:lastUpdCheck).TotalSeconds -gt $UpdateEvery) { try { Start-UpdateCheck } catch {} }
         # Mise à jour programmée « à la fin des téléchargements » : on l'installe dès que tout est terminé
         if ($script:updateWhenIdle -and -not (Test-Busy)) {
             $script:updateWhenIdle = $false
             $err = Invoke-SelfUpdate
-            if ($err) { $script:upd.error = $err } elseif ($script:restartAfter) { break }
+            if ($err) { $script:upd.error = $err } elseif ($script:restartAfter) { $script:stopWhy = 'mise à jour'; break }
         }
 
         # Fermeture automatique quand la fenêtre est fermée et qu'il n'y a plus rien à faire
         $pending = @($queue | Where-Object { $_.status -eq 'attente' }).Count -gt 0 -and (Get-SetupState) -ne 'erreur'
         if (-not $script:proc -and -not $pending -and -not $script:sepProc -and -not $script:searchProcs.Count -and -not $recQueue.Count -and -not $script:splitCur -and -not $script:expJob -and -not $script:mxRun) {
-            if ($script:byeAt -and ($now - $script:byeAt).TotalSeconds -gt 5) { break }
-            if (($now - $script:lastSeen).TotalSeconds -gt $IdleSeconds) { break }
+            if ($script:byeAt -and ($now - $script:byeAt).TotalSeconds -gt 5) { $script:stopWhy = 'fenêtre fermée'; break }
+            if (($now - $script:lastSeen).TotalSeconds -gt $IdleSeconds) { $script:stopWhy = 'fenêtre muette depuis 1 h'; break }
         }
     } catch {
+        Write-Log ('Erreur imprévue : ' + (Format-Err $_))
         Start-Sleep -Milliseconds 200   # une erreur imprévue ne doit jamais arrêter le moteur
     }
 }
+Write-Log "Arrêt : $script:stopWhy"
 try { $listener.Stop() } catch {}
 if ($script:restartAfter) { Restart-Self }   # relance la nouvelle version ; la fenêtre ouverte se reconnecte toute seule
 exit
