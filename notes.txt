@@ -1,3 +1,4 @@
-- Nouvel onglet Mix façon logiciel DJ : formes d’onde zoomées qui défilent, molettes, table de mix centrale avec boutons rotatifs, faders et vumètres
-- Pads en caoutchouc sur chaque platine : repères, boucles, effets à maintenir (écho, réverb, filtres, gate, roll, sans basses, frein) et sampler (sirènes, corne… et tes sons perso)
-- Télécommande sur téléphone : scanne un QR code et pilote platines, crossfader, Auto-DJ, pads et chargement des morceaux depuis le canapé
+- 9 nouveaux bruitages sound system : gamelles, gamelles de la foule, sifflet, gunshot, corne de brume, rewind, tonnerre, boom, cloche
+- Cris d’ambiance (« Pull up selecta! », « Wheel up! », « Rewind! », « Big up massive! »…) créés avec la voix de Windows et traités façon sound system
+- Enregistre ta propre voix au micro avec 4 effets (sound system, mégaphone, grosse voix, naturel) : elle rejoint le sampler et la Mixtape
+- Sampler en banques de pads (PC et téléphone)

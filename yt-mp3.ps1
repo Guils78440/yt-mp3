@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v3.0 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v3.1 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '3.0'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '3.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -437,6 +437,16 @@ body.dj-mode main{max-width:1360px}
 .dk-pads .dk-hot.set::before,.dk-pads .dk-loop.on::before,.pad.on::before{opacity:0}
 .pad small{display:block;font-size:9px;font-weight:600;opacity:.7;letter-spacing:0}
 /* Table de mix : une tranche par platine, au centre */
+.smpbanks{grid-column:1/-1;display:flex;gap:5px;flex-wrap:wrap}
+.smpbanks button{padding:4px 9px;border-radius:7px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--muted);background:var(--panel2);border:1px solid var(--line)}
+.smpbanks button.on{color:#fff;border-color:#4b5060}
+.mxrow #vxfx{flex-wrap:wrap}
+.vxrec{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:16px}
+.vxbtn{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff6b6b,#dc2626 60%,#991b1b);box-shadow:0 0 0 6px #ef444422,0 8px 24px #0009;color:#fff;font-weight:800;font-size:13px}
+.vxbtn.on{animation:vxp 1s infinite}
+@keyframes vxp{50%{box-shadow:0 0 0 16px #ef444400,0 8px 24px #0009}}
+.vxlvl{width:220px;height:8px;border-radius:5px;background:#1c1f26;overflow:hidden}.vxlvl i{display:block;height:100%;width:0;background:linear-gradient(90deg,#22c55e,#facc15,#ef4444)}
+.vxt{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px}
 .dk-strip{display:flex;flex-direction:column;align-items:center;gap:6px;background:linear-gradient(180deg,#191b21,#121318);border:1px solid #262a33;border-radius:12px;padding:10px 6px}
 .dk-strip .chn{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--dc)}
 .knob{display:flex;flex-direction:column;align-items:center;gap:1px;cursor:ns-resize;touch-action:none;user-select:none}
@@ -761,7 +771,7 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
           <h3>Sons</h3>
           <p>Clique pour écouter. Tu peux ajouter tes propres sons (ton nom de sound system, des dubplates…) dans le dossier « Sons perso ».</p>
           <div class="mxsounds" id="mxsounds"></div>
-          <button class="lnk" id="mxuser" style="margin-top:10px">Ouvrir le dossier « Sons perso »</button>
+          <div class="row" style="margin-top:12px;gap:12px"><button class="btn-ghost" data-voixrec>🎤 Enregistrer ta voix</button><button class="lnk" id="mxuser">Ouvrir le dossier « Sons perso »</button></div>
         </div>
         <div class="card">
           <h3>Créer la mixtape</h3>
@@ -901,6 +911,14 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
   <div class="opt" id="telopt" style="border-top:0;margin-top:6px"><div class="ot"><b>Activer la télécommande</b><span>Accessible uniquement avec le lien secret du QR code.</span></div><div class="sw"></div></div>
   <div id="telbox"></div>
   <div class="dlg-btns"><button class="lnk" id="telnew" style="margin-right:auto">Nouveau lien secret</button><button class="go" id="telclose">Fermer</button></div>
+</div></div>
+<div class="overlay" id="voixdlg"><div class="box dlg wide">
+  <h3 style="margin-top:0">Enregistre ta voix</h3>
+  <p>Crie ton « Pull up my selecta ! », le nom de ton sound system, une dédicace… YT MP3 ajoute les effets et le range dans tes sons (sampler et Mixtape).</p>
+  <div class="vxrec"><button class="vxbtn" id="vxbtn">● ENREGISTRER</button><div class="vxlvl"><i id="vxlvl"></i></div><div class="vxt" id="vxt">15 secondes maximum</div></div>
+  <div class="mxrow" style="margin-top:16px"><span>Effet</span><div class="seg mini" id="vxfx"><button type="button" data-v="sound" class="on">Sound system</button><button type="button" data-v="megaphone">Mégaphone</button><button type="button" data-v="grosse">Grosse voix</button><button type="button" data-v="naturel">Naturel</button></div></div>
+  <div class="mxrow"><span>Nom</span><input id="vxname" class="mxtitle" style="margin:0" placeholder="Pull up selecta" spellcheck="false"></div>
+  <div class="dlg-btns"><button class="btn-ghost" id="vxplay" disabled>▶ Écouter</button><button class="btn-ghost" id="vxclose">Fermer</button><button class="go" id="vxkeep" disabled>Garder ce son</button></div>
 </div></div>
 <div class="overlay" id="loaddlg"><div class="box dlg">
   <div class="dlg-ic warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></div>
@@ -1139,6 +1157,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['3.1', '03/11/2026', ['9 nouveaux bruitages sound system : gamelles, gamelles de la foule, sifflet, gunshot, corne de brume, rewind, tonnerre, boom, cloche', 'Cris d’ambiance (« Pull up selecta! », « Wheel up! », « Rewind! », « Big up massive! »…) créés avec la voix de Windows et traités façon sound system', 'Enregistre ta propre voix au micro avec 4 effets (sound system, mégaphone, grosse voix, naturel) : elle rejoint le sampler et la Mixtape', 'Sampler en banques de pads (PC et téléphone)']],
   ['3.0', '30/10/2026', ['Nouvel onglet Mix façon logiciel DJ : formes d’onde zoomées qui défilent, molettes, table de mix centrale avec boutons rotatifs, faders et vumètres', 'Pads en caoutchouc sur chaque platine : repères, boucles, effets à maintenir (écho, réverb, filtres, gate, roll, sans basses, frein) et sampler (sirènes, corne… et tes sons perso)', 'Télécommande sur téléphone : scanne un QR code et pilote platines, crossfader, Auto-DJ, pads et chargement des morceaux depuis le canapé']],
   ['2.9.1', '30/10/2026', ['Correction : YT MP3 ne se bloque plus pendant le choix d\'un dossier (la musique continue de jouer)', 'Correction : « Relancer YT MP3 » remplace un moteur bloqué au lieu de démarrer à côté sans être retrouvé', 'La lecture d\'un très gros dossier pour une mixtape est limitée pour rester rapide', 'Journal du moteur (fichier moteur.log) pour diagnostiquer un éventuel plantage']],
   ['2.9', '26/10/2026', ['Onglet Mix : deux vraies platines vinyle qui tournent avec la musique, la pochette du morceau au centre du disque', 'Bras de lecture qui se pose et avance sur le disque, fader de pitch, bouton START et petit écran rétro (BPM, temps restant, tonalité)', 'Fais tourner le disque à la main pour te déplacer dans le morceau']],
@@ -1586,14 +1605,30 @@ function djFxOff(d, k){
   }
 }
 // Sampler : sons sound system + sons perso, joués dans la sortie salle (et donc dans l'enregistrement du mix)
-let djSmpList = [];
-async function djSmpLoad(){ try { const r = await api('/api/mxsounds', {}); djSmpList = (r.sounds || []).slice(0, 8); djSmpRender(); } catch {} }
+let djSmpList = [], djSmpTimer = null;
+async function djSmpLoad(){
+  try {
+    const r = await api('/api/mxsounds', {}); djSmpList = r.sounds || []; djSmpRender();
+    clearTimeout(djSmpTimer); if (r.voices === 'preparation') djSmpTimer = setTimeout(() => { djSmpLoad(); if (typeof mxSoundsLoad === 'function' && !$('#v-mx').hidden) mxSoundsLoad(); }, 4000);
+  } catch {}
+}
 const SMP_COL = ['#ff3b6b', '#f97316', '#facc15', '#22c55e', '#06b6d4', '#8b5cf6', '#ec4899', '#a3a3a3'];
+DJ.bank = 0;
 function djSmpRender(){
+  const banks = Math.max(1, Math.ceil(djSmpList.length / 7));
+  if (DJ.bank >= banks) DJ.bank = 0;
+  const page = djSmpList.slice(DJ.bank * 7, DJ.bank * 7 + 7);
   document.querySelectorAll('.dk-pads[data-page="smp"]').forEach(p => {
-    p.innerHTML = Array.from({ length: 8 }, (_, i) => { const x = djSmpList[i]; return x ? `<button class="pad ${DJ.smp[x.id] && DJ.smp[x.id].src ? 'on' : ''}" data-smp="${esc(x.id)}" style="--pc:${SMP_COL[i]}" title="Appuie pour jouer, ré-appuie pour arrêter">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : ''}</button>` : `<button class="pad" disabled style="opacity:.35" title="Ajoute tes sons dans le dossier « Sons perso » (onglet Mixtape)">—</button>`; }).join('');
+    p.innerHTML = `<div class="smpbanks">${Array.from({ length: banks }, (_, i) => `<button type="button" data-bank="${i}" class="${i === DJ.bank ? 'on' : ''}">BANQUE ${i + 1}</button>`).join('')}</div>`
+      + page.map((x, i) => `<button class="pad ${DJ.smp[x.id] && DJ.smp[x.id].src ? 'on' : ''}" data-smp="${esc(x.id)}" style="--pc:${SMP_COL[(DJ.bank * 7 + i) % 8]}" title="Appuie pour jouer, ré-appuie pour arrêter">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : x.voice ? '<small>voix</small>' : ''}</button>`).join('')
+      + Array.from({ length: 7 - page.length }, () => '<button class="pad" disabled style="opacity:.3">—</button>').join('')
+      + `<button class="pad" data-voixrec style="--pc:#ef4444" title="Enregistre ta propre voix (« Pull up my selecta ! ») avec les effets sound system">🎤 MA VOIX</button>`;
   });
 }
+document.addEventListener('click', e => {
+  const b = e.target.closest('.smpbanks [data-bank]'); if (b) { DJ.bank = +b.dataset.bank; djSmpRender(); return; }
+  if (e.target.closest('[data-voixrec]')) voixOpen();
+});
 async function djSmp(id){
   djCtx(); djPauseMain();
   const s = DJ.smp[id] || (DJ.smp[id] = {});
@@ -3053,7 +3088,7 @@ function mxSort(){
 }
 
 /* --- Plan de la mixtape : segments, tempos, placements, effets --- */
-const FXLEAD = { sirene: 1.6, montante: 1.5 };
+const FXLEAD = { sirene: 1.6, montante: 1.5, rewind: 1.2, tonnerre: 0.4 };
 function mxSegLen(c, s){   // durée de sortie de la source c.in → s
   let acc = 0;
   for (let k = 0; k < c.segs.length; k++) {
@@ -3118,7 +3153,9 @@ function mxPlan(){
   const clips = [], chapters = [], marks = [];
   const fxClip = (id, at) => { if (!id) return; clips.push({ src: { kind: 's', id }, at: Math.max(0, at - (FXLEAD[id] || 0)), gain: fxv }); };
   let fxn = 0;
-  const autoFx = st => st === 'fade' ? ['sirene', 'corne', 'montante', 'laser'][fxn++ % 4] : st === 'rewind' ? ['bombe', 'corne'][fxn++ % 2] : st === 'echo' ? 'laser' : 'bombe';
+  const have = id => mxSounds.some(x => x.id === id);
+  const rot = arr => { const a = arr.filter(have); return a.length ? a[fxn++ % a.length] : ''; };
+  const autoFx = st => st === 'fade' ? rot(['sirene', 'corne', 'montante', 'gamelles', 'laser', 'voix-bigup', 'sifflet', 'voix-sound']) : st === 'rewind' ? rot(['voix-pullup', 'bombe', 'voix-wheelup', 'gunshot', 'corne']) : st === 'echo' ? rot(['laser', 'voix-forward', 'sifflet']) : rot(['bombe', 'boom', 'gunshot']);
   const pick = tr => tr.fx === 'auto' ? (MX.opts.fx === 'none' ? '' : autoFx(tr.style)) : tr.fx;
   let at = 0;
   T.forEach((t, i) => {
@@ -3207,8 +3244,9 @@ function mxSoundOpts(sel, withAuto){
     + mxSounds.map(x => `<option value="${esc(x.id)}" ${sel === x.id ? 'selected' : ''}>${esc(x.label)}${x.user ? ' (perso)' : ''}</option>`).join('');
 }
 async function mxSoundsLoad(){
-  try { const r = await api('/api/mxsounds', {}); mxSounds = r.sounds || []; } catch { return; }
-  $('#mxsounds').innerHTML = mxSounds.map(x => `<button class="mxsnd ${x.user ? 'user' : ''}" data-snd="${esc(x.id)}">${PLAY_IC}${esc(x.label)}</button>`).join('');
+  let r; try { r = await api('/api/mxsounds', {}); mxSounds = r.sounds || []; } catch { return; }
+  if (r.voices === 'preparation') setTimeout(() => { if (!$('#v-mx').hidden) mxSoundsLoad(); }, 4000);
+  $('#mxsounds').innerHTML = mxSounds.map(x => `<button class="mxsnd ${x.user ? 'user' : ''}" data-snd="${esc(x.id)}">${PLAY_IC}${esc(x.voice ? '« ' + x.label + ' »' : x.label)}</button>`).join('');
   $('#mxintro').innerHTML = mxSoundOpts(MX.opts.intro, false);
   mxKey = ''; mxRender();
 }
@@ -3426,7 +3464,7 @@ function telStatus(){
   return {
     t: Date.now(), xf: DJ.xf, mix: !!DJ.mix, auto: !!DJ.auto, next: djMixTarget() ? 'B' : 'A', msg: telMsg, libv: telLibV,
     decks: DJ.d.map(d => { const x = d.id && byId(d.id); return { id: d.id, title: x ? x.title : '', artist: x ? x.uploader : '', cover: x ? coverUrl(x.vid, x.thumb) : '', bpm: d.bpm ? d.bpm * (d.el.playbackRate || 1) : 0, key: d.key && d.key.cam || '', playing: !d.el.paused, cur: d.el.currentTime || 0, dur: d.el.duration || 0, sync: !!d.sync, vol: d.vol }; }),
-    fx: PAD_FX, smp: djSmpList.map((x, i) => ({ id: x.id, label: x.label, c: SMP_COL[i], on: !!(DJ.smp[x.id] && DJ.smp[x.id].src) }))
+    fx: PAD_FX, smp: djSmpList.map((x, i) => ({ id: x.id, label: x.label, c: SMP_COL[i % 8], on: !!(DJ.smp[x.id] && DJ.smp[x.id].src) }))
   };
 }
 function telLib(){
@@ -3481,6 +3519,59 @@ async function telTick(){
   telBusy = false;
 }
 setInterval(telTick, 200);
+
+
+/* ===================== Enregistrer sa voix (micro) ===================== */
+const VX = { rec: null, stream: null, t0: 0, timer: null, has: false, fx: 'sound', audio: new Audio() };
+function voixOpen(){ $('#voixdlg').classList.add('show'); }
+function voixUi(){
+  $('#vxbtn').classList.toggle('on', !!VX.rec);
+  $('#vxbtn').textContent = VX.rec ? '■ STOP' : '● ENREGISTRER';
+  $('#vxplay').disabled = !VX.has || !!VX.rec; $('#vxkeep').disabled = !VX.has || !!VX.rec;
+}
+async function voixStart(){
+  try { VX.stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true } }); }
+  catch { toast('Micro introuvable ou refusé : autorise le micro pour YT MP3', 'err'); return; }
+  const chunks = [], mr = new MediaRecorder(VX.stream, { mimeType: 'audio/webm;codecs=opus' });
+  const ac = new (window.AudioContext || window.webkitAudioContext)(), an = ac.createAnalyser(); an.fftSize = 512; ac.createMediaStreamSource(VX.stream).connect(an);
+  const buf = new Float32Array(an.fftSize);
+  mr.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+  mr.onstop = async () => {
+    VX.stream.getTracks().forEach(t => t.stop()); ac.close(); clearInterval(VX.timer); $('#vxlvl').style.width = '0';
+    VX.rec = null; voixUi(); $('#vxt').textContent = 'Préparation…';
+    try {
+      const r = await (await fetch('/api/voixrec?preset=' + VX.fx, { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: new Blob(chunks, { type: 'audio/webm' }) })).json();
+      if (r.error) { toast(r.error, 'err'); $('#vxt').textContent = 'Réessaie'; return; }
+      VX.has = true; voixUi(); $('#vxt').textContent = 'Écoute le résultat, change d’effet si tu veux, puis garde-le'; voixPlay();
+    } catch { toast('Envoi impossible', 'err'); }
+  };
+  mr.start(250); VX.rec = mr; VX.t0 = performance.now(); voixUi();
+  VX.timer = setInterval(() => {
+    an.getFloatTimeDomainData(buf); let m = 0; for (const v of buf) m = Math.max(m, Math.abs(v));
+    $('#vxlvl').style.width = Math.min(100, m * 130) + '%';
+    const el = (performance.now() - VX.t0) / 1000; $('#vxt').textContent = el.toFixed(1).replace('.', ',') + ' s';
+    if (el >= 15 && VX.rec) VX.rec.stop();
+  }, 50);
+}
+function voixPlay(){ djPauseAll(); djPauseMain(); VX.audio.src = '/son/apercu?n=' + Date.now(); VX.audio.play().catch(() => {}); }
+$('#vxbtn').onclick = () => { if (VX.rec) VX.rec.stop(); else voixStart(); };
+$('#vxplay').onclick = voixPlay;
+$('#vxclose').onclick = () => { if (VX.rec) VX.rec.stop(); VX.audio.pause(); $('#voixdlg').classList.remove('show'); };
+$('#vxfx').onclick = async e => {
+  const b = e.target.closest('button'); if (!b) return;
+  VX.fx = b.dataset.v; $('#vxfx').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  if (!VX.has) return;
+  try { const r = await api('/api/voixfx', { preset: VX.fx }); if (r.error) toast(r.error, 'err'); else voixPlay(); } catch {}
+};
+$('#vxkeep').onclick = async () => {
+  try {
+    const r = await api('/api/voixkeep', { name: $('#vxname').value.trim() || 'Ma voix' });
+    if (r.error) return toast(r.error, 'err');
+    toast('Son ajouté au sampler et à la Mixtape', 'ok'); VX.has = false; voixUi(); $('#vxname').value = ''; $('#vxt').textContent = '15 secondes maximum';
+    djSmpList = r.sounds || djSmpList; DJ.bank = Math.max(0, Math.ceil(djSmpList.length / 7) - 1); djSmpRender();
+    if (typeof mxSoundsLoad === 'function') mxSoundsLoad();
+  } catch(err){ toast(err.message, 'err'); }
+};
 
 /* --- Notifications de fin --- */
 let known = null;
@@ -4886,20 +4977,102 @@ $Sounds = [ordered]@{
     corne    = @{ label = 'Corne'; src = 'aevalsrc=st(1\,ld(1)+2*PI*(466*(1-0.03*mod(t\,0.25)))/44100)\;st(2\,ld(2)+2*PI*587/44100)\;st(3\,ld(3)+2*PI*698/44100)\;0.22*tanh(2.2*((mod(ld(1)/(2*PI)\,1)*2-1)+(mod(ld(2)/(2*PI)\,1)*2-1)*0.8+(mod(ld(3)/(2*PI)\,1)*2-1)*0.6))*(between(t\,0\,0.17)+between(t\,0.24\,0.41)+between(t\,0.48\,1.45)*min(1\,(1.45-t)*6)):d=1.6:s=44100'; af = 'lowpass=f=4200,aecho=0.7:0.4:120:0.25' }
     laser    = @{ label = 'Laser'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(180+3200*exp(-14*mod(t\,0.21)))/44100)\;0.35*sin(ld(0))*exp(-6*mod(t\,0.21))*lt(t\,0.84):d=1.2:s=44100'; af = 'aecho=0.6:0.5:210:0.3' }
     bombe    = @{ label = 'Bombe'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(30+110*exp(-3*t))/44100)\;(0.75*sin(ld(0))+0.5*(random(1)*2-1)*exp(-5*t))*exp(-1.6*t)*min(1\,t*200):d=2.6:s=44100'; af = 'lowpass=f=900,alimiter=limit=0.9' }
+    gamelles = @{ label = 'Gamelles'; src = 'aevalsrc=st(0\,mod(t\,0.17))\;st(2\,floor(t/0.17))\;st(1\,if(eq(mod(ld(2)\,3)\,2)\,790\,if(eq(mod(ld(2)\,4)\,3)\,610\,515)))\;((sin(2*PI*ld(1)*ld(0))+0.7*sin(2*PI*ld(1)*1.593*ld(0))+0.55*sin(2*PI*ld(1)*2.135*ld(0))+0.4*sin(2*PI*ld(1)*2.653*ld(0))+0.3*sin(2*PI*ld(1)*3.159*ld(0)))*exp(-13*ld(0))*0.22+(random(9)*2-1)*exp(-150*ld(0))*0.35)*(0.65+0.35*eq(mod(ld(2)\,2)\,0))*lt(t\,2.2):d=2.5:s=44100'; af = 'highpass=f=180,aecho=0.6:0.4:45|90:0.35|0.2' }
+    foule    = @{ label = 'Gamelles (foule)'; src = 'aevalsrc=st(0\,mod(t\,0.13))\;st(1\,560)\;st(3\,(sin(2*PI*ld(1)*ld(0))+0.7*sin(2*PI*ld(1)*1.593*ld(0))+0.55*sin(2*PI*ld(1)*2.135*ld(0))+0.4*sin(2*PI*ld(1)*2.653*ld(0))+0.3*sin(2*PI*ld(1)*3.159*ld(0)))*exp(-13*ld(0))*0.22+(random(9)*2-1)*exp(-150*ld(0))*0.35)\;st(0\,mod(t+0.05\,0.19))\;st(1\,830)\;st(4\,(sin(2*PI*ld(1)*ld(0))+0.7*sin(2*PI*ld(1)*1.593*ld(0))+0.55*sin(2*PI*ld(1)*2.135*ld(0))+0.4*sin(2*PI*ld(1)*2.653*ld(0))+0.3*sin(2*PI*ld(1)*3.159*ld(0)))*exp(-13*ld(0))*0.22+(random(9)*2-1)*exp(-150*ld(0))*0.35)\;st(0\,mod(t+0.09\,0.23))\;st(1\,430)\;st(5\,(sin(2*PI*ld(1)*ld(0))+0.7*sin(2*PI*ld(1)*1.593*ld(0))+0.55*sin(2*PI*ld(1)*2.135*ld(0))+0.4*sin(2*PI*ld(1)*2.653*ld(0))+0.3*sin(2*PI*ld(1)*3.159*ld(0)))*exp(-13*ld(0))*0.22+(random(9)*2-1)*exp(-150*ld(0))*0.35)\;(ld(3)+ld(4)*0.8+ld(5)*0.9)*0.7*min(1\,(3-t)*2):d=3:s=44100'; af = 'highpass=f=160,aecho=0.7:0.5:60|130:0.4|0.25' }
+    sifflet  = @{ label = 'Sifflet'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(2950+90*sin(2*PI*31*t))/44100)\;0.35*sin(ld(0))*(0.65+0.35*sin(2*PI*27*t))*(between(t\,0\,0.16)+between(t\,0.24\,0.4)+between(t\,0.48\,1.25)*min(1\,(1.25-t)*10)):d=1.4:s=44100'; af = 'highpass=f=1500' }
+    gunshot  = @{ label = 'Gunshot'; src = 'aevalsrc=st(0\,mod(t\,0.42))\;lt(t\,1.26)*((random(9)*2-1)*exp(-22*ld(0))*0.9+sin(2*PI*(60+90*exp(-30*ld(0)))*ld(0))*exp(-12*ld(0))*0.8):d=2.6:s=44100'; af = 'lowpass=f=5000,aecho=0.8:0.6:70|160|330:0.45|0.3|0.18' }
+    brume    = @{ label = 'Corne de brume'; src = 'aevalsrc=st(1\,ld(1)+2*PI*98/44100)\;st(2\,ld(2)+2*PI*147.5/44100)\;0.3*tanh(1.8*((mod(ld(1)/(2*PI)\,1)*2-1)+0.7*(mod(ld(2)/(2*PI)\,1)*2-1)))*min(1\,t*3)*min(1\,(2.6-t)*2):d=2.6:s=44100'; af = 'lowpass=f=1400,aecho=0.8:0.5:250:0.3' }
+    rewind   = @{ label = 'Rewind'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(140*pow(2\,4.2*t/1.3))/44100)\;lt(t\,1.3)*(0.3*tanh(3*sin(ld(0)))+0.25*(random(9)*2-1)*(0.5+0.5*sin(ld(0)*0.25)))*min(1\,t*12)*min(1\,(1.3-t)*8):d=1.5:s=44100'; af = 'bandpass=f=1800:width_type=q:w=0.5' }
+    tonnerre = @{ label = 'Tonnerre'; src = 'aevalsrc=(random(9)*2-1)*(exp(-9*t)*1.2+0.6*exp(-0.9*t)*(0.6+0.4*sin(2*PI*1.7*t)*sin(2*PI*0.6*t))):d=4:s=44100'; af = 'lowpass=f=900,lowpass=f=600,aecho=0.8:0.7:120|260:0.4|0.3' }
+    boom     = @{ label = 'Boom'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(38+95*exp(-4*t))/44100)\;tanh(2.2*sin(ld(0)))*exp(-1.3*t)*min(1\,t*300)*0.8+(random(9)*2-1)*exp(-90*t)*0.4:d=2.4:s=44100'; af = 'lowpass=f=2500' }
+    cloche   = @{ label = 'Cloche'; src = 'aevalsrc=st(0\,mod(t\,0.3))\;lt(t\,1.2)*0.25*(tanh(4*sin(2*PI*545*ld(0)))+0.8*tanh(4*sin(2*PI*815*ld(0))))*exp(-11*ld(0)):d=1.6:s=44100'; af = 'bandpass=f=900:width_type=q:w=0.6,aecho=0.6:0.4:80:0.25' }
 }
 $AudioExt = @('.mp3', '.m4a', '.aac', '.wav', '.flac', '.ogg', '.opus', '.wma')
 function Get-UserSoundsDir { return (Join-Path (Get-Out) 'Sons perso') }
+# Fabrication des bruitages en arrière-plan (jamais dans le moteur : il ne doit pas se figer)
+$script:sndJob = $null
 function Initialize-Sounds {
     if (-not (Test-Path -LiteralPath $SonsDir)) { [void](New-Item -ItemType Directory -Path $SonsDir) }
-    foreach ($k in $Sounds.Keys) {
-        $f = Join-Path $SonsDir "$k.wav"
-        if (Test-Path -LiteralPath $f) { continue }
-        & $Ffmpeg -v error -y -f lavfi -i $Sounds[$k].src -af ($Sounds[$k].af + ',apad=pad_dur=0.5,loudnorm=I=-16:TP=-1.5:LRA=20,aresample=44100') -ac 2 -c:a pcm_s16le $f 2>$null
+    if ($script:sndJob) { return }
+    $todo = @(foreach ($k in $Sounds.Keys) { if (-not (Test-Path -LiteralPath (Join-Path $SonsDir "$k.wav"))) { , @($k, $Sounds[$k].src, $Sounds[$k].af) } })
+    if (-not $todo.Count) { return }
+    $script:sndJob = Start-Job -ArgumentList $Ffmpeg, $SonsDir, (ConvertTo-Json -InputObject $todo -Compress) -ScriptBlock {
+        param($ffmpeg, $dir, $json)
+        $list = $json | ConvertFrom-Json
+        foreach ($it in $list) {
+            $tmp = Join-Path $dir ($it[0] + '.tmp.wav')
+            & $ffmpeg -nostdin -v error -y -f lavfi -i $it[1] -af ($it[2] + ',apad=pad_dur=0.5,loudnorm=I=-16:TP=-1.5:LRA=20,aresample=44100') -ac 2 -c:a pcm_s16le $tmp 2>$null
+            if (Test-Path -LiteralPath $tmp) { Move-Item -LiteralPath $tmp -Destination (Join-Path $dir ($it[0] + '.wav')) -Force }
+        }
     }
 }
+function Update-SoundGen { $j = $script:sndJob; if ($j -and $j.State -ne 'Running') { Remove-Job $j -Force -ErrorAction SilentlyContinue; $script:sndJob = $null } }
+# Traitements « sound system » pour les voix (voix Windows ou ta voix au micro)
+$VoiceFx = [ordered]@{
+    sound = 'asetrate=44100*0.9,aresample=44100,highpass=f=110,acompressor=threshold=-22dB:ratio=4:attack=5:release=90,volume=7dB,asoftclip=type=tanh,aecho=0.8:0.72:330|660:0.45|0.28,apad=pad_dur=1.3'
+    megaphone = 'highpass=f=450,lowpass=f=3300,acompressor=threshold=-24dB:ratio=6:attack=3:release=60,volume=12dB,asoftclip=type=hard,aecho=0.7:0.5:90|180:0.35|0.2,apad=pad_dur=0.6'
+    grosse = 'asetrate=44100*0.8,aresample=44100,highpass=f=80,acompressor=threshold=-22dB:ratio=3:attack=8:release=120,volume=5dB,aecho=0.8:0.85:60|140|260|420:0.5|0.4|0.3|0.2,apad=pad_dur=1.2'
+    naturel = 'highpass=f=80,acompressor=threshold=-24dB:ratio=3:attack=5:release=90,apad=pad_dur=0.3'
+}
+function Get-VoiceChain([string]$preset) {
+    $fx = $VoiceFx[$preset]; if (-not $fx) { $fx = $VoiceFx['sound'] }
+    $trim = 'silenceremove=start_periods=1:start_threshold=-42dB,areverse,silenceremove=start_periods=1:start_threshold=-42dB,areverse'
+    return "$trim,$fx,loudnorm=I=-15:TP=-1.2:LRA=15,aresample=44100"
+}
+# Cris d'ambiance créés avec la voix de Windows (anglais si une voix anglaise est installée, sinon écriture phonétique)
+$Shouts = @(
+    @('voix-pullup', 'Pull up selecta!', 'Pull up! Pull up, selecta!', 'Poule eupe ! Poule eupe, sélecta !'),
+    @('voix-wheelup', 'Wheel up!', 'Wheel up! Wheel up!', 'Ouil eupe ! Ouil eupe !'),
+    @('voix-rewind', 'Rewind!', 'Rewind, selecta! Come again!', 'Riwaïnde, sélecta ! Keum eu-guène !'),
+    @('voix-bigup', 'Big up massive!', 'Big up all the massive!', 'Bigue eupe ol ze massive !'),
+    @('voix-forward', 'Forward!', 'Forward! Forward!', 'Forouarde ! Forouarde !'),
+    @('voix-sound', 'Sound system!', 'Sound system, inna di dance!', 'Saounde sistème, ina di danse !')
+)
+$script:voiceJob = $null; $script:voiceState = ''
+function Start-VoiceGen {
+    if ($script:voiceJob -or (Test-Path -LiteralPath (Join-Path $SonsDir 'voix-ok.txt')) -or $script:voiceState -eq 'erreur') { return }
+    $items = ConvertTo-Json -InputObject @($Shouts | ForEach-Object { , @($_[0], $_[2], $_[3]) }) -Compress
+    $script:voiceState = 'preparation'
+    $script:voiceJob = Start-Job -ArgumentList $Ffmpeg, $SonsDir, $items, (Get-VoiceChain 'sound') -ScriptBlock {
+        param($ffmpeg, $dir, $itemsJson, $chain)
+        Add-Type -AssemblyName System.Speech
+        $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+        $vs = @($s.GetInstalledVoices() | Where-Object { $_.Enabled } | ForEach-Object { $_.VoiceInfo })
+        if (-not $vs.Count) { throw 'Aucune voix Windows installée' }
+        $v = @($vs | Where-Object { $_.Culture.Name -like 'en-*' } | Sort-Object { [int]($_.Gender -ne 'Male') })[0]
+        $fr = -not $v
+        if ($fr) { $v = @($vs | Sort-Object { [int]($_.Gender -ne 'Male') })[0] }
+        $s.SelectVoice($v.Name); $s.Rate = 1; $s.Volume = 100
+        $list = $itemsJson | ConvertFrom-Json   # (PowerShell 5.1 : ne pas entourer de @(), le tableau resterait groupé)
+        foreach ($it in $list) {
+            $raw = Join-Path $dir ($it[0] + '-brut.wav')
+            $s.SetOutputToWaveFile($raw); [void]$s.Speak($(if ($fr) { $it[2] } else { $it[1] })); $s.SetOutputToNull()
+            & $ffmpeg -nostdin -v error -y -i $raw -af $chain -ac 2 -c:a pcm_s16le (Join-Path $dir ($it[0] + '.wav')) 2>$null
+            Remove-Item -LiteralPath $raw -Force -ErrorAction SilentlyContinue
+        }
+        Set-Content -LiteralPath (Join-Path $dir 'voix-ok.txt') -Value $v.Name -Encoding UTF8
+    }
+}
+function Update-VoiceGen {
+    $j = $script:voiceJob; if (-not $j -or $j.State -eq 'Running') { return }
+    if ($j.State -eq 'Completed') { $script:voiceState = 'pret' }
+    else { $script:voiceState = 'erreur'; try { Write-Log ('Voix Windows indisponibles : ' + $j.ChildJobs[0].JobStateInfo.Reason.Message) } catch {} }
+    Remove-Job $j -Force -ErrorAction SilentlyContinue; $script:voiceJob = $null
+}
+# Ta voix au micro : enregistrement brut gardé pour pouvoir changer d'effet avant de l'enregistrer
+function Invoke-VoiceFx([string]$preset) {
+    $raw = Join-Path $Data 'voix-brute.webm'; $out = Join-Path $Data 'voix-apercu.wav'
+    if (-not (Test-Path -LiteralPath $raw)) { return 'Aucun enregistrement' }
+    & $Ffmpeg -nostdin -v error -y -i $raw -vn -af (Get-VoiceChain $preset) -ac 2 -c:a pcm_s16le $out 2>$null
+    if (-not (Test-Path -LiteralPath $out) -or (Get-Item -LiteralPath $out).Length -lt 2000) { return 'Rien d''audible dans l''enregistrement : parle plus près du micro' }
+    return ''
+}
+
 function Get-SoundList {
     Initialize-Sounds
-    $l = @(foreach ($k in $Sounds.Keys) { @{ id = $k; label = $Sounds[$k].label; user = $false } })
+    Start-VoiceGen
+    $l = @(foreach ($k in $Sounds.Keys) { if (Test-Path -LiteralPath (Join-Path $SonsDir "$k.wav")) { @{ id = $k; label = $Sounds[$k].label; user = $false } } })
+    foreach ($v in $Shouts) { if (Test-Path -LiteralPath (Join-Path $SonsDir ($v[0] + '.wav'))) { $l += @{ id = $v[0]; label = $v[1]; user = $false; voice = $true } } }
     $ud = Get-UserSoundsDir
     if (Test-Path -LiteralPath $ud) {
         $l += @(Get-ChildItem -LiteralPath $ud -File | Where-Object { $AudioExt -contains $_.Extension.ToLower() } | Sort-Object Name |
@@ -4909,7 +5082,9 @@ function Get-SoundList {
 }
 function Get-SoundPath([string]$sid) {
     if ($sid.StartsWith('u:')) { $n = $sid.Substring(2); if ($n -match '[\\/:]' ) { return $null }; return (Join-Path (Get-UserSoundsDir) $n) }
-    if ($Sounds.Contains($sid)) { Initialize-Sounds; return (Join-Path $SonsDir "$sid.wav") }
+    if ($Sounds.Contains($sid)) { return (Join-Path $SonsDir "$sid.wav") }
+    if ($sid -match '^voix-[a-z]+$') { return (Join-Path $SonsDir "$sid.wav") }
+    if ($sid -eq 'apercu') { return (Join-Path $Data 'voix-apercu.wav') }
     return $null
 }
 
@@ -5447,7 +5622,25 @@ function Invoke-Request($ctx) {
             foreach ($pth in @($body.paths)) { if ($pth -and (Test-Path -LiteralPath ([string]$pth))) { [void]$res.Add((Register-MxFile (Get-Item -LiteralPath ([string]$pth)))) } }
             Send-Json $ctx @{ files = @($res) }; return
         }
-        '/api/mxsounds' { Send-Json $ctx @{ sounds = @(Get-SoundList); userDir = (Get-UserSoundsDir) }; return }
+        '/api/mxsounds' { $l = @(Get-SoundList); Send-Json $ctx @{ sounds = $l; userDir = (Get-UserSoundsDir); voices = $(if ($script:sndJob) { 'preparation' } else { $script:voiceState }) }; return }
+        '/api/voixrec' {
+            if ($ctx.Length -lt 800) { Send-Json $ctx @{ error = 'Enregistrement vide' }; return }
+            $fs = [IO.File]::Create((Join-Path $Data 'voix-brute.webm')); try { $fs.Write($ctx.Bytes, 0, [int]$ctx.Length) } finally { $fs.Close() }
+            $pm = [regex]::Match([string]$ctx.Query, 'preset=([a-z]+)')
+            $err = Invoke-VoiceFx $(if ($pm.Success) { $pm.Groups[1].Value } else { 'sound' })
+            Send-Json $ctx @{ ok = -not $err; error = $err }; return
+        }
+        '/api/voixfx' { $err = Invoke-VoiceFx ([string]$body.preset); Send-Json $ctx @{ ok = -not $err; error = $err }; return }
+        '/api/voixkeep' {
+            $src = Join-Path $Data 'voix-apercu.wav'
+            if (-not (Test-Path -LiteralPath $src)) { Send-Json $ctx @{ error = 'Aucun enregistrement' }; return }
+            $ud = Get-UserSoundsDir; if (-not (Test-Path -LiteralPath $ud)) { [void](New-Item -ItemType Directory -Path $ud -Force) }
+            $name = Get-SafeName ([string]$body.name); if (-not $name) { $name = 'Ma voix' }
+            $dst = Join-Path $ud ($name + '.wav'); $k = 2
+            while (Test-Path -LiteralPath $dst) { $dst = Join-Path $ud ("$name ($k).wav"); $k++ }
+            Copy-Item -LiteralPath $src -Destination $dst
+            Send-Json $ctx @{ ok = $true; id = ('u:' + [IO.Path]::GetFileName($dst)); sounds = @(Get-SoundList) }; return
+        }
         '/api/mxuserdir' {
             $ud = Get-UserSoundsDir
             if (-not (Test-Path -LiteralPath $ud)) { [void](New-Item -ItemType Directory -Path $ud -Force) }
@@ -5478,6 +5671,7 @@ if ($Silent -and $Port -ne 8765) { $Silent = $false }
 Start-Setup
 Start-UpdateCheck
 if ($script:settings.remote) { Start-Remote }
+try { Initialize-Sounds; Start-VoiceGen } catch {}
 Open-Window
 
 $tick = [Diagnostics.Stopwatch]::StartNew()
@@ -5491,7 +5685,7 @@ while ($true) {
                 $ctx = Read-HttpRequest $client
                 if ($ctx) {
                     try { Invoke-Request $ctx }
-                    catch { Write-Log ("Erreur sur $($ctx.Path) : " + (Format-Err $_)); try { Send $ctx 500 (ConvertTo-Json @{ error = $_.Exception.Message } -Compress) 'application/json' } catch {} }
+                    catch { if ($ctx.Path -notmatch '^/(media|mxmedia|son|mxapercu)') { Write-Log ("Erreur sur $($ctx.Path) : " + (Format-Err $_)) }; try { Send $ctx 500 (ConvertTo-Json @{ error = $_.Exception.Message } -Compress) 'application/json' } catch {} }
                 }
             } catch {}
             finally { try { $client.Close() } catch {} }
@@ -5525,6 +5719,8 @@ while ($true) {
         try { Update-Export } catch { Write-LogOnce 'Update-Export' $_ }
         try { Update-Mx } catch { Write-LogOnce 'Update-Mx' $_ }
         try { Update-Pick } catch { Write-LogOnce 'Update-Pick' $_ }
+        try { Update-VoiceGen } catch { Write-LogOnce 'Update-VoiceGen' $_ }
+        try { Update-SoundGen } catch { Write-LogOnce 'Update-SoundGen' $_ }
         if ($CanSelfUpdate -and ($now - $script:lastUpdCheck).TotalSeconds -gt $UpdateEvery) { try { Start-UpdateCheck } catch {} }
         # Mise à jour programmée « à la fin des téléchargements » : on l'installe dès que tout est terminé
         if ($script:updateWhenIdle -and -not (Test-Busy)) {
