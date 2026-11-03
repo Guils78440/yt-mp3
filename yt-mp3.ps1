@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v3.3 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v3.4 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '3.3'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '3.4'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -442,6 +442,7 @@ body.dj-mode main{max-width:1360px}
 .smpbanks button.on{color:#fff;border-color:#4b5060}
 .smpbanks [data-bankadd]{margin-left:auto;color:#a3e635}
 .smpbanks [data-packimp]{color:#fbbf24}
+.smpbanks [data-voixrec]{color:#f87171}
 .dk-pads .pad.empty{color:#5b6070;font-size:18px;font-weight:400;background:#16181e;box-shadow:inset 0 0 0 1px #2a2e38,inset 0 2px 6px #0008}
 .dk-pads .pad.empty::before{display:none}
 .dk-pads .pad.empty:hover{color:#a1a1aa;box-shadow:inset 0 0 0 1px #4b5060}
@@ -1175,6 +1176,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['3.4', '03/11/2026', ['Sampler resserré : seuls les sons gardés sur les pads restent, sans emplacement vide, en banques de 8 pads (le bouton 🎤 MA VOIX passe à côté de + IMPORTER)', 'Bruitages intégrés réduits à Laser et Rewind ; les effets automatiques de la Mixtape utilisent tes sons du pack Dancehall']],
   ['3.3', '03/11/2026', ['Sampler à ta main : clic droit sur un pad pour l’écouter, changer de sample ou libérer l’emplacement ; clic droit (ou clic) sur un pad vide pour y ajouter n’importe quel son', '« + BANQUE » ajoute une page de pads vides ; ta disposition est gardée et suivie par la télécommande']],
   ['3.2', '03/11/2026', ['Import d’un pack de sons en un clic (fichier ZIP téléchargé, sons ou dossier) : extraction, volume harmonisé, rangement dans un dossier au nom du pack', 'Les sons perso peuvent être rangés en sous-dossiers (un par pack)']],
   ['3.1', '03/11/2026', ['9 nouveaux bruitages sound system : gamelles, gamelles de la foule, sifflet, gunshot, corne de brume, rewind, tonnerre, boom, cloche', 'Cris d’ambiance (« Pull up selecta! », « Wheel up! », « Rewind! », « Big up massive! »…) créés avec la voix de Windows et traités façon sound system', 'Enregistre ta propre voix au micro avec 4 effets (sound system, mégaphone, grosse voix, naturel) : elle rejoint le sampler et la Mixtape', 'Sampler en banques de pads (PC et téléphone)']],
@@ -1635,11 +1637,18 @@ async function djSmpLoad(){
 const SMP_COL = ['#ff3b6b', '#f97316', '#facc15', '#22c55e', '#06b6d4', '#8b5cf6', '#ec4899', '#a3a3a3'];
 DJ.bank = 0;
 const smpById = id => djSmpList.find(x => x.id === id);
-// Disposition des pads (gardée d'une soirée à l'autre) : 7 emplacements par banque + le pad MA VOIX.
+// Disposition des pads (gardée d'une soirée à l'autre) : 8 emplacements par banque.
 // Un son nouveau (import, micro…) prend le premier emplacement libre ; un emplacement libéré reste libre.
+const SMP_DEFAULT = ["laser", "rewind", "u:Dancehall DJ Sound Effects/Get Mad Now.wav", "u:Dancehall DJ Sound Effects/Gun Shots.wav", "u:Dancehall DJ Sound Effects/Gunshot-3.wav", "u:Dancehall DJ Sound Effects/Gunshots and Explosion.wav", "u:Dancehall DJ Sound Effects/Gunshots-2.wav", "u:Dancehall DJ Sound Effects/Hey Look Ya.wav", "u:Dancehall DJ Sound Effects/Hey.wav", "u:Dancehall DJ Sound Effects/Horn.wav", "u:Dancehall DJ Sound Effects/Iron Bang.wav", "u:Dancehall DJ Sound Effects/Laser Effect.wav", "u:Dancehall DJ Sound Effects/Laser Effect-2.wav", "u:Dancehall DJ Sound Effects/Laser Effect-3.wav", "u:Dancehall DJ Sound Effects/Laser Effect-4.wav", "u:Dancehall DJ Sound Effects/Laser Shot.wav", "u:Dancehall DJ Sound Effects/Laser Shot-2.wav", "u:Dancehall DJ Sound Effects/Laser Shot-3.wav", "u:Dancehall DJ Sound Effects/Laser Shot-5.wav", "u:Dancehall DJ Sound Effects/Multi-laser.wav", "u:Dancehall DJ Sound Effects/Pull U African.wav", "u:Dancehall DJ Sound Effects/Pull up.wav", "u:Dancehall DJ Sound Effects/Pull Up-2.wav", "u:Dancehall DJ Sound Effects/Siren.wav", "u:Dancehall DJ Sound Effects/Sound Bad.wav", "u:Dancehall DJ Sound Effects/Sound De Big Ting.wav", "u:Dancehall DJ Sound Effects/Vinyl Reverse.wav", "u:Dancehall DJ Sound Effects/Wheel and Come Again.wav", "u:Dancehall DJ Sound Effects/Whoosh.wav", "u:Dancehall DJ Sound Effects/Wicked.wav", "u:Dancehall DJ Sound Effects/Yeah Man.wav"];
 function smpLayout(){
   let L = LSJ.get('smplayout', null);
-  if (!L || !Array.isArray(L.slots)) L = { slots: [], known: [] };
+  if (!L || !Array.isArray(L.slots)) {
+    // Première fois : ta sélection (parmi les sons présents sur ce PC), puis les autres sons à la suite
+    const def = SMP_DEFAULT.filter(id => smpById(id)), rest = djSmpList.map(x => x.id).filter(id => !def.includes(id));
+    L = { slots: def.length ? def : rest, known: djSmpList.map(x => x.id), v: 3 };
+    if (!djSmpFull) { const t = { slots: L.slots.slice(), known: [] }; while (!t.slots.length || t.slots.length % 8) t.slots.push(null); return t; }   // liste pas encore complète : rien n'est enregistré
+  }
+  if (L.v !== 3) { L.slots = L.slots.filter(Boolean); L.v = 3; }   // ménage : les pads vides sont retirés, banques de 8
   const known = new Set(L.known);
   djSmpList.forEach(x => {
     if (known.has(x.id)) return;
@@ -1649,28 +1658,27 @@ function smpLayout(){
   });
   // Son disparu (fichier supprimé) : son emplacement redevient libre — seulement quand la liste est complète
   if (djSmpFull) L.slots = L.slots.map(id => id && smpById(id) ? id : null);
-  while (!L.slots.length || L.slots.length % 7) L.slots.push(null);
+  while (!L.slots.length || L.slots.length % 8) L.slots.push(null);
   LSJ.set('smplayout', L);
   return L;
 }
 function smpSave(L){ LSJ.set('smplayout', L); djSmpRender(); }
 function djSmpRender(){
-  const L = smpLayout(), banks = L.slots.length / 7;
+  const L = smpLayout(), banks = L.slots.length / 8;
   if (DJ.bank >= banks) DJ.bank = banks - 1;
   document.querySelectorAll('.dk-pads[data-page="smp"]').forEach(p => {
-    let h = `<div class="smpbanks">${Array.from({ length: banks }, (_, i) => `<button type="button" data-bank="${i}" class="${i === DJ.bank ? 'on' : ''}">BANQUE ${i + 1}</button>`).join('')}<button type="button" data-bankadd title="Ajouter une banque de pads vides">+ BANQUE</button><button type="button" data-packimp title="Importer un pack de sons (fichier ZIP téléchargé, ou des sons)">+ IMPORTER</button></div>`;
-    for (let k = 0; k < 7; k++) {
-      const slot = DJ.bank * 7 + k, x = smpById(L.slots[slot]);
+    let h = `<div class="smpbanks">${Array.from({ length: banks }, (_, i) => `<button type="button" data-bank="${i}" class="${i === DJ.bank ? 'on' : ''}">BANQUE ${i + 1}</button>`).join('')}<button type="button" data-bankadd title="Ajouter une banque de pads vides">+ BANQUE</button><button type="button" data-voixrec title="Enregistre ta propre voix (« Pull up my selecta ! ») avec les effets sound system">🎤 MA VOIX</button><button type="button" data-packimp title="Importer un pack de sons (fichier ZIP téléchargé, ou des sons)">+ IMPORTER</button></div>`;
+    for (let k = 0; k < 8; k++) {
+      const slot = DJ.bank * 8 + k, x = smpById(L.slots[slot]);
       h += x ? `<button class="pad ${DJ.smp[x.id] && DJ.smp[x.id].src ? 'on' : ''}" data-smp="${esc(x.id)}" data-slot="${slot}" style="--pc:${SMP_COL[slot % 8]}" title="Appuie pour jouer, ré-appuie pour arrêter · clic droit : changer ou libérer">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : x.voice ? '<small>voix</small>' : ''}</button>`
              : `<button class="pad empty" data-slot="${slot}" title="Emplacement libre · clic droit (ou clic) : ajouter un sample">+</button>`;
     }
-    h += `<button class="pad" data-voixrec style="--pc:#ef4444" title="Enregistre ta propre voix (« Pull up my selecta ! ») avec les effets sound system">🎤 MA VOIX</button>`;
     p.innerHTML = h;
   });
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('.smpbanks [data-bank]'); if (b) { DJ.bank = +b.dataset.bank; djSmpRender(); return; }
-  if (e.target.closest('.smpbanks [data-bankadd]')) { const L = smpLayout(); L.slots.push(...Array(7).fill(null)); DJ.bank = L.slots.length / 7 - 1; smpSave(L); toast(`Banque ${DJ.bank + 1} ajoutée : clic droit sur un pad pour y mettre un sample`); return; }
+  if (e.target.closest('.smpbanks [data-bankadd]')) { const L = smpLayout(); L.slots.push(...Array(8).fill(null)); DJ.bank = L.slots.length / 8 - 1; smpSave(L); toast(`Banque ${DJ.bank + 1} ajoutée : clic droit sur un pad pour y mettre un sample`); return; }
   const em = e.target.closest('.dk-pads .pad.empty'); if (em) { smpPick(+em.dataset.slot); return; }
   if (e.target.closest('[data-voixrec]')) voixOpen();
   if (!e.target.closest('#smpmenu')) smpMenuClose();
@@ -1699,14 +1707,14 @@ let smpSlot = -1, smpPrevA = new Audio();
 function smpPick(slot){ smpSlot = slot; $('#smpq').value = ''; smpPickRender(); $('#smpdlg').classList.add('show'); setTimeout(() => $('#smpq').focus(), 50); }
 function smpPickRender(){
   const q = $('#smpq').value.trim().toLowerCase(), L = smpLayout(), groups = {};
-  $('#smpdlgt').textContent = `Sample pour la banque ${Math.floor(smpSlot / 7) + 1}, pad ${smpSlot % 7 + 1}`;
+  $('#smpdlgt').textContent = `Sample pour la banque ${Math.floor(smpSlot / 8) + 1}, pad ${smpSlot % 8 + 1}`;
   djSmpList.filter(x => !q || x.label.toLowerCase().includes(q) || (x.pack || '').toLowerCase().includes(q)).forEach(x => {
     const g = x.user ? (x.pack || 'Mes sons') : x.voice ? 'Voix d’ambiance' : 'Bruitages YT MP3';
     (groups[g] = groups[g] || []).push(x);
   });
   $('#smplist').innerHTML = Object.keys(groups).map(g => `<div class="mxlh">${esc(g)} <em>${groups[g].length}</em></div>` + groups[g].map(x => {
     const used = L.slots.indexOf(x.id);
-    return `<div class="smprow"><button class="ib" data-smpprev="${esc(x.id)}" title="Écouter">${PLAY_IC}</button><span>${esc(x.label)}${used >= 0 ? `<em> · banque ${Math.floor(used / 7) + 1}, pad ${used % 7 + 1}</em>` : ''}</span><button class="btn-ghost sm2" data-smpset="${esc(x.id)}">Choisir</button></div>`;
+    return `<div class="smprow"><button class="ib" data-smpprev="${esc(x.id)}" title="Écouter">${PLAY_IC}</button><span>${esc(x.label)}${used >= 0 ? `<em> · banque ${Math.floor(used / 8) + 1}, pad ${used % 8 + 1}</em>` : ''}</span><button class="btn-ghost sm2" data-smpset="${esc(x.id)}">Choisir</button></div>`;
   }).join('')).join('') || '<div class="empty" style="padding:20px">Aucun son</div>';
 }
 $('#smpq').oninput = smpPickRender;
@@ -1717,7 +1725,7 @@ $('#smplist').addEventListener('click', e => {
   const L = smpLayout(), id = st.dataset.smpset, old = L.slots.indexOf(id);
   if (old >= 0 && old !== smpSlot) L.slots[old] = null;   // un son n'occupe qu'un pad : il est déplacé
   L.slots[smpSlot] = id; smpSave(L); smpPrevA.pause();
-  $('#smpdlg').classList.remove('show'); toast(`« ${smpById(id).label} » placé sur le pad ${smpSlot % 7 + 1} de la banque ${Math.floor(smpSlot / 7) + 1}`);
+  $('#smpdlg').classList.remove('show'); toast(`« ${smpById(id).label} » placé sur le pad ${smpSlot % 8 + 1} de la banque ${Math.floor(smpSlot / 8) + 1}`);
 });
 $('#smpclose').onclick = () => { smpPrevA.pause(); $('#smpdlg').classList.remove('show'); };
 async function djSmp(id){
@@ -3039,7 +3047,7 @@ function renderExport(x, force){
 
 
 /* ===================== Mode Mixtape ===================== */
-const MXDEF = { order: 'tempo', len: 16, dur: 'full', style: 'auto', fx: 'auto', fxVol: -6, title: '', intro: 'sirene' };
+const MXDEF = { order: 'tempo', len: 16, dur: 'full', style: 'auto', fx: 'auto', fxVol: -6, title: '', intro: 'u:Dancehall DJ Sound Effects/Sound De Big Ting.wav' };
 const MX = Object.assign({ items: [], tr: {} }, LSJ.get('mxproj', {}));
 MX.opts = Object.assign({}, MXDEF, MX.opts || {});
 const mxSave = () => LSJ.set('mxproj', { items: MX.items, opts: MX.opts, tr: MX.tr });
@@ -3243,11 +3251,15 @@ function mxPlan(){
     t.segs = ev; t.rIn = rIn; t.rOut = rOut;
   });
   const clips = [], chapters = [], marks = [];
-  const fxClip = (id, at) => { if (!id) return; clips.push({ src: { kind: 's', id }, at: Math.max(0, at - (FXLEAD[id] || 0)), gain: fxv }); };
+  const fxClip = (id, at) => { if (!id || !mxSounds.some(x => x.id === id)) return; clips.push({ src: { kind: 's', id }, at: Math.max(0, at - (FXLEAD[id] || 0)), gain: fxv }); };
   let fxn = 0;
   const have = id => mxSounds.some(x => x.id === id);
   const rot = arr => { const a = arr.filter(have); return a.length ? a[fxn++ % a.length] : ''; };
-  const autoFx = st => st === 'fade' ? rot(['sirene', 'corne', 'montante', 'gamelles', 'laser', 'voix-bigup', 'sifflet', 'voix-sound']) : st === 'rewind' ? rot(['voix-pullup', 'bombe', 'voix-wheelup', 'gunshot', 'corne']) : st === 'echo' ? rot(['laser', 'voix-forward', 'sifflet']) : rot(['bombe', 'boom', 'gunshot']);
+  const D = 'u:Dancehall DJ Sound Effects/';
+  const autoFx = st => st === 'fade' ? rot(['laser', D + 'Horn.wav', D + 'Siren.wav', D + 'Iron Bang.wav', D + 'Wicked.wav', D + 'Sound De Big Ting.wav', D + 'Yeah Man.wav'])
+    : st === 'rewind' ? rot([D + 'Pull up.wav', D + 'Wheel and Come Again.wav', D + 'Pull Up-2.wav', 'rewind', D + 'Pull U African.wav'])
+    : st === 'echo' ? rot(['laser', D + 'Laser Shot.wav', D + 'Whoosh.wav', D + 'Hey Look Ya.wav'])
+    : rot([D + 'Gunshots and Explosion.wav', D + 'Gunshot-3.wav', D + 'Gun Shots.wav', D + 'Sound Bad.wav']);
   const pick = tr => tr.fx === 'auto' ? (MX.opts.fx === 'none' ? '' : autoFx(tr.style)) : tr.fx;
   let at = 0;
   T.forEach((t, i) => {
@@ -3681,7 +3693,7 @@ $('#vxkeep').onclick = async () => {
     const r = await api('/api/voixkeep', { name: $('#vxname').value.trim() || 'Ma voix' });
     if (r.error) return toast(r.error, 'err');
     toast('Son ajouté au sampler et à la Mixtape', 'ok'); VX.has = false; voixUi(); $('#vxname').value = ''; $('#vxt').textContent = '15 secondes maximum';
-    djSmpList = r.sounds || djSmpList; DJ.bank = Math.max(0, Math.ceil(djSmpList.length / 7) - 1); djSmpRender();
+    djSmpList = r.sounds || djSmpList; djSmpRender(); { const L = smpLayout(), i = L.slots.indexOf(r.id); if (i >= 0) { DJ.bank = Math.floor(i / 8); djSmpRender(); } }
     if (typeof mxSoundsLoad === 'function') mxSoundsLoad();
   } catch(err){ toast(err.message, 'err'); }
 };
@@ -5089,21 +5101,10 @@ function Add-Urls($urls) {
 # =====================================================================
 $SonsDir = Join-Path $Data 'sons'
 # Effets synthétisés par YT MP3 (aucun sample extérieur) : source aevalsrc + traitement
+# Bruitages intégrés : uniquement ceux gardés sur les pads (les autres sons viennent de « Sons perso »)
 $Sounds = [ordered]@{
-    sirene   = @{ label = 'Sirène dub'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(620+420*sin(2*PI*2.4*t))/44100)\;0.32*tanh(3*sin(ld(0)))*min(1\,t*8)*min(1\,(3.2-t)*3):d=3.2:s=44100'; af = 'aecho=0.8:0.6:300|600:0.45|0.25,highpass=f=200' }
-    montante = @{ label = 'Sirène montante'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(260*pow(2\,2.6*mod(t\,0.62)/0.62))/44100)\;0.3*tanh(2.5*sin(ld(0)))*min(1\,t*10)*min(1\,(3.1-t)*3):d=3.1:s=44100'; af = 'aecho=0.8:0.55:310:0.4,highpass=f=150' }
-    corne    = @{ label = 'Corne'; src = 'aevalsrc=st(1\,ld(1)+2*PI*(466*(1-0.03*mod(t\,0.25)))/44100)\;st(2\,ld(2)+2*PI*587/44100)\;st(3\,ld(3)+2*PI*698/44100)\;0.22*tanh(2.2*((mod(ld(1)/(2*PI)\,1)*2-1)+(mod(ld(2)/(2*PI)\,1)*2-1)*0.8+(mod(ld(3)/(2*PI)\,1)*2-1)*0.6))*(between(t\,0\,0.17)+between(t\,0.24\,0.41)+between(t\,0.48\,1.45)*min(1\,(1.45-t)*6)):d=1.6:s=44100'; af = 'lowpass=f=4200,aecho=0.7:0.4:120:0.25' }
     laser    = @{ label = 'Laser'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(180+3200*exp(-14*mod(t\,0.21)))/44100)\;0.35*sin(ld(0))*exp(-6*mod(t\,0.21))*lt(t\,0.84):d=1.2:s=44100'; af = 'aecho=0.6:0.5:210:0.3' }
-    bombe    = @{ label = 'Bombe'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(30+110*exp(-3*t))/44100)\;(0.75*sin(ld(0))+0.5*(random(1)*2-1)*exp(-5*t))*exp(-1.6*t)*min(1\,t*200):d=2.6:s=44100'; af = 'lowpass=f=900,alimiter=limit=0.9' }
-    gamelles = @{ label = 'Gamelles'; src = 'aevalsrc=st(0\,mod(t\,0.17))\;st(2\,floor(t/0.17))\;st(1\,if(eq(mod(ld(2)\,3)\,2)\,790\,if(eq(mod(ld(2)\,4)\,3)\,610\,515)))\;((sin(2*PI*ld(1)*ld(0))+0.7*sin(2*PI*ld(1)*1.593*ld(0))+0.55*sin(2*PI*ld(1)*2.135*ld(0))+0.4*sin(2*PI*ld(1)*2.653*ld(0))+0.3*sin(2*PI*ld(1)*3.159*ld(0)))*exp(-13*ld(0))*0.22+(random(9)*2-1)*exp(-150*ld(0))*0.35)*(0.65+0.35*eq(mod(ld(2)\,2)\,0))*lt(t\,2.2):d=2.5:s=44100'; af = 'highpass=f=180,aecho=0.6:0.4:45|90:0.35|0.2' }
-    foule    = @{ label = 'Gamelles (foule)'; src = 'aevalsrc=st(0\,mod(t\,0.13))\;st(1\,560)\;st(3\,(sin(2*PI*ld(1)*ld(0))+0.7*sin(2*PI*ld(1)*1.593*ld(0))+0.55*sin(2*PI*ld(1)*2.135*ld(0))+0.4*sin(2*PI*ld(1)*2.653*ld(0))+0.3*sin(2*PI*ld(1)*3.159*ld(0)))*exp(-13*ld(0))*0.22+(random(9)*2-1)*exp(-150*ld(0))*0.35)\;st(0\,mod(t+0.05\,0.19))\;st(1\,830)\;st(4\,(sin(2*PI*ld(1)*ld(0))+0.7*sin(2*PI*ld(1)*1.593*ld(0))+0.55*sin(2*PI*ld(1)*2.135*ld(0))+0.4*sin(2*PI*ld(1)*2.653*ld(0))+0.3*sin(2*PI*ld(1)*3.159*ld(0)))*exp(-13*ld(0))*0.22+(random(9)*2-1)*exp(-150*ld(0))*0.35)\;st(0\,mod(t+0.09\,0.23))\;st(1\,430)\;st(5\,(sin(2*PI*ld(1)*ld(0))+0.7*sin(2*PI*ld(1)*1.593*ld(0))+0.55*sin(2*PI*ld(1)*2.135*ld(0))+0.4*sin(2*PI*ld(1)*2.653*ld(0))+0.3*sin(2*PI*ld(1)*3.159*ld(0)))*exp(-13*ld(0))*0.22+(random(9)*2-1)*exp(-150*ld(0))*0.35)\;(ld(3)+ld(4)*0.8+ld(5)*0.9)*0.7*min(1\,(3-t)*2):d=3:s=44100'; af = 'highpass=f=160,aecho=0.7:0.5:60|130:0.4|0.25' }
-    sifflet  = @{ label = 'Sifflet'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(2950+90*sin(2*PI*31*t))/44100)\;0.35*sin(ld(0))*(0.65+0.35*sin(2*PI*27*t))*(between(t\,0\,0.16)+between(t\,0.24\,0.4)+between(t\,0.48\,1.25)*min(1\,(1.25-t)*10)):d=1.4:s=44100'; af = 'highpass=f=1500' }
-    gunshot  = @{ label = 'Gunshot'; src = 'aevalsrc=st(0\,mod(t\,0.42))\;lt(t\,1.26)*((random(9)*2-1)*exp(-22*ld(0))*0.9+sin(2*PI*(60+90*exp(-30*ld(0)))*ld(0))*exp(-12*ld(0))*0.8):d=2.6:s=44100'; af = 'lowpass=f=5000,aecho=0.8:0.6:70|160|330:0.45|0.3|0.18' }
-    brume    = @{ label = 'Corne de brume'; src = 'aevalsrc=st(1\,ld(1)+2*PI*98/44100)\;st(2\,ld(2)+2*PI*147.5/44100)\;0.3*tanh(1.8*((mod(ld(1)/(2*PI)\,1)*2-1)+0.7*(mod(ld(2)/(2*PI)\,1)*2-1)))*min(1\,t*3)*min(1\,(2.6-t)*2):d=2.6:s=44100'; af = 'lowpass=f=1400,aecho=0.8:0.5:250:0.3' }
     rewind   = @{ label = 'Rewind'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(140*pow(2\,4.2*t/1.3))/44100)\;lt(t\,1.3)*(0.3*tanh(3*sin(ld(0)))+0.25*(random(9)*2-1)*(0.5+0.5*sin(ld(0)*0.25)))*min(1\,t*12)*min(1\,(1.3-t)*8):d=1.5:s=44100'; af = 'bandpass=f=1800:width_type=q:w=0.5' }
-    tonnerre = @{ label = 'Tonnerre'; src = 'aevalsrc=(random(9)*2-1)*(exp(-9*t)*1.2+0.6*exp(-0.9*t)*(0.6+0.4*sin(2*PI*1.7*t)*sin(2*PI*0.6*t))):d=4:s=44100'; af = 'lowpass=f=900,lowpass=f=600,aecho=0.8:0.7:120|260:0.4|0.3' }
-    boom     = @{ label = 'Boom'; src = 'aevalsrc=st(0\,ld(0)+2*PI*(38+95*exp(-4*t))/44100)\;tanh(2.2*sin(ld(0)))*exp(-1.3*t)*min(1\,t*300)*0.8+(random(9)*2-1)*exp(-90*t)*0.4:d=2.4:s=44100'; af = 'lowpass=f=2500' }
-    cloche   = @{ label = 'Cloche'; src = 'aevalsrc=st(0\,mod(t\,0.3))\;lt(t\,1.2)*0.25*(tanh(4*sin(2*PI*545*ld(0)))+0.8*tanh(4*sin(2*PI*815*ld(0))))*exp(-11*ld(0)):d=1.6:s=44100'; af = 'bandpass=f=900:width_type=q:w=0.6,aecho=0.6:0.4:80:0.25' }
 }
 $AudioExt = @('.mp3', '.m4a', '.aac', '.wav', '.flac', '.ogg', '.opus', '.wma')
 function Get-UserSoundsDir { return (Join-Path (Get-Out) 'Sons perso') }
@@ -5138,16 +5139,10 @@ function Get-VoiceChain([string]$preset) {
     return "$trim,$fx,loudnorm=I=-15:TP=-1.2:LRA=15,aresample=44100"
 }
 # Cris d'ambiance créés avec la voix de Windows (anglais si une voix anglaise est installée, sinon écriture phonétique)
-$Shouts = @(
-    @('voix-pullup', 'Pull up selecta!', 'Pull up! Pull up, selecta!', 'Poule eupe ! Poule eupe, sélecta !'),
-    @('voix-wheelup', 'Wheel up!', 'Wheel up! Wheel up!', 'Ouil eupe ! Ouil eupe !'),
-    @('voix-rewind', 'Rewind!', 'Rewind, selecta! Come again!', 'Riwaïnde, sélecta ! Keum eu-guène !'),
-    @('voix-bigup', 'Big up massive!', 'Big up all the massive!', 'Bigue eupe ol ze massive !'),
-    @('voix-forward', 'Forward!', 'Forward! Forward!', 'Forouarde ! Forouarde !'),
-    @('voix-sound', 'Sound system!', 'Sound system, inna di dance!', 'Saounde sistème, ina di danse !')
-)
+$Shouts = @()   # cris en voix Windows retirés (non gardés sur les pads)
 $script:voiceJob = $null; $script:voiceState = ''
 function Start-VoiceGen {
+    if (-not $Shouts.Count) { $script:voiceState = 'pret'; return }
     if ($script:voiceJob -or (Test-Path -LiteralPath (Join-Path $SonsDir 'voix-ok.txt')) -or $script:voiceState -eq 'erreur') { return }
     $items = ConvertTo-Json -InputObject @($Shouts | ForEach-Object { , @($_[0], $_[2], $_[3]) }) -Compress
     $script:voiceState = 'preparation'

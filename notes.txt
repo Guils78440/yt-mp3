@@ -1,2 +1,2 @@
-- Sampler à ta main : clic droit sur un pad pour l’écouter, changer de sample ou libérer l’emplacement ; clic droit (ou clic) sur un pad vide pour y ajouter n’importe quel son
-- « + BANQUE » ajoute une page de pads vides ; ta disposition est gardée et suivie par la télécommande
+- Sampler resserré : seuls les sons gardés sur les pads restent, sans emplacement vide, en banques de 8 pads (le bouton 🎤 MA VOIX passe à côté de + IMPORTER)
+- Bruitages intégrés réduits à Laser et Rewind ; les effets automatiques de la Mixtape utilisent tes sons du pack Dancehall
