@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v3.2 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v3.3 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '3.2'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '3.3'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -440,7 +440,18 @@ body.dj-mode main{max-width:1360px}
 .smpbanks{grid-column:1/-1;display:flex;gap:5px;flex-wrap:wrap}
 .smpbanks button{padding:4px 9px;border-radius:7px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--muted);background:var(--panel2);border:1px solid var(--line)}
 .smpbanks button.on{color:#fff;border-color:#4b5060}
-.smpbanks [data-packimp]{margin-left:auto;color:#fbbf24}
+.smpbanks [data-bankadd]{margin-left:auto;color:#a3e635}
+.smpbanks [data-packimp]{color:#fbbf24}
+.dk-pads .pad.empty{color:#5b6070;font-size:18px;font-weight:400;background:#16181e;box-shadow:inset 0 0 0 1px #2a2e38,inset 0 2px 6px #0008}
+.dk-pads .pad.empty::before{display:none}
+.dk-pads .pad.empty:hover{color:#a1a1aa;box-shadow:inset 0 0 0 1px #4b5060}
+.ctxmenu{position:fixed;z-index:60;min-width:210px;background:#1b1e26;border:1px solid #303542;border-radius:11px;padding:5px;box-shadow:0 12px 32px #000c}
+.ctxmenu .cm-h{padding:7px 10px 6px;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.ctxmenu button{display:block;width:100%;text-align:left;padding:9px 10px;border-radius:7px;font-size:13.5px}
+.ctxmenu button:hover{background:#272b35}.ctxmenu button.danger{color:var(--err)}
+.smprow{display:flex;align-items:center;gap:10px;padding:5px 10px;border-top:1px solid var(--line);font-size:13.5px}
+.smprow span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.smprow em{font-style:normal;color:var(--muted);font-size:12px}
+.smprow .ib svg{width:13px;height:13px}
 .mxrow #vxfx{flex-wrap:wrap}
 .vxrec{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:16px}
 .vxbtn{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff6b6b,#dc2626 60%,#991b1b);box-shadow:0 0 0 6px #ef444422,0 8px 24px #0009;color:#fff;font-weight:800;font-size:13px}
@@ -913,6 +924,12 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
   <div id="telbox"></div>
   <div class="dlg-btns"><button class="lnk" id="telnew" style="margin-right:auto">Nouveau lien secret</button><button class="go" id="telclose">Fermer</button></div>
 </div></div>
+<div class="overlay" id="smpdlg"><div class="box dlg wide">
+  <h3 style="margin-top:0" id="smpdlgt">Choisir un sample</h3>
+  <div class="exdest" style="margin-top:10px"><input id="smpq" placeholder="Rechercher un son…" spellcheck="false"></div>
+  <div class="exlist" id="smplist" style="max-height:380px"></div>
+  <div class="dlg-btns"><button class="btn-ghost" data-packimp style="margin-right:auto">Importer des sons…</button><button class="btn-ghost" id="smpclose">Annuler</button></div>
+</div></div>
 <div class="overlay" id="voixdlg"><div class="box dlg wide">
   <h3 style="margin-top:0">Enregistre ta voix</h3>
   <p>Crie ton « Pull up my selecta ! », le nom de ton sound system, une dédicace… YT MP3 ajoute les effets et le range dans tes sons (sampler et Mixtape).</p>
@@ -1158,6 +1175,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['3.3', '03/11/2026', ['Sampler à ta main : clic droit sur un pad pour l’écouter, changer de sample ou libérer l’emplacement ; clic droit (ou clic) sur un pad vide pour y ajouter n’importe quel son', '« + BANQUE » ajoute une page de pads vides ; ta disposition est gardée et suivie par la télécommande']],
   ['3.2', '03/11/2026', ['Import d’un pack de sons en un clic (fichier ZIP téléchargé, sons ou dossier) : extraction, volume harmonisé, rangement dans un dossier au nom du pack', 'Les sons perso peuvent être rangés en sous-dossiers (un par pack)']],
   ['3.1', '03/11/2026', ['9 nouveaux bruitages sound system : gamelles, gamelles de la foule, sifflet, gunshot, corne de brume, rewind, tonnerre, boom, cloche', 'Cris d’ambiance (« Pull up selecta! », « Wheel up! », « Rewind! », « Big up massive! »…) créés avec la voix de Windows et traités façon sound system', 'Enregistre ta propre voix au micro avec 4 effets (sound system, mégaphone, grosse voix, naturel) : elle rejoint le sampler et la Mixtape', 'Sampler en banques de pads (PC et téléphone)']],
   ['3.0', '30/10/2026', ['Nouvel onglet Mix façon logiciel DJ : formes d’onde zoomées qui défilent, molettes, table de mix centrale avec boutons rotatifs, faders et vumètres', 'Pads en caoutchouc sur chaque platine : repères, boucles, effets à maintenir (écho, réverb, filtres, gate, roll, sans basses, frein) et sampler (sirènes, corne… et tes sons perso)', 'Télécommande sur téléphone : scanne un QR code et pilote platines, crossfader, Auto-DJ, pads et chargement des morceaux depuis le canapé']],
@@ -1607,31 +1625,101 @@ function djFxOff(d, k){
   }
 }
 // Sampler : sons sound system + sons perso, joués dans la sortie salle (et donc dans l'enregistrement du mix)
-let djSmpList = [], djSmpTimer = null;
+let djSmpList = [], djSmpTimer = null, djSmpFull = false;
 async function djSmpLoad(){
   try {
-    const r = await api('/api/mxsounds', {}); djSmpList = r.sounds || []; djSmpRender();
+    const r = await api('/api/mxsounds', {}); djSmpList = r.sounds || []; djSmpFull = r.voices !== 'preparation'; djSmpRender();
     clearTimeout(djSmpTimer); if (r.voices === 'preparation') djSmpTimer = setTimeout(() => { djSmpLoad(); if (typeof mxSoundsLoad === 'function' && !$('#v-mx').hidden) mxSoundsLoad(); }, 4000);
   } catch {}
 }
 const SMP_COL = ['#ff3b6b', '#f97316', '#facc15', '#22c55e', '#06b6d4', '#8b5cf6', '#ec4899', '#a3a3a3'];
 DJ.bank = 0;
+const smpById = id => djSmpList.find(x => x.id === id);
+// Disposition des pads (gardée d'une soirée à l'autre) : 7 emplacements par banque + le pad MA VOIX.
+// Un son nouveau (import, micro…) prend le premier emplacement libre ; un emplacement libéré reste libre.
+function smpLayout(){
+  let L = LSJ.get('smplayout', null);
+  if (!L || !Array.isArray(L.slots)) L = { slots: [], known: [] };
+  const known = new Set(L.known);
+  djSmpList.forEach(x => {
+    if (known.has(x.id)) return;
+    known.add(x.id); L.known.push(x.id);
+    if (L.slots.includes(x.id)) return;
+    const i = L.slots.indexOf(null); if (i >= 0) L.slots[i] = x.id; else L.slots.push(x.id);
+  });
+  // Son disparu (fichier supprimé) : son emplacement redevient libre — seulement quand la liste est complète
+  if (djSmpFull) L.slots = L.slots.map(id => id && smpById(id) ? id : null);
+  while (!L.slots.length || L.slots.length % 7) L.slots.push(null);
+  LSJ.set('smplayout', L);
+  return L;
+}
+function smpSave(L){ LSJ.set('smplayout', L); djSmpRender(); }
 function djSmpRender(){
-  const banks = Math.max(1, Math.ceil(djSmpList.length / 7));
-  if (DJ.bank >= banks) DJ.bank = 0;
-  const page = djSmpList.slice(DJ.bank * 7, DJ.bank * 7 + 7);
+  const L = smpLayout(), banks = L.slots.length / 7;
+  if (DJ.bank >= banks) DJ.bank = banks - 1;
   document.querySelectorAll('.dk-pads[data-page="smp"]').forEach(p => {
-    p.innerHTML = `<div class="smpbanks">${Array.from({ length: banks }, (_, i) => `<button type="button" data-bank="${i}" class="${i === DJ.bank ? 'on' : ''}">BANQUE ${i + 1}</button>`).join('')}</div>`
-      + page.map((x, i) => `<button class="pad ${DJ.smp[x.id] && DJ.smp[x.id].src ? 'on' : ''}" data-smp="${esc(x.id)}" style="--pc:${SMP_COL[(DJ.bank * 7 + i) % 8]}" title="Appuie pour jouer, ré-appuie pour arrêter">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : x.voice ? '<small>voix</small>' : ''}</button>`).join('')
-      + Array.from({ length: 7 - page.length }, () => '<button class="pad" disabled style="opacity:.3">—</button>').join('')
-      + `<button class="pad" data-voixrec style="--pc:#ef4444" title="Enregistre ta propre voix (« Pull up my selecta ! ») avec les effets sound system">🎤 MA VOIX</button>`;
-    const bk = p.querySelector('.smpbanks'); if (bk) bk.insertAdjacentHTML('beforeend', `<button type="button" data-packimp title="Importer un pack de sons (fichier ZIP téléchargé, ou des sons)">+ IMPORTER</button>`);
+    let h = `<div class="smpbanks">${Array.from({ length: banks }, (_, i) => `<button type="button" data-bank="${i}" class="${i === DJ.bank ? 'on' : ''}">BANQUE ${i + 1}</button>`).join('')}<button type="button" data-bankadd title="Ajouter une banque de pads vides">+ BANQUE</button><button type="button" data-packimp title="Importer un pack de sons (fichier ZIP téléchargé, ou des sons)">+ IMPORTER</button></div>`;
+    for (let k = 0; k < 7; k++) {
+      const slot = DJ.bank * 7 + k, x = smpById(L.slots[slot]);
+      h += x ? `<button class="pad ${DJ.smp[x.id] && DJ.smp[x.id].src ? 'on' : ''}" data-smp="${esc(x.id)}" data-slot="${slot}" style="--pc:${SMP_COL[slot % 8]}" title="Appuie pour jouer, ré-appuie pour arrêter · clic droit : changer ou libérer">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : x.voice ? '<small>voix</small>' : ''}</button>`
+             : `<button class="pad empty" data-slot="${slot}" title="Emplacement libre · clic droit (ou clic) : ajouter un sample">+</button>`;
+    }
+    h += `<button class="pad" data-voixrec style="--pc:#ef4444" title="Enregistre ta propre voix (« Pull up my selecta ! ») avec les effets sound system">🎤 MA VOIX</button>`;
+    p.innerHTML = h;
   });
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('.smpbanks [data-bank]'); if (b) { DJ.bank = +b.dataset.bank; djSmpRender(); return; }
+  if (e.target.closest('.smpbanks [data-bankadd]')) { const L = smpLayout(); L.slots.push(...Array(7).fill(null)); DJ.bank = L.slots.length / 7 - 1; smpSave(L); toast(`Banque ${DJ.bank + 1} ajoutée : clic droit sur un pad pour y mettre un sample`); return; }
+  const em = e.target.closest('.dk-pads .pad.empty'); if (em) { smpPick(+em.dataset.slot); return; }
   if (e.target.closest('[data-voixrec]')) voixOpen();
+  if (!e.target.closest('#smpmenu')) smpMenuClose();
 });
+// Menu du clic droit sur un pad
+function smpMenuClose(){ const m = $('#smpmenu'); if (m) m.remove(); }
+document.addEventListener('contextmenu', e => {
+  const pad = e.target.closest('.dk-pads[data-page="smp"] .pad[data-slot]'); if (!pad) return;
+  e.preventDefault(); smpMenuClose();
+  const slot = +pad.dataset.slot, L = smpLayout(), x = smpById(L.slots[slot]);
+  const m = document.createElement('div'); m.id = 'smpmenu'; m.className = 'ctxmenu';
+  m.innerHTML = x ? `<div class="cm-h">${esc(x.label)}</div><button data-cm="play">▶ Écouter</button><button data-cm="pick">Changer de sample…</button><button data-cm="free" class="danger">Libérer l'emplacement</button>`
+                  : `<div class="cm-h">Emplacement libre</div><button data-cm="pick">Ajouter un sample…</button>`;
+  document.body.appendChild(m);
+  m.style.left = Math.min(e.clientX, innerWidth - m.offsetWidth - 8) + 'px'; m.style.top = Math.min(e.clientY, innerHeight - m.offsetHeight - 8) + 'px';
+  m.onclick = ev => {
+    const c = ev.target.closest('[data-cm]'); if (!c) return; smpMenuClose();
+    if (c.dataset.cm === 'play' && x) djSmp(x.id);
+    if (c.dataset.cm === 'pick') smpPick(slot);
+    if (c.dataset.cm === 'free') { const L2 = smpLayout(); L2.slots[slot] = null; smpSave(L2); toast('Emplacement libéré (le son reste disponible pour plus tard)'); }
+  };
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') smpMenuClose(); });
+// Choix d'un sample pour un emplacement
+let smpSlot = -1, smpPrevA = new Audio();
+function smpPick(slot){ smpSlot = slot; $('#smpq').value = ''; smpPickRender(); $('#smpdlg').classList.add('show'); setTimeout(() => $('#smpq').focus(), 50); }
+function smpPickRender(){
+  const q = $('#smpq').value.trim().toLowerCase(), L = smpLayout(), groups = {};
+  $('#smpdlgt').textContent = `Sample pour la banque ${Math.floor(smpSlot / 7) + 1}, pad ${smpSlot % 7 + 1}`;
+  djSmpList.filter(x => !q || x.label.toLowerCase().includes(q) || (x.pack || '').toLowerCase().includes(q)).forEach(x => {
+    const g = x.user ? (x.pack || 'Mes sons') : x.voice ? 'Voix d’ambiance' : 'Bruitages YT MP3';
+    (groups[g] = groups[g] || []).push(x);
+  });
+  $('#smplist').innerHTML = Object.keys(groups).map(g => `<div class="mxlh">${esc(g)} <em>${groups[g].length}</em></div>` + groups[g].map(x => {
+    const used = L.slots.indexOf(x.id);
+    return `<div class="smprow"><button class="ib" data-smpprev="${esc(x.id)}" title="Écouter">${PLAY_IC}</button><span>${esc(x.label)}${used >= 0 ? `<em> · banque ${Math.floor(used / 7) + 1}, pad ${used % 7 + 1}</em>` : ''}</span><button class="btn-ghost sm2" data-smpset="${esc(x.id)}">Choisir</button></div>`;
+  }).join('')).join('') || '<div class="empty" style="padding:20px">Aucun son</div>';
+}
+$('#smpq').oninput = smpPickRender;
+$('#smplist').addEventListener('click', e => {
+  const pv = e.target.closest('[data-smpprev]');
+  if (pv) { smpPrevA.src = '/son/' + encodeURIComponent(pv.dataset.smpprev); smpPrevA.play().catch(() => {}); return; }
+  const st = e.target.closest('[data-smpset]'); if (!st) return;
+  const L = smpLayout(), id = st.dataset.smpset, old = L.slots.indexOf(id);
+  if (old >= 0 && old !== smpSlot) L.slots[old] = null;   // un son n'occupe qu'un pad : il est déplacé
+  L.slots[smpSlot] = id; smpSave(L); smpPrevA.pause();
+  $('#smpdlg').classList.remove('show'); toast(`« ${smpById(id).label} » placé sur le pad ${smpSlot % 7 + 1} de la banque ${Math.floor(smpSlot / 7) + 1}`);
+});
+$('#smpclose').onclick = () => { smpPrevA.pause(); $('#smpdlg').classList.remove('show'); };
 async function djSmp(id){
   djCtx(); djPauseMain();
   const s = DJ.smp[id] || (DJ.smp[id] = {});
@@ -2399,7 +2487,7 @@ function djRecToggle(){
     const off = () => { if (!b.classList.contains('on')) return; b.classList.remove('on'); djFxOff(d, k); };
     b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
   });
-  q('.dk-pads[data-page="smp"]').addEventListener('pointerdown', e => { const b = e.target.closest('[data-smp]'); if (b) { e.preventDefault(); djSmp(b.dataset.smp); } });
+  q('.dk-pads[data-page="smp"]').addEventListener('pointerdown', e => { const b = e.target.closest('[data-smp]'); if (b && e.button === 0) { e.preventDefault(); djSmp(b.dataset.smp); } });
 });
 $('#xf').oninput = e => { djStopMix(); DJ.xf = e.target.value / 1000; djApplyXf(); djMixBtn(); };
 $('#xf').ondblclick = () => { djStopMix(); DJ.xf = 0.5; $('#xf').value = 500; djApplyXf(); djMixBtn(); };
@@ -3468,7 +3556,7 @@ function telStatus(){
   return {
     t: Date.now(), xf: DJ.xf, mix: !!DJ.mix, auto: !!DJ.auto, next: djMixTarget() ? 'B' : 'A', msg: telMsg, libv: telLibV,
     decks: DJ.d.map(d => { const x = d.id && byId(d.id); return { id: d.id, title: x ? x.title : '', artist: x ? x.uploader : '', cover: x ? coverUrl(x.vid, x.thumb) : '', bpm: d.bpm ? d.bpm * (d.el.playbackRate || 1) : 0, key: d.key && d.key.cam || '', playing: !d.el.paused, cur: d.el.currentTime || 0, dur: d.el.duration || 0, sync: !!d.sync, vol: d.vol }; }),
-    fx: PAD_FX, smp: djSmpList.map((x, i) => ({ id: x.id, label: x.label, c: SMP_COL[i % 8], on: !!(DJ.smp[x.id] && DJ.smp[x.id].src) }))
+    fx: PAD_FX, smp: (djSmpList.length ? smpLayout().slots : []).map((id, i) => [smpById(id), i]).filter(([x]) => x).map(([x, i]) => ({ id: x.id, label: x.label, c: SMP_COL[i % 8], on: !!(DJ.smp[x.id] && DJ.smp[x.id].src) }))
   };
 }
 function telLib(){

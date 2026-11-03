@@ -1,2 +1,2 @@
-- Import d’un pack de sons en un clic (fichier ZIP téléchargé, sons ou dossier) : extraction, volume harmonisé, rangement dans un dossier au nom du pack
-- Les sons perso peuvent être rangés en sous-dossiers (un par pack)
+- Sampler à ta main : clic droit sur un pad pour l’écouter, changer de sample ou libérer l’emplacement ; clic droit (ou clic) sur un pad vide pour y ajouter n’importe quel son
+- « + BANQUE » ajoute une page de pads vides ; ta disposition est gardée et suivie par la télécommande
