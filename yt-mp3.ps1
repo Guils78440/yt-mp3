@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v3.4 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v3.5 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '3.4'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '3.5'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -1176,6 +1176,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['3.5', '03/11/2026', ['Scratch sur la molette : pose la main sur le disque, il s’arrête ; pousse et tire, le son suit ton geste en avant comme en arrière ; lâche, la platine repart']],
   ['3.4', '03/11/2026', ['Sampler resserré : seuls les sons gardés sur les pads restent, sans emplacement vide, en banques de 8 pads (le bouton 🎤 MA VOIX passe à côté de + IMPORTER)', 'Bruitages intégrés réduits à Laser et Rewind ; les effets automatiques de la Mixtape utilisent tes sons du pack Dancehall']],
   ['3.3', '03/11/2026', ['Sampler à ta main : clic droit sur un pad pour l’écouter, changer de sample ou libérer l’emplacement ; clic droit (ou clic) sur un pad vide pour y ajouter n’importe quel son', '« + BANQUE » ajoute une page de pads vides ; ta disposition est gardée et suivie par la télécommande']],
   ['3.2', '03/11/2026', ['Import d’un pack de sons en un clic (fichier ZIP téléchargé, sons ou dossier) : extraction, volume harmonisé, rangement dans un dossier au nom du pack', 'Les sons perso peuvent être rangés en sous-dossiers (un par pack)']],
@@ -1579,6 +1580,69 @@ function djDeckHtml(L){
 </div>`;
 }
 
+/* ---------- Scratch : lecture à la vitesse de la main, en avant comme en arrière ---------- */
+// Petit processeur audio : la tête de lecture suit la position de la main avec un ressort amorti,
+// ce qui donne le son caractéristique du vinyle qu'on pousse et qu'on tire.
+const SCR_SRC = `
+class Scratch extends AudioWorkletProcessor {
+  constructor(){
+    super(); this.buf = null; this.sr = 22050; this.pos = 0; this.target = 0; this.v = 0; this.on = false; this.g = 0; this.n = 0; this.motor = 0; this.mrate = 1;
+    this.port.onmessage = e => { const m = e.data;
+      if (m.buf) { this.buf = m.buf; this.sr = m.sr; }
+      if (m.start !== undefined) { this.pos = this.target = m.start * this.sr; this.v = m.v || 0; this.on = true; this.motor = 0; }
+      if (m.target !== undefined) this.target = m.target * this.sr;
+      if (m.release) { this.motor = m.motor ? Math.round(0.15 * sampleRate) : 0; this.mrate = m.rate || 1; if (!this.motor) this.on = false; }
+    };
+  }
+  process(_, outs){
+    const o = outs[0], L = o[0], R = o[1] || o[0], b = this.buf;
+    if (!b) return true;
+    const k = this.sr / sampleRate, a = 1 - Math.exp(-1 / (0.006 * sampleRate)), ga = 1 - Math.exp(-1 / (0.004 * sampleRate));
+    for (let i = 0; i < L.length; i++) {
+      if (this.motor > 0) { this.v += (this.mrate - this.v) * 0.004; if (--this.motor === 0) this.on = false; }
+      else if (this.on) { const want = (this.target - this.pos) / this.sr / 0.025; this.v += (Math.max(-8, Math.min(8, want)) - this.v) * a; }
+      this.g += ((this.on ? 1 : 0) - this.g) * ga;
+      let s = 0;
+      if (this.g > 0.0005) {
+        this.pos += this.v * k;
+        const p = this.pos, i0 = Math.floor(p);
+        if (i0 >= 0 && i0 < b.length - 1) { const f = p - i0; s = (b[i0] * (1 - f) + b[i0 + 1] * f) * this.g; }
+      }
+      L[i] = s; R[i] = s;
+    }
+    if ((this.n += L.length) >= 1024) { this.n = 0; this.port.postMessage(this.pos / this.sr); }
+    return true;
+  }
+}
+registerProcessor('scratch', Scratch);`;
+async function djScratchInit(){
+  if (DJ.scrInit || !DJ.ctx || !DJ.ctx.audioWorklet) return;
+  DJ.scrInit = true;
+  try {
+    await DJ.ctx.audioWorklet.addModule(URL.createObjectURL(new Blob([SCR_SRC], { type: 'application/javascript' })));
+    DJ.d.forEach(d => {
+      const n = new AudioWorkletNode(DJ.ctx, 'scratch', { numberOfInputs: 0, outputChannelCount: [2] });
+      n.port.onmessage = e => { d.scrPos = e.data; };
+      n.connect(d.nodes.low);   // le scratch passe par l'égaliseur, le volume et le crossfader de la platine
+      d.scrNode = n;
+      if (d.scrBuf) n.port.postMessage({ buf: d.scrBuf.data, sr: d.scrBuf.sr });
+    });
+  } catch { DJ.scrInit = false; }
+}
+// Copie du morceau en mémoire (mono 22 kHz, léger) pour pouvoir le jouer dans les deux sens
+async function djScratchPrep(d){
+  const id = d.id, stem = d.stem; d.scrBuf = null;
+  try {
+    const raw = await djFetchAll(url(id, stem)); if (!raw || d.id !== id || d.stem !== stem) return;
+    const ab = await new OfflineAudioContext(1, 1, 22050).decodeAudioData(raw);
+    if (d.id !== id || d.stem !== stem) return;
+    let x = ab.getChannelData(0);
+    if (ab.numberOfChannels > 1) { const r = ab.getChannelData(1), m = new Float32Array(x.length); for (let i = 0; i < m.length; i++) m[i] = (x[i] + r[i]) / 2; x = m; }
+    d.scrBuf = { data: x, sr: ab.sampleRate };
+    if (d.scrNode) d.scrNode.port.postMessage({ buf: x, sr: ab.sampleRate });
+  } catch {}
+}
+
 /* ---------- Pads d'effets ---------- */
 function djFxOn(d, k){
   if (!d.id) return;
@@ -1813,6 +1877,7 @@ function djCtx(){
       d.nodes = { low, mid, high, lp, hp, vol, xg, pfl, delay, fb, echoWet, revWet, an };
       djApply(d);
     });
+    djScratchInit();
     djApplyXf();
     djApplyOutputs();
   }
@@ -1877,7 +1942,7 @@ function djLoad(i, id, stem, quiet){
   const inf = djInfo(id); d.bpm = inf ? inf.bpm : null; d.b0 = inf ? inf.b0 : 0; d.key = inf ? inf.key : null;
   d.hot = djCuesOf(id);
   djSetSrc(d, 0, false);
-  djMeta(d); djAnalyse(d); djRenderLib(true); djRenderSet();
+  djMeta(d); djAnalyse(d); djScratchPrep(d); djRenderLib(true); djRenderSet();
   if (!quiet) toast(`${x.title} chargé sur la platine ${d.L}`);
 }
 function djSetSrc(d, at, play){
@@ -2103,7 +2168,7 @@ function djSetTempoUI(d){
 }
 // Forme d'onde : partie jouée, boucle, hot cues, point CUE, tête de lecture ; indicateur des 4 temps
 function djJog(d){
-  const q = s => d.root.querySelector(s), el = d.el, dur = el.duration || 0, cur = el.currentTime || 0;
+  const q = s => d.root.querySelector(s), el = d.el, dur = el.duration || 0, cur = d.jog && d.jog.scr && d.scrPos != null ? d.scrPos : (el.currentTime || 0);
   q('.tt-rec').style.transform = `rotate(${(cur * 200) % 360}deg)`;   // molette : 200°/s, comme un vinyle 33 tours
   q('.jog-prog').style.setProperty('--p', (dur ? Math.min(100, cur / dur * 100) : 0).toFixed(2) + '%');
   const tm = d.id ? '-' + fmtT(Math.max(0, dur - cur)) : '--:--';
@@ -2414,15 +2479,31 @@ function djRecToggle(){
   rec.addEventListener('pointerdown', e => {
     if (!d.id) return;
     rec.setPointerCapture(e.pointerId);
-    d.jog = { a: ang(e), play: !el.paused };
+    djCtx();
+    const scr = !!(d.scrNode && d.scrBuf);
+    d.jog = { a: ang(e), play: !el.paused, start: el.currentTime, turn: 0, scr };
+    d.loop = null;
     if (!el.paused) el.pause();
+    if (scr) { d.scrPos = el.currentTime; d.scrNode.port.postMessage({ start: el.currentTime, v: d.jog.play ? d.rate : 0 }); }   // la main se pose : le disque s'arrête
   });
   rec.addEventListener('pointermove', e => {
     if (!d.jog) return;
     const a = ang(e); let da = a - d.jog.a; if (da > 180) da -= 360; if (da < -180) da += 360;
-    d.jog.a = a; el.currentTime = Math.max(0, Math.min((el.duration || 0) - 0.05, el.currentTime + da / 200));
+    d.jog.a = a; d.jog.turn += da;
+    const t = Math.max(0, Math.min((el.duration || 0) - 0.05, d.jog.start + d.jog.turn / 200));   // 1 tour = 1,8 s, comme un 33 tours
+    if (d.jog.scr) d.scrNode.port.postMessage({ target: t }); else el.currentTime = t;
   });
-  const jogEnd = () => { if (!d.jog) return; const pl = d.jog.play; d.jog = null; if (pl) { djCtx(); el.play().catch(() => {}); } };
+  const jogEnd = () => {
+    if (!d.jog) return;
+    const j = d.jog; d.jog = null;
+    if (j.scr) {
+      const pos = d.scrPos != null ? d.scrPos : el.currentTime;
+      d.scrNode.port.postMessage({ release: true, motor: j.play, rate: d.rate });   // la platine repart toute seule
+      el.currentTime = Math.max(0, Math.min((el.duration || 0) - 0.05, pos + (j.play ? 0.15 * d.rate : 0)));
+      d.scrPos = null;
+    }
+    if (j.play) { djCtx(); el.play().catch(() => {}); }
+  };
   rec.addEventListener('pointerup', jogEnd); rec.addEventListener('pointercancel', jogEnd);
   q('.dk-cue').onclick = d.cueBtn;
   q('.dk-sync').onclick = d.syncBtn;
@@ -2447,7 +2528,7 @@ function djRecToggle(){
   q('.dk-stem').onclick = e => {
     const b = e.target.closest('button'); if (!b || b.disabled || !d.id || b.dataset.s === d.stem) return;
     d.stem = b.dataset.s; d.peaks = null;
-    djSetSrc(d, el.currentTime, !el.paused);
+    djSetSrc(d, el.currentTime, !el.paused); djScratchPrep(d);
     djMeta(d); djAnalyse(d);
   };
   const tempo = q('.dk-tempo');

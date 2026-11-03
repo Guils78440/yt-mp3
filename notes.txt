@@ -1,2 +1,1 @@
-- Sampler resserré : seuls les sons gardés sur les pads restent, sans emplacement vide, en banques de 8 pads (le bouton 🎤 MA VOIX passe à côté de + IMPORTER)
-- Bruitages intégrés réduits à Laser et Rewind ; les effets automatiques de la Mixtape utilisent tes sons du pack Dancehall
+- Scratch sur la molette : pose la main sur le disque, il s’arrête ; pousse et tire, le son suit ton geste en avant comme en arrière ; lâche, la platine repart
