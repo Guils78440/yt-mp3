@@ -1,4 +1,2 @@
-- 9 nouveaux bruitages sound system : gamelles, gamelles de la foule, sifflet, gunshot, corne de brume, rewind, tonnerre, boom, cloche
-- Cris d’ambiance (« Pull up selecta! », « Wheel up! », « Rewind! », « Big up massive! »…) créés avec la voix de Windows et traités façon sound system
-- Enregistre ta propre voix au micro avec 4 effets (sound system, mégaphone, grosse voix, naturel) : elle rejoint le sampler et la Mixtape
-- Sampler en banques de pads (PC et téléphone)
+- Import d’un pack de sons en un clic (fichier ZIP téléchargé, sons ou dossier) : extraction, volume harmonisé, rangement dans un dossier au nom du pack
+- Les sons perso peuvent être rangés en sous-dossiers (un par pack)

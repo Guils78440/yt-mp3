@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v3.1 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v3.2 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '3.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '3.2'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -440,6 +440,7 @@ body.dj-mode main{max-width:1360px}
 .smpbanks{grid-column:1/-1;display:flex;gap:5px;flex-wrap:wrap}
 .smpbanks button{padding:4px 9px;border-radius:7px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--muted);background:var(--panel2);border:1px solid var(--line)}
 .smpbanks button.on{color:#fff;border-color:#4b5060}
+.smpbanks [data-packimp]{margin-left:auto;color:#fbbf24}
 .mxrow #vxfx{flex-wrap:wrap}
 .vxrec{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:16px}
 .vxbtn{width:96px;height:96px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#ff6b6b,#dc2626 60%,#991b1b);box-shadow:0 0 0 6px #ef444422,0 8px 24px #0009;color:#fff;font-weight:800;font-size:13px}
@@ -771,7 +772,7 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
           <h3>Sons</h3>
           <p>Clique pour écouter. Tu peux ajouter tes propres sons (ton nom de sound system, des dubplates…) dans le dossier « Sons perso ».</p>
           <div class="mxsounds" id="mxsounds"></div>
-          <div class="row" style="margin-top:12px;gap:12px"><button class="btn-ghost" data-voixrec>🎤 Enregistrer ta voix</button><button class="lnk" id="mxuser">Ouvrir le dossier « Sons perso »</button></div>
+          <div class="row" style="margin-top:12px;gap:10px;flex-wrap:wrap"><button class="btn-ghost" data-voixrec>🎤 Enregistrer ta voix</button><button class="btn-ghost" data-packimp>Importer un pack de sons (ZIP)</button><button class="lnk" id="mxuser">Ouvrir le dossier « Sons perso »</button></div>
         </div>
         <div class="card">
           <h3>Créer la mixtape</h3>
@@ -1157,6 +1158,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['3.2', '03/11/2026', ['Import d’un pack de sons en un clic (fichier ZIP téléchargé, sons ou dossier) : extraction, volume harmonisé, rangement dans un dossier au nom du pack', 'Les sons perso peuvent être rangés en sous-dossiers (un par pack)']],
   ['3.1', '03/11/2026', ['9 nouveaux bruitages sound system : gamelles, gamelles de la foule, sifflet, gunshot, corne de brume, rewind, tonnerre, boom, cloche', 'Cris d’ambiance (« Pull up selecta! », « Wheel up! », « Rewind! », « Big up massive! »…) créés avec la voix de Windows et traités façon sound system', 'Enregistre ta propre voix au micro avec 4 effets (sound system, mégaphone, grosse voix, naturel) : elle rejoint le sampler et la Mixtape', 'Sampler en banques de pads (PC et téléphone)']],
   ['3.0', '30/10/2026', ['Nouvel onglet Mix façon logiciel DJ : formes d’onde zoomées qui défilent, molettes, table de mix centrale avec boutons rotatifs, faders et vumètres', 'Pads en caoutchouc sur chaque platine : repères, boucles, effets à maintenir (écho, réverb, filtres, gate, roll, sans basses, frein) et sampler (sirènes, corne… et tes sons perso)', 'Télécommande sur téléphone : scanne un QR code et pilote platines, crossfader, Auto-DJ, pads et chargement des morceaux depuis le canapé']],
   ['2.9.1', '30/10/2026', ['Correction : YT MP3 ne se bloque plus pendant le choix d\'un dossier (la musique continue de jouer)', 'Correction : « Relancer YT MP3 » remplace un moteur bloqué au lieu de démarrer à côté sans être retrouvé', 'La lecture d\'un très gros dossier pour une mixtape est limitée pour rester rapide', 'Journal du moteur (fichier moteur.log) pour diagnostiquer un éventuel plantage']],
@@ -1623,6 +1625,7 @@ function djSmpRender(){
       + page.map((x, i) => `<button class="pad ${DJ.smp[x.id] && DJ.smp[x.id].src ? 'on' : ''}" data-smp="${esc(x.id)}" style="--pc:${SMP_COL[(DJ.bank * 7 + i) % 8]}" title="Appuie pour jouer, ré-appuie pour arrêter">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : x.voice ? '<small>voix</small>' : ''}</button>`).join('')
       + Array.from({ length: 7 - page.length }, () => '<button class="pad" disabled style="opacity:.3">—</button>').join('')
       + `<button class="pad" data-voixrec style="--pc:#ef4444" title="Enregistre ta propre voix (« Pull up my selecta ! ») avec les effets sound system">🎤 MA VOIX</button>`;
+    const bk = p.querySelector('.smpbanks'); if (bk) bk.insertAdjacentHTML('beforeend', `<button type="button" data-packimp title="Importer un pack de sons (fichier ZIP téléchargé, ou des sons)">+ IMPORTER</button>`);
   });
 }
 document.addEventListener('click', e => {
@@ -2765,6 +2768,7 @@ function render(s){
   if (s.appVersion) renderAbout(s.appVersion);
   renderSepCard(s.separation || {});
   mxState(s.mixtape || {});
+  if (s.packImport) packState(s.packImport);
   renderPl(s.playlist || {}); renderFollows(s); renderNews(s.news || []); renderExport(s.export || {});
   renderSearch(s.search);
   djRenderLib(false); djRenderSet();
@@ -3520,6 +3524,27 @@ async function telTick(){
 }
 setInterval(telTick, 200);
 
+
+/* ===================== Import d'un pack de sons ===================== */
+let packLast = '';
+document.addEventListener('click', async e => {
+  if (!e.target.closest('[data-packimp]')) return;
+  try {
+    const sel = await pickDir('pack'); if (!sel) return;
+    const r = await api('/api/packimport', { paths: sel });
+    if (r.error) toast(r.error, 'err'); else { toast('Import du pack en cours…'); render(r); }
+  } catch(err){ toast(err.message, 'err'); }
+});
+function packState(m){
+  const k = (m.status || '') + m.done + '/' + m.total;
+  if (k === packLast) return; packLast = k;
+  if (m.status === 'import') toast(m.total ? `Import des sons : ${m.done} / ${m.total}` : 'Ouverture du pack…');
+  if (m.status === 'fini' || m.status === 'erreur') {
+    if (m.status === 'erreur') toast(m.error, 'err');
+    api('/api/packdone', {}).catch(() => {});
+    djSmpLoad(); if (typeof mxSoundsLoad === 'function') mxSoundsLoad();
+  }
+}
 
 /* ===================== Enregistrer sa voix (micro) ===================== */
 const VX = { rec: null, stream: null, t0: 0, timer: null, has: false, fx: 'sound', audio: new Audio() };
@@ -4418,7 +4443,7 @@ $script:lastUpdCheck = [datetime]::MinValue
 $script:updateWhenIdle = $false   # « installer à la fin des téléchargements »
 $UpdateEvery = 1800               # vérification toutes les 30 min tant que l'application est ouverte
 if ($env:YTMP3_UPDATE_EVERY_SEC) { $UpdateEvery = [int]$env:YTMP3_UPDATE_EVERY_SEC }
-function Test-Busy { return [bool]($script:proc -or $script:sepProc -or $script:splitCur -or $script:expJob -or $script:mxRun -or @($queue | Where-Object { $_.status -eq 'attente' }).Count) }
+function Test-Busy { return [bool]($script:proc -or $script:sepProc -or $script:splitCur -or $script:expJob -or $script:mxRun -or $script:impJob -or @($queue | Where-Object { $_.status -eq 'attente' }).Count) }
 $script:updJob = $null
 $script:restartAfter = $false
 $CanSelfUpdate = [bool]($Installed -and $SelfPath)
@@ -4617,9 +4642,14 @@ function Start-Pick([string]$kind, [string]$desc, [string]$start) {
     $q = { param($t) "'" + ([string]$t -replace "'", "''") + "'" }
     $ps = "Add-Type -AssemblyName System.Windows.Forms`n" +
         "`$f = New-Object System.Windows.Forms.Form; `$f.TopMost = `$true; `$f.ShowInTaskbar = `$false; `$f.Opacity = 0; `$f.StartPosition = 'CenterScreen'; `$f.Show(); `$f.Activate()`n" +
-        "`$d = New-Object System.Windows.Forms.FolderBrowserDialog; `$d.Description = $(& $q $desc); `$d.ShowNewFolderButton = `$true`n" +
-        $(if ($start) { "`$d.SelectedPath = $(& $q $start)`n" } else { '' }) +
-        "`$r = ''; if (`$d.ShowDialog(`$f) -eq [System.Windows.Forms.DialogResult]::OK) { `$r = `$d.SelectedPath }`n" +
+        $(if ($kind -eq 'pack') {
+            "`$d = New-Object System.Windows.Forms.OpenFileDialog; `$d.Title = $(& $q $desc); `$d.Filter = 'Pack de sons (*.zip) ou son|*.zip;*.wav;*.mp3;*.ogg;*.flac;*.m4a|Tous les fichiers|*.*'; `$d.Multiselect = `$true; `$d.InitialDirectory = [Environment]::GetFolderPath('UserProfile') + '\Downloads'`n" +
+            "`$r = ''; if (`$d.ShowDialog(`$f) -eq [System.Windows.Forms.DialogResult]::OK) { `$r = (`$d.FileNames -join '|') }`n"
+        } else {
+            "`$d = New-Object System.Windows.Forms.FolderBrowserDialog; `$d.Description = $(& $q $desc); `$d.ShowNewFolderButton = `$true`n" +
+            $(if ($start) { "`$d.SelectedPath = $(& $q $start)`n" } else { '' }) +
+            "`$r = ''; if (`$d.ShowDialog(`$f) -eq [System.Windows.Forms.DialogResult]::OK) { `$r = `$d.SelectedPath }`n"
+        }) +
         "[IO.File]::WriteAllText($(& $q $out), 'ok|' + `$r, (New-Object Text.UTF8Encoding `$false))"
     $enc = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($ps))
     $script:pick = @{ status = 'ouvert'; n = [int]$script:pick.n + 1; kind = $kind; dir = '' }
@@ -5059,6 +5089,60 @@ function Update-VoiceGen {
     else { $script:voiceState = 'erreur'; try { Write-Log ('Voix Windows indisponibles : ' + $j.ChildJobs[0].JobStateInfo.Reason.Message) } catch {} }
     Remove-Job $j -Force -ErrorAction SilentlyContinue; $script:voiceJob = $null
 }
+$script:imp = @{ status = 'vide'; done = 0; total = 0; pack = ''; error = '' }
+$script:impJob = $null
+function Start-PackImport([string[]]$paths) {
+    if ($script:impJob) { return 'Un import est déjà en cours' }
+    $paths = @($paths | Where-Object { $_ -and (Test-Path -LiteralPath $_) })
+    if (-not $paths.Count) { return 'Rien à importer' }
+    $first = $paths[0]
+    $pack = Get-SafeName $(if ((Test-Path -LiteralPath $first -PathType Container) -or $first -match '\.zip$') { [IO.Path]::GetFileNameWithoutExtension($first.TrimEnd('\')) } else { 'Sons importés' })
+    $pack = ($pack -replace '[-_]+', ' ' -replace '\s+(MP3|WAV|mp3|wav)$', '' -replace '\s{2,}', ' ').Trim(); if (-not $pack) { $pack = 'Pack' }
+    $dest = Join-Path (Get-UserSoundsDir) $pack
+    $prog = Join-Path $Data 'import.progress'; Set-Content -LiteralPath $prog -Value '0/0'
+    $script:imp = @{ status = 'import'; done = 0; total = 0; pack = $pack; error = '' }
+    $script:impJob = Start-Job -ArgumentList $Ffmpeg, ($paths -join '|'), $dest, $prog, (Join-Path $Data 'import-tmp'), ($AudioExt -join '|') -ScriptBlock {
+        param($ffmpeg, $pathsJoined, $dest, $prog, $tmp, $extJoined)
+        $exts = $extJoined -split '\|'
+        if (Test-Path -LiteralPath $tmp) { Remove-Item -LiteralPath $tmp -Recurse -Force }
+        [void](New-Item -ItemType Directory -Path $tmp -Force)
+        $files = New-Object System.Collections.ArrayList
+        foreach ($pth in ($pathsJoined -split '\|')) {
+            if ($pth -match '\.zip$') {
+                $x = Join-Path $tmp ([guid]::NewGuid().ToString('N').Substring(0, 6))
+                Add-Type -AssemblyName System.IO.Compression.FileSystem
+                [IO.Compression.ZipFile]::ExtractToDirectory($pth, $x)
+                foreach ($f in Get-ChildItem -LiteralPath $x -File -Recurse) { if ($exts -contains $f.Extension.ToLower() -and $f.FullName -notmatch '__MACOSX') { [void]$files.Add($f.FullName) } }
+            } elseif (Test-Path -LiteralPath $pth -PathType Container) {
+                foreach ($f in Get-ChildItem -LiteralPath $pth -File -Recurse) { if ($exts -contains $f.Extension.ToLower()) { [void]$files.Add($f.FullName) } }
+            } else { [void]$files.Add($pth) }
+        }
+        if (-not $files.Count) { throw 'Aucun son trouvé dans ce pack' }
+        if ($files.Count -gt 300) { $files = $files.GetRange(0, 300) }
+        [void](New-Item -ItemType Directory -Path $dest -Force)
+        $i = 0
+        foreach ($f in $files) {
+            $i++
+            $name = ([IO.Path]::GetFileNameWithoutExtension($f) -replace '[<>:"/\\|?*]', '').Trim(); if (-not $name) { $name = "Son $i" }
+            $out = Join-Path $dest ($name + '.wav'); $k = 2
+            while (Test-Path -LiteralPath $out) { $out = Join-Path $dest ("$name ($k).wav"); $k++ }
+            # Volume harmonisé (tous les sons au même niveau perçu), silence de début retiré, 44,1 kHz stéréo
+            & $ffmpeg -nostdin -v error -y -i $f -vn -af 'silenceremove=start_periods=1:start_threshold=-50dB,loudnorm=I=-16:TP=-1.5:LRA=20,aresample=44100' -ac 2 -c:a pcm_s16le $out 2>$null
+            Set-Content -LiteralPath $prog -Value "$i/$($files.Count)"
+        }
+        Remove-Item -LiteralPath $tmp -Recurse -Force -ErrorAction SilentlyContinue
+    }
+    return ''
+}
+function Update-PackImport {
+    $j = $script:impJob; if (-not $j) { return }
+    try { $pp = (Get-Content -LiteralPath (Join-Path $Data 'import.progress') -Raw) -split '/'; $script:imp.done = [int]$pp[0]; $script:imp.total = [int]$pp[1] } catch {}
+    if ($j.State -eq 'Running') { return }
+    if ($j.State -eq 'Completed') { $script:imp.status = 'fini'; Add-News ("$($script:imp.done) sons importés dans « $($script:imp.pack) »") }
+    else { $script:imp.status = 'erreur'; try { $script:imp.error = $j.ChildJobs[0].JobStateInfo.Reason.Message } catch {}; if (-not $script:imp.error) { $script:imp.error = 'Import impossible' } }
+    Remove-Job $j -Force -ErrorAction SilentlyContinue; $script:impJob = $null
+}
+
 # Ta voix au micro : enregistrement brut gardé pour pouvoir changer d'effet avant de l'enregistrer
 function Invoke-VoiceFx([string]$preset) {
     $raw = Join-Path $Data 'voix-brute.webm'; $out = Join-Path $Data 'voix-apercu.wav'
@@ -5075,13 +5159,23 @@ function Get-SoundList {
     foreach ($v in $Shouts) { if (Test-Path -LiteralPath (Join-Path $SonsDir ($v[0] + '.wav'))) { $l += @{ id = $v[0]; label = $v[1]; user = $false; voice = $true } } }
     $ud = Get-UserSoundsDir
     if (Test-Path -LiteralPath $ud) {
-        $l += @(Get-ChildItem -LiteralPath $ud -File | Where-Object { $AudioExt -contains $_.Extension.ToLower() } | Sort-Object Name |
-            ForEach-Object { @{ id = 'u:' + $_.Name; label = [IO.Path]::GetFileNameWithoutExtension($_.Name); user = $true } })
+        $base = (Get-Item -LiteralPath $ud).FullName.TrimEnd('\') + '\'
+        $l += @(Get-ChildItem -LiteralPath $ud -File -Recurse -ErrorAction SilentlyContinue | Where-Object { $AudioExt -contains $_.Extension.ToLower() } |
+            Sort-Object @{ e = { $_.DirectoryName } }, Name | Select-Object -First 300 |
+            ForEach-Object {
+                $rel = $_.FullName.Substring([math]::Min($base.Length, $_.FullName.Length))
+                $lab = ([IO.Path]::GetFileNameWithoutExtension($_.Name) -replace '[_]+', ' ' -replace '^\s*\d{1,3}\s*[-.)]?\s*', '').Trim()
+                @{ id = 'u:' + ($rel -replace '\\', '/'); label = $(if ($lab) { $lab } else { $_.BaseName }); user = $true; pack = $(if ($rel.Contains('\')) { $rel.Split('\')[0] } else { '' }) }
+            })
     }
     return $l
 }
 function Get-SoundPath([string]$sid) {
-    if ($sid.StartsWith('u:')) { $n = $sid.Substring(2); if ($n -match '[\\/:]' ) { return $null }; return (Join-Path (Get-UserSoundsDir) $n) }
+    if ($sid.StartsWith('u:')) {
+        $n = $sid.Substring(2) -replace '/', '\'
+        if ($n -match ':|\.\.' -or $n.StartsWith('\')) { return $null }   # pas de sortie du dossier « Sons perso »
+        return (Join-Path (Get-UserSoundsDir) $n)
+    }
     if ($Sounds.Contains($sid)) { return (Join-Path $SonsDir "$sid.wav") }
     if ($sid -match '^voix-[a-z]+$') { return (Join-Path $SonsDir "$sid.wav") }
     if ($sid -eq 'apercu') { return (Join-Path $Data 'voix-apercu.wav') }
@@ -5383,6 +5477,7 @@ function Get-State {
         export = $script:exp
         mixtape = $script:mx
         remoteOn = [bool]$script:remL
+        packImport = $script:imp
         pick = @{ status = $script:pick.status; n = $script:pick.n; kind = $script:pick.kind; dir = $script:pick.dir }
         separation = @{ state = (Get-SepState); step = (Get-SepStep); error = $script:sepInstallError
             gpu = (Get-GpuState); gpuName = (Get-GpuName); gpuError = $script:gpuError }
@@ -5584,7 +5679,7 @@ function Invoke-Request($ctx) {
         }
         '/api/pickdir' {
             $k = [string]$body.kind
-            Start-Pick $k $(if ($k -eq 'mx') { 'Choisis le dossier de MP3 à mixer (les sous-dossiers sont inclus)' } else { 'Choisis la clé USB ou le dossier où copier les titres' }) ''
+            Start-Pick $k $(if ($k -eq 'mx') { 'Choisis le dossier de MP3 à mixer (les sous-dossiers sont inclus)' } elseif ($k -eq 'pack') { 'Choisis le pack de sons (fichier ZIP) ou des sons à importer' } elseif ($k -eq 'packdir') { 'Choisis le dossier de sons à importer (les sous-dossiers sont inclus)' } else { 'Choisis la clé USB ou le dossier où copier les titres' }) ''
         }
         '/api/export' {
             if ($script:expJob) { Send-Json $ctx @{ error = 'Une copie est déjà en cours' }; return }
@@ -5630,6 +5725,11 @@ function Invoke-Request($ctx) {
             $err = Invoke-VoiceFx $(if ($pm.Success) { $pm.Groups[1].Value } else { 'sound' })
             Send-Json $ctx @{ ok = -not $err; error = $err }; return
         }
+        '/api/packimport' {
+            $err = Start-PackImport @(([string]$body.paths) -split '\|')
+            if ($err) { Send-Json $ctx @{ error = $err }; return }
+        }
+        '/api/packdone' { if (-not $script:impJob) { $script:imp = @{ status = 'vide'; done = 0; total = 0; pack = ''; error = '' } } }
         '/api/voixfx' { $err = Invoke-VoiceFx ([string]$body.preset); Send-Json $ctx @{ ok = -not $err; error = $err }; return }
         '/api/voixkeep' {
             $src = Join-Path $Data 'voix-apercu.wav'
@@ -5721,6 +5821,7 @@ while ($true) {
         try { Update-Pick } catch { Write-LogOnce 'Update-Pick' $_ }
         try { Update-VoiceGen } catch { Write-LogOnce 'Update-VoiceGen' $_ }
         try { Update-SoundGen } catch { Write-LogOnce 'Update-SoundGen' $_ }
+        try { Update-PackImport } catch { Write-LogOnce 'Update-PackImport' $_ }
         if ($CanSelfUpdate -and ($now - $script:lastUpdCheck).TotalSeconds -gt $UpdateEvery) { try { Start-UpdateCheck } catch {} }
         # Mise à jour programmée « à la fin des téléchargements » : on l'installe dès que tout est terminé
         if ($script:updateWhenIdle -and -not (Test-Busy)) {
