@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v3.5 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v4.0 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '3.5'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '4.0'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -167,20 +167,25 @@ $Html = @'
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>YT MP3</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <style>
 :root{
-  --bg:#0b0c10; --panel:#13151c; --panel2:#191c25; --line:#252935; --line2:#30354300;
-  --text:#eceef4; --muted:#8a90a0; --faint:#5d6272;
-  --a1:#ff3b6b; --a2:#8b5cf6; --ok:#34d399; --err:#f87171;
-  --grad:linear-gradient(135deg,var(--a1),var(--a2));
-  --r:14px;
+  --bg:#0c0b10; --panel:#16141c; --panel2:#1e1b26; --line:#2b2835; --line2:#30354300;
+  --text:#f2f0f5; --muted:#a09cab; --faint:#7a7587;
+  --a1:#ff4d79; --a2:#9b7bff; --ok:#4fd6a5; --err:#ff7a7a; --warn:#ffb454;
+  --grad:var(--a1); --ink:#14060b;
+  --r:16px;
+  --f-display:'Bricolage Grotesque','Segoe UI Variable Display','Segoe UI',system-ui,sans-serif;
+  --f-body:'Instrument Sans','Segoe UI Variable Text','Segoe UI',system-ui,sans-serif;
+  --f-mono:'JetBrains Mono',Consolas,'Cascadia Mono',monospace;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
 body{
   background:
-    radial-gradient(900px 420px at 15% -10%, #ff3b6b1c, transparent 60%),
-    radial-gradient(800px 420px at 95% 0%, #8b5cf61f, transparent 60%),
+    radial-gradient(900px 420px at 15% -10%, #ff4d791c, transparent 60%),
+    radial-gradient(800px 420px at 95% 0%, #9b7bff1f, transparent 60%),
     var(--bg);
   background-attachment:fixed;
   color:var(--text);
@@ -193,16 +198,16 @@ main{max-width:880px;margin:0 auto;padding:26px 24px 60px}
 
 /* ---- En-tête ---- */
 header{display:flex;align-items:center;gap:14px;margin-bottom:22px}
-.logo{width:42px;height:42px;border-radius:12px;background:var(--grad);display:grid;place-items:center;box-shadow:0 8px 24px #ff3b6b40}
+.logo{width:42px;height:42px;border-radius:12px;background:var(--grad);display:grid;place-items:center;box-shadow:0 8px 24px #ff4d7940}
 .logo svg{width:22px;height:22px;color:#fff}
 .brand h1{margin:0;font:600 20px/1.1 "Segoe UI Variable Display","Segoe UI",system-ui;letter-spacing:.2px}
 .ver{font:500 11.5px "Segoe UI",system-ui;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;vertical-align:3px;margin-left:4px;cursor:pointer}
 .ver:hover{color:var(--text)}
-.newver{font:600 11.5px "Segoe UI",system-ui;color:#fff;background:var(--grad);border-radius:6px;padding:3px 8px;vertical-align:3px;margin-left:6px;cursor:pointer;box-shadow:0 4px 14px #ff3b6b40}
+.newver{font:600 11.5px "Segoe UI",system-ui;color:#fff;background:var(--grad);border-radius:6px;padding:3px 8px;vertical-align:3px;margin-left:6px;cursor:pointer;box-shadow:0 4px 14px #ff4d7940}
 .updst{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:14px}
 .box.dlg{text-align:left;width:min(460px,92vw)}
 .dlg h3{margin:14px 0 4px}
-.dlg-ic{width:44px;height:44px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 8px 24px #ff3b6b40}
+.dlg-ic{width:44px;height:44px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff;box-shadow:0 8px 24px #ff4d7940}
 .dlg-ic.warn{background:linear-gradient(135deg,#f59e0b,#ef4444);box-shadow:0 8px 24px #f59e0b40}
 .dlg-choice .lnk.danger{color:var(--err)}
 .dlg-ic svg{width:22px;height:22px}
@@ -225,9 +230,9 @@ header .sp{flex:1}
 
 /* ---- Zone de saisie ---- */
 .hero{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;position:relative;transition:.2s}
-.hero.drag{border-color:var(--a1);box-shadow:0 0 0 4px #ff3b6b22}
+.hero.drag{border-color:var(--a1);box-shadow:0 0 0 4px #ff4d7922}
 .field{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:0 6px 0 14px;transition:.15s}
-.field:focus-within{border-color:#ff3b6b99;box-shadow:0 0 0 3px #ff3b6b1f}
+.field:focus-within{border-color:#ff4d7999;box-shadow:0 0 0 3px #ff4d791f}
 .field svg{color:var(--faint)}
 .field input{flex:1;min-width:0;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:15.5px;padding:15px 0}
 .field input::placeholder{color:var(--faint)}
@@ -243,7 +248,7 @@ header .sp{flex:1}
 .auto-q{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13.5px}
 .auto-q svg{color:var(--a1)}
 .tag.src{color:var(--text);border-color:#3a4050}
-.go{display:flex;align-items:center;gap:9px;padding:12px 22px;border-radius:11px;background:var(--grad);color:#fff;font-weight:600;font-size:15px;box-shadow:0 8px 22px #ff3b6b35;transition:.15s}
+.go{display:flex;align-items:center;gap:9px;padding:12px 22px;border-radius:11px;background:var(--grad);color:#fff;font-weight:600;font-size:15px;box-shadow:0 8px 22px #ff4d7935;transition:.15s}
 .go:hover{filter:brightness(1.08);transform:translateY(-1px)}
 .go:disabled{opacity:.45;transform:none;cursor:default}
 .hint{margin:12px 2px 0;color:var(--faint);font-size:12.5px}
@@ -364,9 +369,9 @@ body.has-player{--toast-b:112px}
 .seg.mini button{padding:4px 9px;font-size:12px}
 .seg.mini button:disabled{opacity:.3;cursor:default}
 .ib.fade{width:auto;padding:0 10px;font-size:12px;gap:6px;display:flex;align-items:center}
-.ib.fade.on{color:var(--a1);background:#ff3b6b14}
+.ib.fade.on{color:var(--a1);background:#ff4d7914}
 /* Titre en cours dans la bibliothèque */
-.item.playing{border-color:#ff3b6b66;background:linear-gradient(90deg,#ff3b6b10,transparent 60%),var(--panel)}
+.item.playing{border-color:#ff4d7966;background:linear-gradient(90deg,#ff4d7910,transparent 60%),var(--panel)}
 .item.playing .t{color:#fff}
 .eq{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;gap:3px;padding-bottom:16px;background:#0009}
 .eq i{width:4px;background:var(--a1);border-radius:2px;animation:eq .9s ease-in-out infinite}
@@ -406,7 +411,7 @@ body.dj-mode main{max-width:1360px}
 .jog-plate:active{cursor:grabbing}
 .jog-plate::before{content:'';position:absolute;inset:8px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffffff12,transparent 55%);pointer-events:none}
 .jog-cover{position:absolute;left:50%;top:50%;width:92px;height:92px;margin:-46px 0 0 -46px;border-radius:50%;overflow:hidden;
-  background-image:var(--lbl,none),linear-gradient(135deg,var(--dc),#8b5cf6 60%,#1e1b4b);background-size:cover;background-position:center;box-shadow:0 0 0 3px #0b0c10,0 0 0 4px #2c3039}
+  background-image:var(--lbl,none),linear-gradient(135deg,var(--dc),#9b7bff 60%,#1e1b4b);background-size:cover;background-position:center;box-shadow:0 0 0 3px #0b0c10,0 0 0 4px #2c3039}
 .jog-cover i{position:absolute;left:0;right:0;top:50%;margin-top:-6px;text-align:center;font-style:normal;font-size:9px;font-weight:800;letter-spacing:1px;color:#fff;text-shadow:0 1px 2px #000;padding:0 8px}
 .jog-mark{position:absolute;left:50%;top:4px;width:4px;height:22px;margin-left:-2px;border-radius:3px;background:var(--dc);box-shadow:0 0 10px var(--dc)}
 .jog-info{position:absolute;left:0;right:0;bottom:-2px;text-align:center;pointer-events:none}
@@ -540,7 +545,7 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
 .dlg-choice{display:flex;flex-direction:column;gap:10px;margin-top:18px}
 .dlg-choice .go,.dlg-choice .btn-ghost{width:100%;justify-content:center;margin:0}
 .chk{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:14px;cursor:pointer}
-.chk input{width:17px;height:17px;accent-color:#ff3b6b}
+.chk input{width:17px;height:17px;accent-color:#ff4d79}
 .chk span{flex:1}.chk small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
 .fwrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line);font-size:14px}
 .fwrow .ft{flex:1;min-width:0}.fwrow .ft b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -551,7 +556,7 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
 .exlist label:first-child{border-top:0}
 .exlist label span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .exlist label em{font-style:normal;color:var(--muted);font-size:12px}
-.exlist input{accent-color:#ff3b6b}
+.exlist input{accent-color:#ff4d79}
 .expre{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
 .expre .btn-ghost{padding:6px 12px;font-size:13px}
 .exsum{margin-top:10px;font-size:13px;color:var(--muted)}
@@ -577,21 +582,21 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
 .mxrow .seg{flex-wrap:nowrap}
 .mxsounds{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .mxsnd{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border:1px solid var(--line);border-radius:999px;font-size:13px;background:var(--bg)}
-.mxsnd svg{width:13px;height:13px}.mxsnd.user{border-style:dashed}.mxsnd.on{border-color:#ff3b6b;color:#fff}
+.mxsnd svg{width:13px;height:13px}.mxsnd.user{border-style:dashed}.mxsnd.on{border-color:#ff4d79;color:#fff}
 .mxtitle{width:100%;margin-top:12px;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font:inherit;font-size:14px}
 .mxsum{margin-top:10px;font-size:13px;color:var(--muted);line-height:1.5}
 .mxlist{gap:0}
 .mxtrk{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;cursor:grab}
-.mxtrk.drag{opacity:.4}.mxtrk.over{border-color:#ff3b6b}
+.mxtrk.drag{opacity:.4}.mxtrk.over{border-color:#ff4d79}
 .mxtrk .num{width:22px;text-align:center;color:var(--muted);font-size:12.5px;flex:none}
 .mxtrk .meta{flex:1;min-width:0}.mxtrk .t{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mxtrk .s{color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mxtrk .bad{color:var(--err)}
 .mxtr{display:flex;align-items:center;gap:8px;padding:7px 10px 7px 42px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
-.mxtr::before{content:'';width:2px;height:22px;background:linear-gradient(#ff3b6b,#8b5cf6);border-radius:2px;margin-right:4px}
+.mxtr::before{content:'';width:2px;height:22px;background:linear-gradient(#ff4d79,#9b7bff);border-radius:2px;margin-right:4px}
 .mxtr select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:4px 6px;font:inherit;font-size:12.5px}
 .mxtr .pv{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border:1px solid var(--line);border-radius:999px;color:var(--text)}
-.mxtr .pv svg{width:12px;height:12px}.mxtr .pv.on{border-color:#ff3b6b}
+.mxtr .pv svg{width:12px;height:12px}.mxtr .pv.on{border-color:#ff4d79}
 .mxtr .note{flex-basis:100%;padding-left:10px}
 .mxana{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);margin:0 0 12px}
 .mxana .bar{flex:1;max-width:260px;margin:0}
@@ -664,29 +669,153 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
 .toast.ok{border-color:#34d39955}.toast.err{border-color:#f8717166}
 @keyframes tin{from{opacity:0;transform:translateY(8px)}}
 @media (max-width:640px){.thumb{width:80px;height:45px}.search{width:150px}}
+
+/* =====================  Thème 4.0  ===================== */
+body{font-family:var(--f-body);font-size:15px;display:grid;grid-template-columns:232px minmax(0,1fr);
+  background:radial-gradient(900px 520px at 18% -10%, rgba(255,77,121,.15), transparent 70%),var(--bg);background-attachment:fixed}
+h1,h2,h3,.sh h2,.brand h1,.card h3,.dlg h3,.hello{font-family:var(--f-display);letter-spacing:-.2px}
+.dk-bpmv,.dk-cur,.dk-rem,.tt-pv,.tt-ltime,.count,.dur,.pl-time,.mxtrk .num,kbd{font-family:var(--f-mono)}
+main{max-width:1020px;width:100%;margin:0 auto;padding:28px 32px 60px}
+body.dj-mode main{max-width:1400px}body.mx-mode main{max-width:1280px}
+/* Barre latérale */
+.side{position:sticky;top:0;height:100vh;box-sizing:border-box;padding:22px 14px 16px;display:flex;flex-direction:column;gap:22px;border-right:1px solid rgba(255,255,255,.07);background:rgba(12,11,16,.55);backdrop-filter:blur(14px);z-index:16;overflow-y:auto}
+.side .brand{display:flex;align-items:center;gap:10px;padding:0 8px}
+.side .logo{width:32px;height:32px;border-radius:10px;background:var(--a1);color:var(--ink);box-shadow:none}
+.side .logo svg{width:30px;height:30px;color:var(--ink)}
+.side .brand h1{font-size:19px;font-weight:700;margin:0;white-space:nowrap}
+.ver{font-family:var(--f-mono);font-size:11px;background:transparent;border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:2px 6px;vertical-align:2px}
+.newver{display:inline-block;margin:6px 0 0;color:var(--ink);background:var(--ok);box-shadow:none}
+.side .tabs{flex-direction:column;background:none;border:0;padding:0;gap:4px}
+.side .tabs button{min-height:44px;padding:0 12px;border-radius:11px;gap:12px;font-size:15px;color:#c9c5d2;justify-content:flex-start;width:100%}
+.side .tabs button svg{width:18px;height:18px}
+.side .tabs button:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.side .tabs button.on{background:rgba(255,77,121,.14);color:#fff;font-weight:600;box-shadow:none}
+.side .tabs button.on svg{color:var(--a1)}
+.side-sec{display:flex;flex-direction:column;gap:8px;padding:0 12px;font-size:14px;color:#c9c5d2}
+.side-sec .t{font-size:11px;letter-spacing:1.4px;color:var(--muted);font-weight:600}
+.side-sec .r{display:flex;justify-content:space-between;gap:8px}.side-sec .r span:first-child{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.side-sec .r em{font-style:normal;font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.side-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.side-foot p{margin:0 12px 4px;font-size:12.5px;color:var(--muted)}
+.side-btn{display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.08);font-size:13.5px;color:#c9c5d2;text-align:left}
+.side-btn:hover{border-color:rgba(255,255,255,.18);color:var(--text)}
+.side-btn .dot{width:9px;height:9px;border-radius:50%;background:#4a4656;flex:none}
+.side-btn.on .dot{background:var(--ok);box-shadow:0 0 10px var(--ok)}
+.vhead{margin:4px 0 16px}
+.hello{margin:0;font-size:32px;font-weight:700;letter-spacing:-.6px;text-wrap:balance}
+body.dj-mode .vhead,body.mx-mode .vhead,body.set-mode .vhead{display:none}
+/* Surfaces en verre */
+.hero,.card,.item,.deck,.mxtrk,.dk-strip,.vwaves{border-color:rgba(255,255,255,.08)}
+.hero,.card,.item,.deck,.mxtrk{background:rgba(255,255,255,.045)}
+.hero{border-radius:18px;border-color:rgba(255,77,121,.45);box-shadow:0 0 0 4px rgba(255,77,121,.08),0 18px 40px rgba(0,0,0,.4)}
+.field{background:rgba(0,0,0,.25);border-color:rgba(255,255,255,.1);border-radius:14px}
+.field input{font-size:17px}
+.item{border-radius:16px}.item:hover{border-color:rgba(255,255,255,.16)}
+.card{border-radius:18px}
+.sh h2{font-size:18px;font-weight:700;text-transform:none;letter-spacing:-.2px;color:var(--text)}
+.go{color:var(--ink);box-shadow:none;border-radius:12px;font-weight:600}
+.go:hover{filter:brightness(1.1);transform:none}
+.btn-ghost{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.12);border-radius:11px}
+.btn-ghost:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22)}
+.seg{background:rgba(255,255,255,.05);border-color:transparent;border-radius:11px}
+.seg button.on{background:rgba(255,255,255,.12);box-shadow:none}
+.tag{font-family:var(--f-mono);font-size:11px}
+.box{background:#17151e;border:1px solid rgba(255,255,255,.1);border-radius:20px}
+.overlay{backdrop-filter:blur(8px)}
+.dlg-ic{background:var(--a1);color:var(--ink);box-shadow:none}
+.player{left:232px;background:rgba(22,20,28,.92);backdrop-filter:blur(16px);border-top:1px solid rgba(255,255,255,.09)}
+.toast{border-radius:12px}
+:focus-visible{outline:2px solid var(--a1);outline-offset:2px}
+[hidden]{display:none!important}
+/* Copilote */
+body:not(.dj-mode):not(.mx-mode):not(.set-mode) main{max-width:1320px}
+#v-main{display:grid;grid-template-columns:minmax(0,1fr) 310px;column-gap:22px;align-items:start}
+#v-main>*{grid-column:1;min-width:0}
+#v-main>#copi{grid-column:2;grid-row:1/span 40;position:sticky;top:20px;margin:0}
+.chips{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:14px}
+.chips button{min-height:34px;padding:0 13px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#c9c5d2;font-size:13px}
+.chips button:hover{border-color:rgba(255,77,121,.6);color:#fff}
+.chip-k{margin-left:auto;font-size:12px;color:var(--faint)}
+kbd{font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:6px;padding:2px 6px;color:var(--muted)}
+.cpnote{margin:0 2px 10px;color:var(--muted);font-size:13.5px}
+.cplist{display:flex;flex-direction:column}
+.cprow{display:flex;align-items:center;gap:12px;padding:8px 4px;border-top:1px solid rgba(255,255,255,.06);min-height:48px}
+.cprow .meta{flex:1;min-width:0}.cprow .t{font-weight:600;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cprow .s{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cprow .mono{font-family:var(--f-mono);font-size:12.5px;white-space:nowrap}
+.cprow .keyc{font-family:var(--f-mono);font-size:11.5px;color:var(--ok);border:1px solid rgba(79,214,165,.45);border-radius:6px;padding:1px 6px;min-width:34px;text-align:center}
+.cprow .keyc:empty{visibility:hidden}
+.cprow button{min-width:36px;height:36px;padding:0 9px;border-radius:9px;border:1px solid rgba(255,255,255,.14);font-size:13px;font-weight:600;display:grid;place-items:center}
+.cprow button:hover{background:rgba(255,255,255,.08)}
+.cprow button svg{width:13px;height:13px}
+.cprow button[data-cp="a"]{color:var(--a1)}.cprow button[data-cp="b"]{color:#b9a3ff}
+.cprow.sel{background:rgba(255,77,121,.08);border-radius:10px}
+.copi h3{margin:0 0 4px;font-size:17px}
+.copi .in{display:flex;flex-direction:column;gap:6px;padding:14px 0;border-top:1px solid rgba(255,255,255,.07)}
+.copi .in:first-child{border-top:0}
+.copi .k{font-size:11px;letter-spacing:1.4px;font-weight:600}
+.copi .k.w{color:var(--warn)}.copi .k.g{color:var(--ok)}.copi .k.v{color:#b9a3ff}.copi .k.n{color:var(--muted)}
+.copi .tx{font-size:14px;line-height:1.45}
+.copi .in button{align-self:flex-start;min-height:40px;padding:0 14px;border-radius:11px;border:1px solid rgba(255,255,255,.14);font-size:13.5px;margin-top:2px}
+.copi .in button.pri{border:0;background:var(--text);color:var(--bg);font-weight:600}
+.copi .in button:hover{filter:brightness(1.15)}
+.copi .bar{margin:4px 0 0}
+.box.cmd{width:min(640px,94vw);padding:0;text-align:left;overflow:hidden;align-self:flex-start;margin-top:12vh}
+.cmd-in{display:flex;align-items:center;gap:12px;padding:6px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.cmd-in svg{color:var(--a1);width:20px;height:20px}
+.cmd-in input{flex:1;min-width:0;height:52px;background:none;border:0;outline:0;color:var(--text);font:inherit;font-size:17px}
+#cmdlist{max-height:46vh;overflow:auto;padding:0 12px}
+.cmd-help{margin:0;padding:12px 18px;font-size:12.5px;color:var(--muted);border-top:1px solid rgba(255,255,255,.08)}
+.cmd-help em{font-style:normal;color:#c9c5d2}
+.cpmix{border:1px solid rgba(255,77,121,.35);background:rgba(255,77,121,.07);border-radius:14px;padding:12px 14px;margin-bottom:12px;font-size:13.5px;line-height:1.45;display:flex;flex-direction:column;gap:8px}
+.cpmix b.h{font-family:var(--f-display);font-size:14.5px;display:flex;align-items:center;gap:7px}
+.cpmix b.h svg{width:15px;height:15px;color:var(--a1)}
+.cpmix .acts{display:flex;gap:8px;flex-wrap:wrap}
+.cpmix button{min-height:38px;padding:0 13px;border-radius:10px;border:1px solid rgba(255,255,255,.16);font-size:13px}
+.cpmix button.pri{border:0;background:var(--a1);color:var(--ink);font-weight:600}
+@media (max-width:1180px){#v-main{grid-template-columns:minmax(0,1fr)}#v-main>#copi{grid-column:1;grid-row:auto;position:static;margin-top:18px}}
+@media (max-width:900px){
+  body{display:block}
+  .side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:10px;padding:12px 14px;border-right:0;border-bottom:1px solid rgba(255,255,255,.07)}
+  .side .tabs{flex-direction:row;flex-wrap:wrap;flex:1 1 100%;order:3}
+  .side .tabs button{width:auto}
+  .side-sec,.side-foot p{display:none}
+  .side-foot{margin:0 0 0 auto;flex-direction:row}
+  .player{left:0}
+  main{padding:18px 16px 60px}
+  .hello{font-size:24px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<main>
-  <header>
-    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></div>
-    <div class="brand"><h1>YT MP3 <span class="ver" id="appver"></span><span class="newver" id="newver" hidden></span></h1><p id="stats">Bibliothèque vide</p></div>
-    <div class="sp"></div>
-    <nav class="tabs">
-      <button data-tab="main" class="on">Convertir</button>
+<aside class="side" aria-label="Navigation">
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 30 30"><path d="M8 19v-6M12 22V8M16 19v-8M20 16v-3" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" fill="none"/></svg></div>
+    <div><h1>YT MP3 <span class="ver" id="appver"></span></h1><span class="newver" id="newver" hidden></span></div>
+  </div>
+  <nav class="tabs">
+      <button data-tab="main" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0 0-4-4m4 4 4-4M4 20h16"/></svg>Convertir</button>
       <button data-tab="dj"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="7" cy="12" r="4.5"/><circle cx="17" cy="12" r="4.5"/><circle cx="7" cy="12" r="1"/><circle cx="17" cy="12" r="1"/></svg>Mix</button>
       <button data-tab="mx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="8" cy="12" r="2.5"/><circle cx="16" cy="12" r="2.5"/><path d="M8 9.5h8M8 14.5h8"/></svg>Mixtape</button>
       <button data-tab="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Paramètres</button>
     </nav>
-    <button class="btn-ghost" id="folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Dossier MP3</button>
-  </header>
+  <div class="side-sec" id="sidepl" hidden></div>
+  <div class="side-foot">
+    <p id="stats">Bibliothèque vide</p>
+    <button class="side-btn" id="folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Dossier MP3</button>
+    <button class="side-btn" id="sidetel" title="Télécommande sur téléphone"><span class="dot"></span><span id="sidetelt">Téléphone</span></button>
+  </div>
+</aside>
+<main>
+  <div id="v-head" class="vhead"><h2 class="hello" id="hello">Qu'est-ce qu'on écoute ?</h2></div>
 
   <div id="v-main">
   <div class="hero" id="hero">
     <form id="form">
       <div class="field">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
-        <input id="url" placeholder="Colle un lien YouTube ou tape une recherche…" autocomplete="off" spellcheck="false">
+        <input id="url" placeholder="Colle un lien, cherche un titre ou demande : zouk autour de 100 BPM…" autocomplete="off" spellcheck="false">
         <button type="button" class="paste" id="paste"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>Coller</button>
       </div>
       <div class="row">
@@ -695,8 +824,24 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
         <button class="go" id="go" type="submit"></button>
       </div>
     </form>
-    <p class="hint">Astuce : <kbd>Ctrl</kbd> + <kbd>V</kbd> n'importe où, glisser-déposer un lien, plusieurs liens d'un coup, ou simplement « artiste titre » pour chercher sur YouTube Music, YouTube et SoundCloud.</p>
+    <div class="chips" id="cpchips">
+      <button type="button" data-chip="entre 95 et 105 BPM">Entre 95 et 105 BPM</button>
+      <button type="button" data-chip="compatible avec le morceau en cours">Compatible avec le morceau en cours</button>
+      <button type="button" data-chip="mixtape de 30 min avec mes derniers titres">Mixtape de 30 min avec mes derniers titres</button>
+      <span class="chip-k"><kbd>Ctrl</kbd> <kbd>K</kbd> depuis n'importe quel écran</span>
+    </div>
   </div>
+
+  <section id="cpsec" hidden>
+    <div class="sh"><h2 id="cptitle">Copilote</h2><div class="sp"></div><button class="ib" id="cpclose" title="Fermer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <p class="cpnote" id="cpnote"></p>
+    <div class="cplist" id="cplist"></div>
+  </section>
+
+  <aside class="card copi" id="copi" aria-label="Suggestions du copilote">
+    <h3>Le copilote a remarqué</h3>
+    <div id="copibox"></div>
+  </aside>
 
   <section id="ssec" hidden>
     <div class="sh"><h2 id="stitle">Résultats</h2><div class="sp"></div><button class="ib" id="sclose" title="Fermer les résultats"></button></div>
@@ -742,6 +887,7 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
         <div class="sh"><h2>Liste de soirée</h2><span class="count" id="setcount"></span><div class="sp"></div>
           <button class="lnk" id="setsort" title="Trie par tempo croissant pour faire monter l'énergie">Trier par BPM</button>
           <button class="lnk" id="setclear">Vider</button></div>
+        <div class="cpmix" id="cpmix"></div>
         <button class="btn-ghost recb autodjb" id="autodj" title="Auto-DJ : enchaîne tout seul la liste de soirée (puis des morceaux compatibles)"></button>
         <div class="setnow" id="setnow"></div>
         <div class="list setlist" id="setlist"></div>
@@ -918,6 +1064,11 @@ kbd{font:600 11.5px "Segoe UI",system-ui;background:var(--panel2);border:1px sol
   <div class="dlg-btns"><button class="btn-ghost" id="exclose">Fermer</button><button class="go" id="exgo">Copier</button></div>
 </div></div>
 <svg width="0" height="0" style="position:absolute"><defs><radialGradient id="knobg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#5b606d"/><stop offset=".6" stop-color="#2c2f37"/><stop offset="1" stop-color="#1b1d23"/></radialGradient></defs></svg>
+<div class="overlay" id="cmddlg"><div class="box cmd">
+  <div class="cmd-in"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg><input id="cmdq" placeholder="Un titre, « 100 BPM », « charge … sur B », « mixtape de 30 min »…" autocomplete="off" spellcheck="false"><kbd>Échap</kbd></div>
+  <div class="cplist" id="cmdlist"></div>
+  <p class="cmd-help">Entrée lance la demande. Exemples : <em>joue kompa love</em> · <em>charge soleil sur B</em> · <em>sépare la voix de …</em> · <em>compatible avec 8A</em></p>
+</div></div>
 <div class="overlay" id="teldlg"><div class="box dlg">
   <h3 style="margin-top:0">Télécommande sur téléphone</h3>
   <p>Pilote les platines, le crossfader, les pads et charge des morceaux depuis ton téléphone, connecté au même Wi-Fi que ce PC.</p>
@@ -1089,7 +1240,7 @@ function extract(text){ return [...new Set((String(text).match(/https?:\/\/[^\s"
 async function add(text){
   const urls = extract(text);
   if (!urls.length){
-    if (String(text).trim()) return search(text);
+    if (String(text).trim()) { if (cpRun(text)) return; return search(text); }
     toast('Colle un lien ou tape une recherche', 'err'); return;
   }
   if (urls.length === 1 && /youtu.*[?&]list=[\w-]+/.test(urls[0])) {
@@ -1176,6 +1327,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['4.0', '14/11/2026', ['Nouvelle interface : barre latérale, panneaux translucides, nouvelle typographie, sur tous les écrans', 'Copilote : écris ce que tu veux dans la barre (« entre 95 et 105 BPM », « compatible avec … », « charge … sur B », « mixtape de 30 min », « sépare la voix de … »)', 'Barre de commande Ctrl + K depuis n’importe quel écran', 'Suggestions sur l’accueil : doublons, titres prêts à mixer, morceaux à séparer', 'Dans le Mix : le copilote propose le morceau suivant et le bon type d’enchaînement', 'L’analyse du tempo et de la tonalité se fait maintenant sur tous les écrans']],
   ['3.5', '03/11/2026', ['Scratch sur la molette : pose la main sur le disque, il s’arrête ; pousse et tire, le son suit ton geste en avant comme en arrière ; lâche, la platine repart']],
   ['3.4', '03/11/2026', ['Sampler resserré : seuls les sons gardés sur les pads restent, sans emplacement vide, en banques de 8 pads (le bouton 🎤 MA VOIX passe à côté de + IMPORTER)', 'Bruitages intégrés réduits à Laser et Rewind ; les effets automatiques de la Mixtape utilisent tes sons du pack Dancehall']],
   ['3.3', '03/11/2026', ['Sampler à ta main : clic droit sur un pad pour l’écouter, changer de sample ou libérer l’emplacement ; clic droit (ou clic) sur un pad vide pour y ajouter n’importe quel son', '« + BANQUE » ajoute une page de pads vides ; ta disposition est gardée et suivie par la télécommande']],
@@ -1698,7 +1850,7 @@ async function djSmpLoad(){
     clearTimeout(djSmpTimer); if (r.voices === 'preparation') djSmpTimer = setTimeout(() => { djSmpLoad(); if (typeof mxSoundsLoad === 'function' && !$('#v-mx').hidden) mxSoundsLoad(); }, 4000);
   } catch {}
 }
-const SMP_COL = ['#ff3b6b', '#f97316', '#facc15', '#22c55e', '#06b6d4', '#8b5cf6', '#ec4899', '#a3a3a3'];
+const SMP_COL = ['#ff4d79', '#f97316', '#facc15', '#22c55e', '#06b6d4', '#9b7bff', '#ec4899', '#a3a3a3'];
 DJ.bank = 0;
 const smpById = id => djSmpList.find(x => x.id === id);
 // Disposition des pads (gardée d'une soirée à l'autre) : 8 emplacements par banque.
@@ -2188,7 +2340,7 @@ function djZoom(d){
   if (!w) return;
   if (cv.width !== Math.round(w * r)) { cv.width = Math.round(w * r); cv.height = Math.round(h * r); }
   const g = cv.getContext('2d'); g.setTransform(r, 0, 0, r, 0, 0); g.clearRect(0, 0, w, h);
-  const col = d.i ? '#8b5cf6' : '#ff3b6b', cur = d.el.currentTime || 0, span = 5 * (d.el.playbackRate || 1), x0 = cur - span, pps = w / (2 * span), mid = h / 2;
+  const col = d.i ? '#9b7bff' : '#ff4d79', cur = d.el.currentTime || 0, span = 5 * (d.el.playbackRate || 1), x0 = cur - span, pps = w / (2 * span), mid = h / 2;
   if (d.zp && d.id) {
     const z = d.zp;
     for (let px = 0; px < w; px += 2) {
@@ -2222,7 +2374,7 @@ function djDraw(){
     if (cv.width !== Math.round(w * r)) { cv.width = Math.round(w * r); cv.height = Math.round(h * r); }
     const g = cv.getContext('2d'); g.setTransform(r, 0, 0, r, 0, 0); g.clearRect(0, 0, w, h);
     const dur = d.el.duration || 0, cur = d.el.currentTime || 0, k = dur ? cur / dur : 0;
-    const col = d.i ? '#8b5cf6' : '#ff3b6b';
+    const col = d.i ? '#9b7bff' : '#ff4d79';
     if (dur && d.loop) { g.fillStyle = '#22c55e26'; g.fillRect(d.loop.in / dur * w, 0, Math.max(2, (d.loop.out - d.loop.in) / dur * w), h); }
     if (d.peaks instanceof Float32Array) {
       const n = d.peaks.length;
@@ -2777,7 +2929,7 @@ autoBtn();
 /* ---------- Analyse de fond : tempo et tonalité de toute la bibliothèque (onglet Mix ouvert) ---------- */
 let anaBusy = false;
 async function djAnalyseLibrary(){
-  if (anaBusy || $('#v-dj').hidden || !state) return;
+  if (anaBusy || !state || decks.some(a => !a.paused)) return;   // sur tous les écrans, mais pas pendant une lecture
   const todo = (state.history || []).filter(x => x.exists && x.uploader !== 'Mix YT MP3' && x.uploader !== 'Mixtape YT MP3' && !LSJ.get('anaskip', {})[x.id] && !((djInfo(x.id) || {}).v === 2));
   $('#anacount').textContent = todo.length ? `analyse du tempo et de la tonalité… (${todo.length} restant${todo.length > 1 ? 's' : ''})` : '';
   if (!todo.length) return;
@@ -2853,6 +3005,7 @@ function show(tab){
   document.body.classList.toggle('mx-mode', tab === 'mx');
   if (tab === 'mx') { mxSoundsLoad(); mxKey = ''; mxRender(); }
   document.body.classList.toggle('dj-mode', tab === 'dj');
+  document.body.classList.toggle('set-mode', tab === 'set');
   if (tab === 'dj') { djRenderLib(true); setKey = ''; djRenderSet(); if (!djSmpList.length) djSmpLoad(); }
 }
 document.querySelector('.tabs').onclick = e => { const b = e.target.closest('button'); if (b) show(b.dataset.tab); };
@@ -2944,6 +3097,7 @@ function render(s){
   maybeOfferUpdate(s);
   if (s.appVersion) renderAbout(s.appVersion);
   renderSepCard(s.separation || {});
+  sideRender(s);
   mxState(s.mixtape || {});
   if (s.packImport) packState(s.packImport);
   renderPl(s.playlist || {}); renderFollows(s); renderNews(s.news || []); renderExport(s.export || {});
@@ -3779,6 +3933,264 @@ $('#vxkeep').onclick = async () => {
   } catch(err){ toast(err.message, 'err'); }
 };
 
+
+/* ===================== Copilote : demandes en langage courant, suggestions ===================== */
+const cpNorm = t => String(t || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const CP_STOP = new Set('de du des le la les un une et a au aux pour avec sans sur dans en mes mon ma moi me ce cet cette qui que quoi il y titre titres morceau morceaux son sons chanson chansons musique musiques truc trucs bpm tempo autour vers environ entre apres compatible compatibles enchainer suite suivant cours platine joue lis mets charge trouve cherche donne veux voudrais stp svp derniers dernier recents recent nouveaux lent lents rapide rapides'.split(' '));
+const cpLib = () => (state && state.history || []).filter(x => x.exists && x.uploader !== 'Mix YT MP3' && x.uploader !== 'Mixtape YT MP3');
+function cpFind(q, lib){
+  const w = cpNorm(q).split(' ').filter(t => t.length > 1 && !CP_STOP.has(t)); if (!w.length) return [];
+  return (lib || cpLib()).map(x => { const h = ' ' + cpNorm(x.title + ' ' + x.uploader) + ' '; return [x, w.filter(t => h.includes(t)).length / w.length]; })
+    .filter(([, sc]) => sc >= 0.6).sort((a, b) => b[1] - a[1]).map(([x]) => x);
+}
+const PLAY_SVG = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4v16l13-8z"/></svg>';
+function cpRow(x){
+  const i = djInfo(x.id) || {};
+  return `<div class="cprow" data-id="${x.id}"><div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${x.duration ? ' · ' + esc(x.duration) : ''}</div></div>
+    <span class="mono">${i.bpm ? fr1(i.bpm) + ' BPM' : ''}</span><span class="keyc">${i.key && i.key.cam || ''}</span>
+    <button data-cp="play" title="Écouter" aria-label="Écouter">${PLAY_SVG}</button><button data-cp="a" title="Charger sur la platine A">A</button><button data-cp="b" title="Charger sur la platine B">B</button><button data-cp="set" title="Ajouter à la liste de soirée">+</button></div>`;
+}
+// Morceau de référence : celui d'une platine à l'antenne, sinon celui du lecteur
+function cpCurrent(){
+  const d = DJ.d.find(x => djOnAir(x)) || DJ.d.find(x => x.id && !x.el.paused);
+  if (d) return byId(d.id);
+  return (P.id && byId(P.id)) || null;
+}
+function cpParse(text){
+  const q = cpNorm(text); let m;
+  if (/\bmixtape\b/.test(q)) { m = q.match(/(\d{1,3})\s*(min|mn|minutes?)\b/); const h = q.match(/\b(\d)\s*h(eures?)?\b/); return { kind: 'mixtape', minutes: m ? +m[1] : h ? +h[1] * 60 : 30, recent: /\b(derniers?|recents?|nouveaux|nouveautes)\b/.test(q), q }; }
+  if (m = q.match(/^(?:separe|separer|isole|isoler)\s+(?:la voix et l instru(?:mental)? de |les? voix de |la voix de |l instru(?:mental)? de )?(.+)/)) return { kind: 'sep', q: m[1] };
+  if (m = q.match(/^(?:charge|charger|mets|met|mettre|envoie)\s+(.+?)\s+sur\s+(?:la\s+)?(?:platine\s+)?([ab])$/)) return { kind: 'load', q: m[1], deck: m[2] === 'a' ? 0 : 1 };
+  if (m = q.match(/^(?:joue|jouer|lis|lire|ecoute|ecouter|lance|lancer)\s+(.+)/)) return { kind: 'play', q: m[1] };
+  const f = {}; let rest = q;
+  const cut = re => { const r = rest.match(re); if (r) rest = rest.replace(r[0], ' '); return r; };
+  if (m = cut(/(?:apres|compatibles? avec|qui va avec|pour enchainer(?: apres| avec)?|a la suite de)\s+(.+)$/)) {
+    const k = m[1].match(/^(1[0-2]|[1-9])\s?([ab])$/);
+    if (k) f.key = k[1] + k[2].toUpperCase(); else if (/morceau en cours|ce morceau|ca$|celui en cours|la platine/.test(m[1])) f.afterCur = true; else f.after = m[1];
+  }
+  if (m = cut(/entre\s+(\d{2,3})\s+et\s+(\d{2,3})(?:\s*bpm)?/)) { f.lo = +m[1]; f.hi = +m[2]; }
+  else if (m = cut(/(\d{2,3})\s*(?:a|-)\s*(\d{2,3})\s*bpm/)) { f.lo = +m[1]; f.hi = +m[2]; }
+  else if (m = cut(/(\d{2,3})\s*bpm/)) { f.lo = +m[1] - 4; f.hi = +m[1] + 4; }
+  if (!f.key && (m = cut(/\b(1[0-2]|[1-9])([ab])\b/))) f.key = m[1] + m[2].toUpperCase();
+  if (cut(/\b(lents?|calmes?|doux|slow)\b/)) f.hi = Math.min(f.hi || 999, 100);
+  if (cut(/\b(rapides?|qui bouge|energiques?)\b/)) f.lo = Math.max(f.lo || 0, 118);
+  if (cut(/\b(compatibles?|pour enchainer|la suite|suivant)\b/) && !f.after && !f.key) f.afterCur = true;
+  if (cut(/\b(sans voix|instrumentaux?|instru|karaoke)\b/)) f.instru = true;
+  if (cut(/\b(derniers?|recents?|nouveaux|nouveautes)\b/)) f.recent = true;
+  if (!Object.keys(f).length) return null;
+  f.words = rest.split(' ').filter(t => t.length > 1 && !CP_STOP.has(t) && !/^\d+$/.test(t)).join(' ');
+  return { kind: 'filter', f };
+}
+// Applique un filtre à la bibliothèque : { list, note }
+function cpFilter(f){
+  let lib = cpLib().filter(x => !x.fromMix), notes = [], ref = null;
+  const total = lib.length, missing = lib.filter(x => !(djInfo(x.id) || {}).bpm).length;
+  if (f.after) { ref = cpFind(f.after)[0]; if (!ref) return { list: [], note: `Je ne trouve pas « ${f.after} » dans ta bibliothèque.` }; }
+  if (f.afterCur) { ref = cpCurrent(); if (!ref) return { list: [], note: 'Aucun morceau en cours : lance une lecture ou précise un titre (« compatible avec … »).' }; }
+  if (f.words) { const hit = cpFind(f.words, lib); if (hit.length) { lib = hit; notes.push(`« ${f.words} »`); } else notes.push(`« ${f.words} » ignoré (je ne connais pas le genre des morceaux, seulement leur titre et leur artiste)`); }
+  if (f.lo || f.hi) { const lo = f.lo || 0, hi = f.hi || 999; lib = lib.filter(x => { const b = (djInfo(x.id) || {}).bpm; return b && ((b >= lo && b <= hi) || (b * 2 >= lo && b * 2 <= hi) || (b / 2 >= lo && b / 2 <= hi)); }); notes.push(f.lo && f.hi && f.hi < 999 ? `${f.lo} à ${f.hi} BPM` : f.lo ? `plus de ${f.lo} BPM` : `moins de ${f.hi} BPM`); }
+  if (f.key) { lib = lib.filter(x => djKeyOk({ cam: f.key }, (djInfo(x.id) || {}).key)); notes.push(`tonalité compatible avec ${f.key}`); }
+  if (ref) {
+    const ri = djInfo(ref.id) || {};
+    if (!ri.bpm) return { list: [], note: `« ${ref.title} » n'est pas encore analysé : réessaie dans un instant.` };
+    lib = lib.filter(x => { if (x.id === ref.id) return false; const i = djInfo(x.id) || {}; if (!i.bpm) return false; let r = i.bpm / ri.bpm; [2, 0.5].forEach(k => { if (Math.abs(r * k - 1) < Math.abs(r - 1)) r *= k; }); return Math.abs(r - 1) <= 0.08 && (!ri.key || !ri.key.cam || !i.key || !i.key.cam || djKeyOk(ri.key, i.key)); })
+      .sort((a, b) => Math.abs(djInfo(a.id).bpm - ri.bpm) - Math.abs(djInfo(b.id).bpm - ri.bpm));
+    notes.push(`s'enchaîne avec « ${ref.title} » (${fr1(ri.bpm)} BPM${ri.key && ri.key.cam ? ', ' + ri.key.cam : ''})`);
+  }
+  if (f.instru) { lib = lib.filter(x => x.instru); notes.push('version instrumentale disponible'); }
+  if (f.recent) { lib = lib.slice(0, 15); notes.push('les plus récents'); }
+  let note = notes.join(' · ');
+  if (missing && (f.lo || f.hi || f.key || ref)) note += ` — ${missing} titre${missing > 1 ? 's' : ''} sur ${total} pas encore analysé${missing > 1 ? 's' : ''}`;
+  return { list: lib.slice(0, 40), note };
+}
+function cpShow(title, note, list){
+  $('#cptitle').textContent = title; $('#cpnote').textContent = note || ''; $('#cpnote').hidden = !note;
+  $('#cplist').innerHTML = list.map(cpRow).join('');
+  $('#cpsec').hidden = false;
+}
+$('#cpclose').onclick = () => { $('#cpsec').hidden = true; };
+// Choisit les morceaux d'une mixtape : des tempos proches, pour une durée donnée
+function cpMixtapePick(minutes, recent){
+  let lib = cpLib().filter(x => !x.fromMix && (djInfo(x.id) || {}).bpm && secsOf(x.duration) >= 45);
+  if (recent) lib = lib.slice(0, 40);
+  if (lib.length < 2) return [];
+  const fold = b => { while (b < 75) b *= 2; while (b >= 150) b /= 2; return b; };
+  lib = lib.map(x => ({ x, b: fold(djInfo(x.id).bpm), s: secsOf(x.duration) })).sort((p, q) => p.b - q.b);
+  const want = minutes * 60; let best = null;
+  for (let i = 0; i < lib.length; i++) {   // fenêtre de tempos la plus serrée qui atteint la durée
+    let tot = 0;
+    for (let j = i; j < lib.length; j++) { tot += lib[j].s; if (tot >= want * 0.9) { const spread = lib[j].b - lib[i].b; if (!best || spread < best.spread) best = { i, j, spread }; break; } }
+  }
+  const pick = best ? lib.slice(best.i, best.j + 1) : lib;
+  return pick.map(p => p.x);
+}
+function cpMakeMixtape(list, title){
+  if (!list.length) return toast('Pas assez de morceaux analysés pour une mixtape', 'err');
+  if (MX.items.length && !confirm(`Remplacer les ${MX.items.length} morceaux déjà dans l'onglet Mixtape ?`)) return;
+  MX.items = list.map(x => ({ kind: 'h', id: x.id })); MX.tr = {}; MX.opts.title = title; MX.opts.order = 'tempo'; mxSave();
+  show('mx'); toast(`${list.length} morceaux prêts : vérifie l'ordre puis clique sur « Créer la mixtape »`, 'ok');
+}
+// Exécute une demande. Renvoie false si ce n'en est pas une (la recherche en ligne prend alors le relais).
+function cpRun(text){
+  const p = cpParse(text);
+  if (!p) {
+    const hit = cpFind(text);   // simple recherche : on montre aussi ce que la bibliothèque contient déjà
+    if (hit.length) cpShow('Déjà dans ta bibliothèque', '', hit.slice(0, 8)); else $('#cpsec').hidden = true;
+    return false;
+  }
+  $('#url').value = '';
+  if (p.kind === 'filter') {
+    const r = cpFilter(p.f);
+    cpShow(r.list.length ? `${r.list.length} titre${r.list.length > 1 ? 's' : ''} de ta bibliothèque` : 'Aucun titre ne correspond', r.note, r.list);
+    show('main'); return true;
+  }
+  if (p.kind === 'mixtape') {
+    const list = cpMixtapePick(p.minutes, p.recent);
+    cpMakeMixtape(list, `Mixtape ${p.minutes} min`); return true;
+  }
+  const x = cpFind(p.q)[0];
+  if (!x) { toast(`Je ne trouve pas « ${p.q} » dans ta bibliothèque`, 'err'); return true; }
+  if (p.kind === 'play') { playFrom(x.id, 'orig'); toast(`Lecture : ${x.title}`); }
+  if (p.kind === 'load') { show('dj'); djLoadSafe(p.deck, x.id); }
+  if (p.kind === 'sep') {
+    if (!state.separation || state.separation.state !== 'pret') { toast('Installe d’abord le module de séparation dans Paramètres', 'err'); show('set'); }
+    else if (x.instru) toast(`« ${x.title} » est déjà séparé`);
+    else api('/api/separate', { id: x.id }).then(s => { render(s); toast(`Séparation lancée : ${x.title}`, 'ok'); }).catch(e => toast(e.message, 'err'));
+  }
+  return true;
+}
+// Boutons d'une ligne de résultat
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-cp]'); if (!b) return;
+  const id = b.closest('.cprow').dataset.id, k = b.dataset.cp;
+  if (k === 'play') playFrom(id, 'orig');
+  if (k === 'a' || k === 'b') { cmdClose(); show('dj'); djLoadSafe(k === 'a' ? 0 : 1, id); }
+  if (k === 'set') setAdd(id);
+});
+$('#cpchips').onclick = e => { const b = e.target.closest('[data-chip]'); if (b) { $('#url').value = b.dataset.chip; add(b.dataset.chip); } };
+
+/* --- Barre de commande (Ctrl + K) --- */
+function cmdOpen(){ $('#cmddlg').classList.add('show'); $('#cmdq').value = ''; cmdRender(); setTimeout(() => $('#cmdq').focus(), 30); }
+function cmdClose(){ $('#cmddlg').classList.remove('show'); $('#cmdq').blur(); }
+function cmdRender(){
+  const t = $('#cmdq').value, p = t.trim() ? cpParse(t) : null;
+  let list = [];
+  if (p && p.kind === 'filter') list = cpFilter(p.f).list; else if (p && p.q) list = cpFind(p.q); else if (t.trim()) list = cpFind(t);
+  $('#cmdlist').innerHTML = list.slice(0, 7).map(cpRow).join('');
+}
+$('#cmdq').oninput = cmdRender;
+$('#cmdq').onkeydown = e => {
+  if (e.key === 'Escape') { cmdClose(); return; }
+  if (e.key !== 'Enter') return;
+  const t = $('#cmdq').value.trim(); if (!t) return;
+  cmdClose();
+  const p = cpParse(t);
+  if (!p && !extract(t).length) { const hit = cpFind(t); if (hit.length && !$('#v-dj').hidden) { djLoadSafe(djMixTarget(), hit[0].id); return; } }   // dans le Mix : un titre seul se charge sur la platine libre
+  if (!p) show('main');
+  $('#url').value = t; add(t);
+};
+$('#cmddlg').addEventListener('mousedown', e => { if (e.target === $('#cmddlg')) cmdClose(); });
+document.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); e.stopImmediatePropagation(); if ($('#cmddlg').classList.contains('show')) cmdClose(); else cmdOpen(); } }, true);
+
+/* --- Ce que le copilote a remarqué (accueil) --- */
+let copiKey = '';
+function copiRender(){
+  if (!state || $('#v-main').hidden) return;
+  const lib = cpLib().filter(x => !x.fromMix), info = LSJ.get('djinfo', {});
+  const key = JSON.stringify([lib.map(x => x.id + (x.instru ? 'i' : '')), Object.keys(info).length, SET.ids, state.separation && state.separation.state]);
+  if (key === copiKey) return; copiKey = key;
+  const out = [];
+  // Doublons : même titre et même artiste
+  const groups = {};
+  // (deux fichiers du même nom se remplacent déjà : ici, même titre et même durée à 3 s près, publiés par des chaînes différentes)
+  lib.forEach(x => { const k = cpNorm(x.title.replace(/[\(\[].*?[\)\]]/g, ' ')) + '|' + Math.round(secsOf(x.duration) / 3); (groups[k] = groups[k] || []).push(x); });
+  const dup = Object.values(groups).filter(g => g.length > 1);
+  if (dup.length) {
+    const g = dup[0], keep = g.slice().sort((a, b) => (b.quality || 0) - (a.quality || 0))[0], drop = g.filter(x => x !== keep);
+    out.push(`<div class="in"><span class="k w">DOUBLON${dup.length > 1 ? 'S' : ''}</span><span class="tx">Tu as ${g.length} fois « ${esc(keep.title)} »${dup.length > 1 ? `, et ${dup.length - 1} autre${dup.length > 2 ? 's' : ''} doublon${dup.length > 2 ? 's' : ''}` : ''}. Je garde la version en ${keep.quality || '?'} kbps.</span><button data-copi="dup" data-ids="${drop.map(x => x.id).join(',')}">Mettre ${drop.length > 1 ? 'les autres' : 'l’autre'} à la corbeille</button></div>`);
+  }
+  // Prêt à mixer : le plus grand groupe de tempos proches
+  const an = lib.filter(x => (info[x.id] || {}).bpm).map(x => ({ x, b: info[x.id].bpm, s: secsOf(x.duration) })).sort((p, q) => p.b - q.b);
+  let best = null;
+  for (let i = 0; i < an.length; i++) { let j = i; while (j + 1 < an.length && an[j + 1].b <= an[i].b * 1.08) j++; if (!best || j - i > best.j - best.i) best = { i, j }; }
+  if (best && best.j - best.i >= 3) {
+    const g = an.slice(best.i, best.j + 1), mins = Math.round(g.reduce((a, p) => a + p.s, 0) / 60);
+    out.push(`<div class="in"><span class="k g">PRÊT À MIXER</span><span class="tx">${g.length} titres entre ${Math.round(g[0].b)} et ${Math.round(g[g.length - 1].b)} BPM : de quoi faire environ ${mins} minutes de mixtape enchaînée.</span><button class="pri" data-copi="mix" data-ids="${g.map(p => p.x.id).join(',')}">Préparer la mixtape</button></div>`);
+  }
+  // Liste de soirée sans version instrumentale
+  const noStem = SET.ids.map(byId).filter(x => x && x.exists && !x.instru);
+  if (noStem.length && state.separation && state.separation.state === 'pret')
+    out.push(`<div class="in"><span class="k v">VOIX ET INSTRU</span><span class="tx">${noStem.length} titre${noStem.length > 1 ? 's' : ''} de ta liste de soirée n'${noStem.length > 1 ? 'ont' : 'a'} pas encore de version instrumentale.</span><button data-copi="sep" data-ids="${noStem.map(x => x.id).join(',')}">${noStem.length > 1 ? 'Les séparer' : 'Le séparer'}</button></div>`);
+  // Analyse en cours
+  const todo = lib.filter(x => !(info[x.id] || {}).v && !LSJ.get('anaskip', {})[x.id]).length;
+  if (todo) out.push(`<div class="in"><span class="k n">ANALYSE</span><span class="tx">Tempo et tonalité : ${lib.length - todo} titre${lib.length - todo > 1 ? 's' : ''} sur ${lib.length}. Les suggestions s'affinent au fur et à mesure.</span><div class="bar"><i style="width:${Math.round((lib.length - todo) * 100 / Math.max(1, lib.length))}%"></i></div></div>`);
+  $('#copibox').innerHTML = out.join('') || `<div class="in"><span class="tx" style="color:var(--muted)">${lib.length ? 'Rien à signaler pour l’instant.' : 'Ajoute quelques morceaux : je te signalerai les doublons, les titres qui s’enchaînent bien et de quoi faire une mixtape.'}</span></div>`;
+}
+$('#copibox').addEventListener('click', async e => {
+  const b = e.target.closest('[data-copi]'); if (!b) return;
+  const ids = b.dataset.ids.split(',').filter(Boolean), k = b.dataset.copi;
+  if (k === 'mix') cpMakeMixtape(ids.map(byId).filter(Boolean), 'Mixtape du ' + new Date().toLocaleDateString('fr-FR'));
+  if (k === 'dup') { if (!confirm(`Envoyer ${ids.length} fichier${ids.length > 1 ? 's' : ''} en double à la corbeille ?`)) return; for (const id of ids) { try { render(await api('/api/delete', { id })); } catch(err){ toast(err.message, 'err'); } } toast('Doublon retiré', 'ok'); }
+  if (k === 'sep') { for (const id of ids) { try { render(await api('/api/separate', { id })); } catch(err){ toast(err.message, 'err'); } } toast('Séparation lancée', 'ok'); }
+  copiKey = '';
+});
+setInterval(copiRender, 1500);
+
+/* --- Copilote du Mix : la suite conseillée --- */
+let cpmKey = '';
+function cpMixRender(){
+  if (!state || $('#v-dj').hidden) return;
+  const SP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg>';
+  const on = DJ.d.filter(d => d.id && !d.el.paused);
+  let html, key;
+  if (DJ.mix) { key = 'mix'; html = `<b class="h">${SP}Copilote</b><span>Enchaînement en cours.</span>`; }
+  else if (on.length !== 1) { key = 'idle' + on.length; html = `<b class="h">${SP}Copilote</b><span>${on.length ? 'Les deux platines jouent.' : 'Lance un morceau : je te proposerai la suite et le bon type d’enchaînement.'}</span>`; }
+  else {
+    const d = on[0], o = DJ.d[1 - d.i], x = byId(d.id);
+    if (o.id && o.id !== d.id) {
+      const y = byId(o.id), ok = d.bpm && o.bpm;
+      let r = ok ? o.bpm / d.bpm : 1; [2, 0.5].forEach(k => { if (Math.abs(r * k - 1) < Math.abs(r - 1)) r *= k; });
+      const gap = Math.abs(r - 1) * 100, kOk = d.key && o.key && d.key.cam && o.key.cam ? djKeyOk(d.key, o.key) : null;
+      key = ['pair', d.id, o.id, Math.round(gap * 10), kOk].join();
+      const txt = !ok ? `« ${esc(y ? y.title : '')} » est en cours d'analyse.`
+        : gap <= 8 ? `« ${esc(y.title)} » s'enchaîne bien : ${fr1(gap)} % d'écart de tempo${kOk === true ? `, tonalités compatibles (${d.key.cam} vers ${o.key.cam})` : kOk === false ? `, mais tonalités éloignées (${d.key.cam} et ${o.key.cam}) : fais un enchaînement court` : ''}. Fondu calé conseillé.`
+        : `« ${esc(y.title)} » a ${fr1(gap)} % d'écart de tempo avec la platine ${d.L} : le calage n'est pas possible, préfère une coupure ou un effet (frein, écho) avant de le lancer.`;
+      html = `<b class="h">${SP}Copilote</b><span>${txt}</span><div class="acts">${ok && gap <= 8 ? `<button class="pri" data-cpm="mix">Enchaîner vers ${o.L}</button>` : ''}<button data-cpm="other" data-deck="${o.i}" data-cur="${d.id}">Proposer autre chose</button></div>`;
+    } else {
+      const nid = autoNextId(d.id), y = nid && byId(nid), i = y && djInfo(y.id);
+      key = ['sug', d.id, nid, i && i.bpm].join();
+      html = y ? `<b class="h">${SP}Copilote</b><span>Pour la suite, je propose « ${esc(y.title)} »${i && i.bpm ? ` (${fr1(i.bpm)} BPM${i.key && i.key.cam ? ', ' + i.key.cam : ''})` : ''}${SET.ids.includes(nid) ? ', le prochain de ta liste de soirée' : ''}.</span><div class="acts"><button class="pri" data-cpm="load" data-deck="${o.i}" data-id="${nid}">Charger sur ${o.L}</button><button data-cpm="other" data-deck="${o.i}" data-cur="${d.id}">Proposer autre chose</button></div>`
+        : `<b class="h">${SP}Copilote</b><span>Aucun autre morceau disponible pour la suite.</span>`;
+    }
+  }
+  if (key === cpmKey) return; cpmKey = key; $('#cpmix').innerHTML = html;
+}
+$('#cpmix').addEventListener('click', e => {
+  const b = e.target.closest('[data-cpm]'); if (!b) return;
+  if (b.dataset.cpm === 'mix') djAutoMix();
+  if (b.dataset.cpm === 'load') djLoadSafe(+b.dataset.deck, b.dataset.id);
+  if (b.dataset.cpm === 'other') {   // écarte la proposition actuelle et en charge une autre
+    const d = DJ.d[+b.dataset.deck], skip = d.id || (SET.pick && SET.pick.id);
+    if (skip) SET.played.add(skip);
+    SET.pick = null; const nid = autoNextId(b.dataset.cur);
+    if (skip) SET.played.delete(skip);
+    if (nid && nid !== skip) djLoad(d.i, nid); else toast('Pas d’autre morceau compatible', 'err');
+  }
+  cpmKey = '';
+});
+setInterval(cpMixRender, 700);
+
+/* --- Barre latérale : playlists suivies, téléphone --- */
+let sideKey = '';
+function sideRender(s){
+  const f = s.follows || [], k = JSON.stringify([f, s.remoteOn]); if (k === sideKey) return; sideKey = k;
+  $('#sidepl').hidden = !f.length;
+  $('#sidepl').innerHTML = `<span class="t">PLAYLISTS SUIVIES</span>` + f.slice(0, 6).map(x => `<div class="r"><span>${esc(x.title)}</span><em>${x.count}</em></div>`).join('');
+  $('#sidetel').classList.toggle('on', !!s.remoteOn);
+  $('#sidetelt').textContent = s.remoteOn ? 'Télécommande active' : 'Téléphone';
+}
+$('#sidetel').onclick = () => $('#telbtn').click();
+
 /* --- Notifications de fin --- */
 let known = null;
 function notifyDone(s){
@@ -3819,7 +4231,7 @@ $TelHtml = @'
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0b0c10"><title>YT MP3 · Télécommande</title>
 <style>
-:root{--bg:#0b0c10;--panel:#14161c;--panel2:#1b1e26;--line:#262a33;--text:#eceef3;--muted:#8b90a0;--a:#ff3b6b;--b:#8b5cf6;--ok:#34d399;--err:#f87171}
+:root{--bg:#0c0b10;--panel:#16141c;--panel2:#1e1b26;--line:#2b2835;--text:#f2f0f5;--muted:#a09cab;--a:#ff4d79;--b:#9b7bff;--ok:#34d399;--err:#f87171}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0;background:var(--bg);color:var(--text);font:15px/1.35 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
@@ -3873,7 +4285,7 @@ h3{font-size:12px;letter-spacing:1.5px;color:var(--muted);margin:16px 2px 8px}
 .off{position:fixed;inset:0;background:#0b0c10f0;display:none;place-items:center;text-align:center;padding:30px;z-index:20;color:var(--muted)}.off.on{display:grid}
 .off b{color:#fff;font-size:18px;display:block;margin-bottom:8px}
 </style></head><body>
-<header><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff3b6b" stroke-width="2" stroke-linecap="round"><circle cx="7" cy="12" r="4.5"/><circle cx="17" cy="12" r="4.5"/></svg><b>YT MP3</b><span style="color:var(--muted);font-size:13px">télécommande</span><div class="sp"></div><span class="dot" id="dot"></span></header>
+<header><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ff4d79" stroke-width="2" stroke-linecap="round"><circle cx="7" cy="12" r="4.5"/><circle cx="17" cy="12" r="4.5"/></svg><b>YT MP3</b><span style="color:var(--muted);font-size:13px">télécommande</span><div class="sp"></div><span class="dot" id="dot"></span></header>
 <main>
   <section class="view on" id="v-decks"><div id="decks"></div>
     <div class="xf"><div class="lab"><b>A</b><span style="color:var(--muted);font-weight:600">CROSSFADER</span><b>B</b></div><input type="range" id="xf" min="0" max="1000" value="500">
@@ -3957,7 +4369,7 @@ const fxUp = e => { const b = e.target.closest('[data-fx]'); if (!b || !held.has
 ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => $('#fxpads').addEventListener(t, fxUp));
 setInterval(() => held.forEach(b => cmd({ c: 'fxhold', d: pd, k: b.dataset.fx })), 2000);
 $('#smppads').addEventListener('pointerdown', e => { const b = e.target.closest('[data-smp]'); if (!b) return; e.preventDefault(); cmd({ c: 'smp', id: b.dataset.smp }); if (navigator.vibrate) navigator.vibrate(12); });
-$('#lib').addEventListener('click', e => { const b = e.target.closest('[data-load]'); if (!b) return; cmd({ c: 'load', d: +b.dataset.load, id: b.dataset.id }); b.style.background = b.dataset.load === '0' ? '#ff3b6b' : '#8b5cf6'; setTimeout(() => { b.style.background = ''; }, 600); });
+$('#lib').addEventListener('click', e => { const b = e.target.closest('[data-load]'); if (!b) return; cmd({ c: 'load', d: +b.dataset.load, id: b.dataset.id }); b.style.background = b.dataset.load === '0' ? '#ff4d79' : '#9b7bff'; setTimeout(() => { b.style.background = ''; }, 600); });
 document.addEventListener('contextmenu', e => e.preventDefault());
 poll();
 </script></body></html>

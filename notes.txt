@@ -1,1 +1,6 @@
-- Scratch sur la molette : pose la main sur le disque, il s’arrête ; pousse et tire, le son suit ton geste en avant comme en arrière ; lâche, la platine repart
+- Nouvelle interface : barre latérale, panneaux translucides, nouvelle typographie, sur tous les écrans
+- Copilote : écris ce que tu veux dans la barre (« entre 95 et 105 BPM », « compatible avec … », « charge … sur B », « mixtape de 30 min », « sépare la voix de … »)
+- Barre de commande Ctrl + K depuis n’importe quel écran
+- Suggestions sur l’accueil : doublons, titres prêts à mixer, morceaux à séparer
+- Dans le Mix : le copilote propose le morceau suivant et le bon type d’enchaînement
+- L’analyse du tempo et de la tonalité se fait maintenant sur tous les écrans
