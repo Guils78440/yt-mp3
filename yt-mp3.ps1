@@ -1,10 +1,10 @@
 ﻿# =====================================================================
-#  YT MP3 v4.0 - convertisseur YouTube vers MP3 (usage personnel)
+#  YT MP3 v4.0.1 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '4.0'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '4.0.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -1327,6 +1327,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['4.0.1', '18/11/2026', ['Correction : les sons du sampler passent maintenant par leur platine (volume, crossfader, casque, effets) : un pad de la platine B ne sort plus en salle quand le crossfader est sur A', 'Sur le téléphone, le sampler joue sur la platine choisie en haut de l’onglet Pads']],
   ['4.0', '14/11/2026', ['Nouvelle interface : barre latérale, panneaux translucides, nouvelle typographie, sur tous les écrans', 'Copilote : écris ce que tu veux dans la barre (« entre 95 et 105 BPM », « compatible avec … », « charge … sur B », « mixtape de 30 min », « sépare la voix de … »)', 'Barre de commande Ctrl + K depuis n’importe quel écran', 'Suggestions sur l’accueil : doublons, titres prêts à mixer, morceaux à séparer', 'Dans le Mix : le copilote propose le morceau suivant et le bon type d’enchaînement', 'L’analyse du tempo et de la tonalité se fait maintenant sur tous les écrans']],
   ['3.5', '03/11/2026', ['Scratch sur la molette : pose la main sur le disque, il s’arrête ; pousse et tire, le son suit ton geste en avant comme en arrière ; lâche, la platine repart']],
   ['3.4', '03/11/2026', ['Sampler resserré : seuls les sons gardés sur les pads restent, sans emplacement vide, en banques de 8 pads (le bouton 🎤 MA VOIX passe à côté de + IMPORTER)', 'Bruitages intégrés réduits à Laser et Rewind ; les effets automatiques de la Mixtape utilisent tes sons du pack Dancehall']],
@@ -1883,10 +1884,11 @@ function djSmpRender(){
   const L = smpLayout(), banks = L.slots.length / 8;
   if (DJ.bank >= banks) DJ.bank = banks - 1;
   document.querySelectorAll('.dk-pads[data-page="smp"]').forEach(p => {
+    const di = p.closest('#deckB') ? 1 : 0;
     let h = `<div class="smpbanks">${Array.from({ length: banks }, (_, i) => `<button type="button" data-bank="${i}" class="${i === DJ.bank ? 'on' : ''}">BANQUE ${i + 1}</button>`).join('')}<button type="button" data-bankadd title="Ajouter une banque de pads vides">+ BANQUE</button><button type="button" data-voixrec title="Enregistre ta propre voix (« Pull up my selecta ! ») avec les effets sound system">🎤 MA VOIX</button><button type="button" data-packimp title="Importer un pack de sons (fichier ZIP téléchargé, ou des sons)">+ IMPORTER</button></div>`;
     for (let k = 0; k < 8; k++) {
       const slot = DJ.bank * 8 + k, x = smpById(L.slots[slot]);
-      h += x ? `<button class="pad ${DJ.smp[x.id] && DJ.smp[x.id].src ? 'on' : ''}" data-smp="${esc(x.id)}" data-slot="${slot}" style="--pc:${SMP_COL[slot % 8]}" title="Appuie pour jouer, ré-appuie pour arrêter · clic droit : changer ou libérer">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : x.voice ? '<small>voix</small>' : ''}</button>`
+      h += x ? `<button class="pad ${smpOn(x.id, di) ? 'on' : ''}" data-smp="${esc(x.id)}" data-slot="${slot}" style="--pc:${SMP_COL[slot % 8]}" title="Appuie pour jouer, ré-appuie pour arrêter · clic droit : changer ou libérer">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : x.voice ? '<small>voix</small>' : ''}</button>`
              : `<button class="pad empty" data-slot="${slot}" title="Emplacement libre · clic droit (ou clic) : ajouter un sample">+</button>`;
     }
     p.innerHTML = h;
@@ -1912,7 +1914,7 @@ document.addEventListener('contextmenu', e => {
   m.style.left = Math.min(e.clientX, innerWidth - m.offsetWidth - 8) + 'px'; m.style.top = Math.min(e.clientY, innerHeight - m.offsetHeight - 8) + 'px';
   m.onclick = ev => {
     const c = ev.target.closest('[data-cm]'); if (!c) return; smpMenuClose();
-    if (c.dataset.cm === 'play' && x) djSmp(x.id);
+    if (c.dataset.cm === 'play' && x) djSmp(x.id, pad.closest('#deckB') ? 1 : 0);
     if (c.dataset.cm === 'pick') smpPick(slot);
     if (c.dataset.cm === 'free') { const L2 = smpLayout(); L2.slots[slot] = null; smpSave(L2); toast('Emplacement libéré (le son reste disponible pour plus tard)'); }
   };
@@ -1944,18 +1946,23 @@ $('#smplist').addEventListener('click', e => {
   $('#smpdlg').classList.remove('show'); toast(`« ${smpById(id).label} » placé sur le pad ${smpSlot % 8 + 1} de la banque ${Math.floor(smpSlot / 8) + 1}`);
 });
 $('#smpclose').onclick = () => { smpPrevA.pause(); $('#smpdlg').classList.remove('show'); };
-async function djSmp(id){
+// Un son du sampler passe par la tranche de SA platine (effets, égaliseur, volume, crossfader, casque),
+// exactement comme le morceau de cette platine : un pad de B coupé au crossfader ne sort pas en salle.
+async function djSmp(id, deck){
   djCtx(); djPauseMain();
-  const s = DJ.smp[id] || (DJ.smp[id] = {});
-  if (s.src) { try { s.src.stop(); } catch {} s.src = null; djSmpRender(); return; }
+  const di = deck === 1 ? 1 : 0, d = DJ.d[di];
+  const s = DJ.smp[id] || (DJ.smp[id] = { on: [null, null] });
+  if (s.on[di]) { try { s.on[di].stop(); } catch {} s.on[di] = null; djSmpRender(); return; }
   try {
     if (!s.buf) s.buf = await DJ.ctx.decodeAudioData(await (await fetch('/son/' + encodeURIComponent(id))).arrayBuffer());
+    if (!d.nodes) return;
     const src = DJ.ctx.createBufferSource(), g = DJ.ctx.createGain(); g.gain.value = 0.85;
-    src.buffer = s.buf; src.connect(g).connect(DJ.master); src.start();
-    s.src = src; src.onended = () => { if (s.src === src) { s.src = null; djSmpRender(); } };
+    src.buffer = s.buf; src.connect(g).connect(d.nodes.low); src.start();
+    s.on[di] = src; src.onended = () => { if (s.on[di] === src) { s.on[di] = null; djSmpRender(); } };
     djSmpRender();
   } catch { toast('Son illisible', 'err'); }
 }
+const smpOn = (id, di) => !!(DJ.smp[id] && DJ.smp[id].on[di]);
 
 /* ---------- Boutons rotatifs (pilotent les curseurs cachés : même logique qu'avant) ---------- */
 const KNOB_A0 = -135, KNOB_A1 = 135;
@@ -2728,7 +2735,7 @@ function djRecToggle(){
     const off = () => { if (!b.classList.contains('on')) return; b.classList.remove('on'); djFxOff(d, k); };
     b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off); b.addEventListener('lostpointercapture', off);
   });
-  q('.dk-pads[data-page="smp"]').addEventListener('pointerdown', e => { const b = e.target.closest('[data-smp]'); if (b && e.button === 0) { e.preventDefault(); djSmp(b.dataset.smp); } });
+  q('.dk-pads[data-page="smp"]').addEventListener('pointerdown', e => { const b = e.target.closest('[data-smp]'); if (b && e.button === 0) { e.preventDefault(); djSmp(b.dataset.smp, d.i); } });
 });
 $('#xf').oninput = e => { djStopMix(); DJ.xf = e.target.value / 1000; djApplyXf(); djMixBtn(); };
 $('#xf').ondblclick = () => { djStopMix(); DJ.xf = 0.5; $('#xf').value = 500; djApplyXf(); djMixBtn(); };
@@ -3803,7 +3810,7 @@ function telStatus(){
   return {
     t: Date.now(), xf: DJ.xf, mix: !!DJ.mix, auto: !!DJ.auto, next: djMixTarget() ? 'B' : 'A', msg: telMsg, libv: telLibV,
     decks: DJ.d.map(d => { const x = d.id && byId(d.id); return { id: d.id, title: x ? x.title : '', artist: x ? x.uploader : '', cover: x ? coverUrl(x.vid, x.thumb) : '', bpm: d.bpm ? d.bpm * (d.el.playbackRate || 1) : 0, key: d.key && d.key.cam || '', playing: !d.el.paused, cur: d.el.currentTime || 0, dur: d.el.duration || 0, sync: !!d.sync, vol: d.vol }; }),
-    fx: PAD_FX, smp: (djSmpList.length ? smpLayout().slots : []).map((id, i) => [smpById(id), i]).filter(([x]) => x).map(([x, i]) => ({ id: x.id, label: x.label, c: SMP_COL[i % 8], on: !!(DJ.smp[x.id] && DJ.smp[x.id].src) }))
+    fx: PAD_FX, smp: (djSmpList.length ? smpLayout().slots : []).map((id, i) => [smpById(id), i]).filter(([x]) => x).map(([x, i]) => ({ id: x.id, label: x.label, c: SMP_COL[i % 8], on: [smpOn(x.id, 0), smpOn(x.id, 1)] }))
   };
 }
 function telLib(){
@@ -3821,7 +3828,7 @@ function telExec(c){
     case 'xf': djStopMix(); DJ.xf = Math.max(0, Math.min(1000, +c.v)) / 1000; $('#xf').value = Math.round(DJ.xf * 1000); djApplyXf(); djMixBtn(); break;
     case 'mix': djAutoMix(); break;
     case 'auto': autoToggle(); break;
-    case 'smp': if (djSmpList.some(x => x.id === c.id)) djSmp(c.id); break;
+    case 'smp': if (djSmpList.some(x => x.id === c.id)) djSmp(c.id, c.d === 1 ? 1 : 0); break;
     case 'fxdown': case 'fxhold': {
       if (!PAD_FX.some(f => f.k === c.k)) break;
       const key = d.i + c.k;
@@ -4294,7 +4301,7 @@ h3{font-size:12px;letter-spacing:1.5px;color:var(--muted);margin:16px 2px 8px}
   <section class="view" id="v-pads">
     <div class="seg" id="pdeck"><button data-d="0" class="on">PLATINE A</button><button data-d="1">PLATINE B</button></div>
     <h3>EFFETS · APPUIE ET MAINTIENS</h3><div class="pads" id="fxpads"></div>
-    <h3>SAMPLER</h3><div class="pads" id="smppads"></div>
+    <h3>SAMPLER · SUR LA PLATINE CHOISIE</h3><div class="pads" id="smppads"></div>
   </section>
   <section class="view" id="v-lib">
     <div class="search"><input id="q" placeholder="Chercher un morceau…" autocomplete="off"></div>
@@ -4334,7 +4341,7 @@ function render(){
   $('#auto').classList.toggle('on', !!S.auto); $('#auto').textContent = S.auto ? 'Auto-DJ activé' : 'Auto-DJ';
   const fx = S.fx || [], smp = S.smp || [], dd = (S.decks || [])[pd] || {};
   const fk = JSON.stringify([fx, pd]); if ($('#fxpads').dataset.k !== fk) { $('#fxpads').dataset.k = fk; $('#fxpads').innerHTML = fx.map(f => `<button class="pad" data-fx="${f.k}" style="--pc:${f.c}">${esc(f.t)}</button>`).join(''); }
-  const sk = JSON.stringify(smp); if ($('#smppads').dataset.k !== sk) { $('#smppads').dataset.k = sk; $('#smppads').innerHTML = smp.map((x, i) => `<button class="pad ${x.on ? 'on' : ''}" data-smp="${esc(x.id)}" style="--pc:${x.c}">${esc(x.label.toUpperCase())}</button>`).join(''); }
+  const sk = JSON.stringify([smp, pd]); if ($('#smppads').dataset.k !== sk) { $('#smppads').dataset.k = sk; $('#smppads').innerHTML = smp.map((x, i) => `<button class="pad ${(Array.isArray(x.on) ? x.on[pd] : x.on) ? 'on' : ''}" data-smp="${esc(x.id)}" style="--pc:${x.c}">${esc(x.label.toUpperCase())}</button>`).join(''); }
   if (S.msg) { if (lastMsg !== null && S.msg.n !== lastMsg && S.msg.text) toast(S.msg.text); lastMsg = S.msg.n; }
 }
 async function poll(){
@@ -4368,7 +4375,7 @@ $('#fxpads').addEventListener('pointerdown', e => { const b = e.target.closest('
 const fxUp = e => { const b = e.target.closest('[data-fx]'); if (!b || !held.has(b)) return; held.delete(b); b.classList.remove('on'); cmd({ c: 'fxup', d: pd, k: b.dataset.fx }); };
 ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => $('#fxpads').addEventListener(t, fxUp));
 setInterval(() => held.forEach(b => cmd({ c: 'fxhold', d: pd, k: b.dataset.fx })), 2000);
-$('#smppads').addEventListener('pointerdown', e => { const b = e.target.closest('[data-smp]'); if (!b) return; e.preventDefault(); cmd({ c: 'smp', id: b.dataset.smp }); if (navigator.vibrate) navigator.vibrate(12); });
+$('#smppads').addEventListener('pointerdown', e => { const b = e.target.closest('[data-smp]'); if (!b) return; e.preventDefault(); cmd({ c: 'smp', id: b.dataset.smp, d: pd }); if (navigator.vibrate) navigator.vibrate(12); });
 $('#lib').addEventListener('click', e => { const b = e.target.closest('[data-load]'); if (!b) return; cmd({ c: 'load', d: +b.dataset.load, id: b.dataset.id }); b.style.background = b.dataset.load === '0' ? '#ff4d79' : '#9b7bff'; setTimeout(() => { b.style.background = ''; }, 600); });
 document.addEventListener('contextmenu', e => e.preventDefault());
 poll();

@@ -1,3 +1,5 @@
+- Correction : les sons du sampler passent maintenant par leur platine (volume, crossfader, casque, effets) : un pad de la platine B ne sort plus en salle quand le crossfader est sur A
+- Sur le téléphone, le sampler joue sur la platine choisie en haut de l’onglet Pads
 - Nouvelle interface : barre latérale, panneaux translucides, nouvelle typographie, sur tous les écrans
 - Copilote : écris ce que tu veux dans la barre (« entre 95 et 105 BPM », « compatible avec … », « charge … sur B », « mixtape de 30 min », « sépare la voix de … »)
 - Barre de commande Ctrl + K depuis n’importe quel écran
