@@ -4,7 +4,7 @@
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '4.1.0'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '4.2.0'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -777,6 +777,19 @@ kbd{font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,25
 .cpmix b.h svg{width:15px;height:15px;color:var(--a1)}
 .cpmix .acts{display:flex;gap:8px;flex-wrap:wrap}
 .cpmix button{min-height:38px;padding:0 13px;border-radius:10px;border:1px solid rgba(255,255,255,.16);font-size:13px}
+.tag.nrg{color:var(--warn)}
+.setpanel .sh{flex-wrap:wrap;row-gap:4px;gap:8px}.setpanel .sh .count:empty{display:none}.setpanel .sh .lnk{font-size:12.5px}.setpanel .sh h2{white-space:nowrap}.setpanel .sh .lnk{white-space:nowrap}
+.tltxt{margin:14px 0 0;max-height:46vh;overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font:12.5px/1.6 var(--f-mono);white-space:pre-wrap;color:var(--text)}
+#tlorig button:disabled{opacity:.35;cursor:default}
+.cpmix .cpe{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+.cpmix .cpe .seg button{min-height:30px;padding:0 10px;border:0;font-size:12px}
+.cpmix .cpl{display:flex;flex-direction:column;gap:6px}
+.cpmix .cpi{display:flex;align-items:center;gap:10px;padding:7px 8px 7px 10px;border-radius:10px;background:rgba(255,255,255,.04)}
+.cpmix .cpi.best{background:rgba(255,77,121,.1)}
+.cpmix .cpi .m{flex:1;min-width:0;display:flex;flex-direction:column}
+.cpmix .cpi .m b{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpmix .cpi .m small{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpmix .cpi button{min-height:32px;flex:none}
 .cpmix button.pri{border:0;background:var(--a1);color:var(--ink);font-weight:600}
 @media (max-width:1180px){#v-main{grid-template-columns:minmax(0,1fr)}#v-main>#copi{grid-column:1;grid-row:auto;position:static;margin-top:18px}}
 @media (max-width:900px){
@@ -891,6 +904,7 @@ kbd{font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,25
     <div class="djbottom">
       <section class="setpanel">
         <div class="sh"><h2>Liste de soirée</h2><span class="count" id="setcount"></span><div class="sp"></div>
+          <button class="lnk" id="tlbtn" title="Tracklist de soirée : les morceaux passés dans la salle, avec l'heure, à copier ou enregistrer">Tracklist</button>
           <button class="lnk" id="setsort" title="Trie par tempo croissant pour faire monter l'énergie">Trier par BPM</button>
           <button class="lnk" id="setclear">Vider</button></div>
         <div class="cpmix" id="cpmix"></div>
@@ -1068,6 +1082,14 @@ kbd{font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,25
   <div class="exdest"><input id="exdir" spellcheck="false" placeholder="Ex. E:\"><button class="btn-ghost" id="expick">Choisir…</button></div>
   <div id="exprog"></div>
   <div class="dlg-btns"><button class="btn-ghost" id="exclose">Fermer</button><button class="go" id="exgo">Copier</button></div>
+</div></div>
+<div class="overlay" id="tldlg"><div class="box dlg wide">
+  <h3 style="margin-top:0">Tracklist de soirée</h3>
+  <p>Chaque morceau qui passe dans la salle plus de 20 secondes est noté ici, avec l'heure. Copie-la pour une description YouTube ou Mixcloud, ou garde-la en fichier texte.</p>
+  <div class="mxrow"><span>Soirée</span><select id="tlsess"></select></div>
+  <div class="mxrow"><span>Minutage</span><div class="seg mini" id="tlorig"><button type="button" data-v="first" class="on">Depuis le 1er titre</button><button type="button" data-v="rec">Depuis l'enregistrement</button><button type="button" data-v="clock">Heure</button></div></div>
+  <pre class="tltxt" id="tltxt"></pre>
+  <div class="dlg-btns"><button class="lnk" id="tlnew" style="margin-right:auto" title="Les prochains morceaux iront dans une nouvelle tracklist">Nouvelle soirée</button><button class="btn-ghost" id="tlclose">Fermer</button><button class="btn-ghost" id="tlsave">Enregistrer en .txt</button><button class="go" id="tlcopy">Copier</button></div>
 </div></div>
 <svg width="0" height="0" style="position:absolute"><defs><radialGradient id="knobg" cx="40%" cy="35%" r="70%"><stop offset="0" stop-color="#5b606d"/><stop offset=".6" stop-color="#2c2f37"/><stop offset="1" stop-color="#1b1d23"/></radialGradient></defs></svg>
 <div class="overlay" id="cmddlg"><div class="box cmd">
@@ -1341,6 +1363,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['4.2', '22/11/2026', ['Prochain titre idéal : le copilote du Mix propose 3 morceaux selon le tempo, la tonalité et l’énergie, en évitant le même artiste deux fois de suite', 'Énergie de chaque morceau estimée sur 10 (⚡ dans la bibliothèque du Mix), avec un choix Calmer / Garder / Monter pour la suite', 'Tracklist de soirée : chaque morceau passé dans la salle est noté avec l’heure, à copier (YouTube, Mixcloud) ou enregistrer en .txt, calée si besoin sur ton enregistrement du mix']],
   ['4.1', '22/11/2026', ['Limiteur de sortie sur le Mix : le son ne sature plus quand tu empiles sirènes et gunshots sur le morceau (bouton « Limiteur », il s’allume quand il travaille)', 'Voix / Instru en direct sur chaque platine : pour les morceaux séparés, la bascule est instantanée, sans coupure ni décalage', 'Dubplates parlées : tape « Big up… pull up selecta ! », une voix Windows le dit avec les effets sound system, prêt pour un pad', 'Nouvelle page de pads BOUCLES : repère + boucle en un clic, sauts de 4 ou 16 temps calés sur le rythme, boucle ½ et ×2', 'Barre latérale : la durée totale de la bibliothèque s’affiche à côté du nombre de titres']],
   ['4.0.2', '22/11/2026', ['Barre latérale : la durée totale de la bibliothèque s’affiche à côté du nombre de titres']],
   ['4.0.1', '18/11/2026', ['Correction : les sons du sampler passent maintenant par leur platine (volume, crossfader, casque, effets) : un pad de la platine B ne sort plus en salle quand le crossfader est sur A', 'Sur le téléphone, le sampler joue sur la platine choisie en haut de l’onglet Pads']],
@@ -2144,7 +2167,7 @@ function djLoad(i, id, stem, quiet){
   if (!quiet) djStopMix();
   d.el.pause();
   d.id = id; d.stem = stemFor(x, stem || 'orig'); d.cue = 0; d.peaks = null; d.loop = null; d.sync = false; d.nudge = 1;
-  d.hasStems = !!(x.voix && x.instru);
+  d.hasStems = !!(x.voix && x.instru); if (TL) TL.pend[d.i] = null;
   ['voix', 'instru'].forEach(k => { const s = d.sv[k]; s.pause(); if (d.hasStems) s.src = url(id, k); else { s.removeAttribute('src'); s.load(); } });
   djStemGains(d, true);
   const inf = djInfo(id); d.bpm = inf ? inf.bpm : null; d.b0 = inf ? inf.b0 : 0; d.key = inf ? inf.key : null;
@@ -2216,11 +2239,31 @@ async function djDecode(u, max){
   return { mono, sr: ab.sampleRate };
 }
 // Tempo et tonalité se calculent sur l'original (les voix seules n'ont pas de rythme fiable)
+// Énergie de 1 à 10 : volume du corps du morceau, densité des attaques, brillance et tempo (estimation)
+function djEnergy(mono, sr, bpm){
+  const n = mono.length, a = Math.floor(n * 0.15), b = Math.floor(n * 0.85), hop = Math.round(sr * 0.05);
+  if (b - a < hop * 20) return null;
+  const env = []; let zc = 0, cnt = 0;
+  for (let i = a; i + hop <= b; i += hop) {
+    let e = 0;
+    for (let j = i; j < i + hop; j++) { const v = mono[j]; e += v * v; if (j > i && (v >= 0) !== (mono[j - 1] >= 0)) zc++; }
+    env.push(Math.sqrt(e / hop)); cnt += hop;
+  }
+  const srt = [...env].sort((x, y) => x - y), med = srt[Math.floor(srt.length / 2)] || 1e-6;
+  const db = 20 * Math.log10(med + 1e-9);
+  let on = 0; for (let i = 1; i < env.length; i++) if (env[i] > env[i - 1] * 1.25 + med * 0.05) on++;
+  const secs = env.length * 0.05, dens = on / secs, zcr = zc / cnt;
+  const cl = v => Math.max(0, Math.min(1, v));
+  const t = bpm ? (bpm < 80 ? bpm * 2 : bpm) : 110;   // un 70 BPM « demi-temps » compte comme 140
+  const x = 0.35 * cl((db + 26) / 16) + 0.3 * cl(dens / 6) + 0.2 * cl((zcr - 0.02) / 0.12) + 0.15 * cl((t - 85) / 60);
+  return Math.max(1, Math.min(10, Math.round(1 + 9 * x)));
+}
 function djAnalyseMono(id, mono, sr){
   const inf = Object.assign({}, djInfo(id) || {});
   if (!inf.bpm) { const r = djRhythm(mono, sr); if (r) Object.assign(inf, r); }
   if (!inf.key) { const k = djKey(mono, sr); if (k) inf.key = k; }
-  inf.v = 2;
+  if (!inf.e) { const e = djEnergy(mono, sr, inf.bpm); if (e) inf.e = e; }
+  inf.v = 3;
   djInfoSave(id, inf);
   return inf;
 }
@@ -2231,7 +2274,7 @@ async function djAnalyse(d){
     if (d.id !== id || d.stem !== stem) return;
     if (!r) { d.peaks = 'x'; return; }
     d.peaks = djPeaks(r.mono, 1200); d.zp = djZoomPeaks(r.mono, r.sr);
-    if (stem === 'orig' && (!d.bpm || !d.key)) {
+    if (stem === 'orig' && (!d.bpm || !d.key || !(djInfo(id) || {}).e)) {
       const inf = djAnalyseMono(id, r.mono, r.sr);
       d.bpm = inf.bpm || null; d.b0 = inf.b0 || 0; d.key = inf.key || null;
     }
@@ -2707,6 +2750,7 @@ function djRecToggle(){
   };
   mr.start(1000);
   DJ.rec = { mr, t0: performance.now(), timer: setInterval(djRecBtn, 500) };
+  { const s = tlSession(true); s.rec = Date.now(); tlPut(s); }   // la tracklist pourra se caler sur le fichier enregistré
   djRecBtn();
   toast('Enregistrement du mix démarré');
 }
@@ -2935,17 +2979,34 @@ function autoNextId(curId){
   if (fromSet) return fromSet;
   // choix automatique mémorisé, pour ne pas changer d'avis à chaque instant
   if (SET.pick && SET.pick.for === curId && !SET.played.has(SET.pick.id) && byId(SET.pick.id)) return SET.pick.id;
-  const cur = djInfo(curId), cand = (state.history || []).filter(x => x.exists && x.id !== curId && !SET.played.has(x.id) && x.uploader !== 'Mix YT MP3' && x.uploader !== 'Mixtape YT MP3');
-  if (!cand.length) return null;
-  const score = x => {
-    const inf = djInfo(x.id); let sc = Math.random() * 0.3;
-    if (cur && cur.bpm && inf && inf.bpm) { let r = inf.bpm / cur.bpm; [2, 0.5].forEach(m => { if (Math.abs(r * m - 1) < Math.abs(r - 1)) r *= m; }); sc += Math.max(0, 1 - Math.abs(r - 1) / 0.08); }
-    if (cur && inf && djKeyOk(cur.key, inf.key)) sc += 0.8;
-    return sc;
-  };
-  const pick = cand.map(x => [x.id, score(x)]).sort((a, b) => b[1] - a[1])[0][0];
-  SET.pick = { for: curId, id: pick };
-  return pick;
+  const c = djNextCands(curId, 1)[0];
+  if (!c) return null;
+  SET.pick = { for: curId, id: c.id };
+  return c.id;
+}
+// Prochain titre idéal : tempo proche, tonalité compatible, énergie voulue (calmer / garder / monter), pas le même artiste
+DJ.eDir = LSJ.get('djedir', 0);
+const djNorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s*(-\s*topic|vevo|official)\s*$/i, '').trim();
+const djJit = t => { let h = 2166136261; for (let i = 0; i < t.length; i++) h = Math.imul(h ^ t.charCodeAt(i), 16777619); return (h >>> 0) / 4294967296; };   // petit hasard stable
+function djNextCands(curId, n, skip){
+  const cur = djInfo(curId), cx = byId(curId), skp = new Set(skip || []);
+  const recent = [...SET.played].slice(-3).map(id => byId(id)).filter(Boolean).map(x => djNorm(x.uploader));
+  const cand = (state.history || []).filter(x => x.exists && x.id !== curId && !SET.played.has(x.id) && !skp.has(x.id) && x.uploader !== 'Mix YT MP3' && x.uploader !== 'Mixtape YT MP3');
+  const target = cur && cur.e ? Math.max(1, Math.min(10, cur.e + 2 * DJ.eDir)) : null;
+  return cand.map(x => {
+    const inf = djInfo(x.id) || {}, why = []; let sc = djJit(curId + x.id) * 0.15, gap = null, kOk = null;
+    if (cur && cur.bpm && inf.bpm) {
+      let r = inf.bpm / cur.bpm; [2, 0.5].forEach(m => { if (Math.abs(r * m - 1) < Math.abs(r - 1)) r *= m; });
+      gap = Math.abs(r - 1) * 100; sc += gap <= 8 ? 1 - gap / 8 : -0.6;   // tempo hors de portée du calage : en dernier
+      why.push(gap <= 8 ? `${fr1(gap)} % de tempo` : `tempo trop loin (${fr1(gap)} %)`);
+    } else if (!inf.bpm) { sc -= 0.3; why.push('pas encore analysé'); }
+    if (cur && cur.key && inf.key && cur.key.cam && inf.key.cam) { kOk = djKeyOk(cur.key, inf.key); if (kOk) { sc += 0.8; why.push(`tonalité ${inf.key.cam} ✓`); } else why.push(`tonalité ${inf.key.cam}`); }
+    if (target && inf.e) { sc += 0.7 * Math.max(0, 1 - Math.abs(inf.e - target) / 3); why.push(`énergie ${inf.e}${inf.e > cur.e ? ' ↗' : inf.e < cur.e ? ' ↘' : ' ='}`); }
+    if (cx && djNorm(x.uploader) && djNorm(x.uploader) === djNorm(cx.uploader)) sc -= 0.5;   // éviter deux fois le même artiste d'affilée
+    else if (recent.includes(djNorm(x.uploader))) sc -= 0.2;
+    if (SET.ids.includes(x.id)) sc += 0.2;
+    return { id: x.id, sc, gap, kOk, e: inf.e || null, why };
+  }).sort((a, b) => b.sc - a.sc).slice(0, n);
 }
 const startPoint = d => d.hot[0] !== null ? d.hot[0] : (d.bpm ? d.b0 : 0);
 
@@ -3052,12 +3113,91 @@ $('#setclear').onclick = () => { if (!SET.ids.length || !confirm('Vider la liste
 $('#autodj').onclick = autoToggle;
 autoBtn();
 
+/* ---------- Tracklist de soirée : ce qui passe vraiment dans la salle ---------- */
+var TL = { pend: {}, orig: 'first', view: null };
+const tlAll = () => LSJ.get('djlog', []);
+function tlSession(create){
+  const l = tlAll(), now = Date.now(); let s = l[l.length - 1];
+  const last = s ? (s.items.length ? s.items[s.items.length - 1].at : s.start) : 0;
+  if (create && (!s || now - last > 3 * 3600e3)) { s = { start: now, items: [] }; l.push(s); LSJ.set('djlog', l.slice(-20)); }   // plus de 3 h sans musique : nouvelle soirée
+  return s || null;
+}
+function tlPut(s){ const l = tlAll(), k = l.findIndex(x => x.start === s.start); if (k >= 0) l[k] = s; else l.push(s); LSJ.set('djlog', l.slice(-20)); tlBtn(); }
+function tlAdd(id, at){
+  const x = byId(id); if (!x) return;
+  const s = tlSession(true), last = s.items[s.items.length - 1];
+  if (last && last.id === id && at - last.at < 600e3) return;
+  const inf = djInfo(id) || {};
+  s.items.push({ at, id, title: x.title, up: x.uploader, bpm: inf.bpm ? Math.round(inf.bpm) : null, cam: inf.key && inf.key.cam || null });
+  tlPut(s);
+}
+function tlBtn(){ const s = tlSession(false), n = s ? s.items.length : 0; $('#tlbtn').textContent = n ? `Tracklist (${n})` : 'Tracklist'; }
+setInterval(() => {
+  if (!state) return;
+  DJ.d.forEach(d => {
+    const p = TL.pend[d.i];
+    if (!d.id || !djOnAir(d)) return;
+    if (!p || p.id !== d.id) { TL.pend[d.i] = { id: d.id, since: Date.now(), acc: 0 }; return; }
+    if (p.done) return;
+    if (++p.acc >= 20) { p.done = true; tlAdd(d.id, p.since); }   // 20 s dans la salle : le morceau compte
+  });
+}, 1000);
+const tlTime = ms => { const t = Math.max(0, Math.round(ms / 1000)), h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), ss = String(t % 60).padStart(2, '0'); return h ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${String(m).padStart(2, '0')}:${ss}`; };
+const tlClock = ms => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+const tlDay = ms => new Date(ms).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+function tlText(s, orig){
+  if (!s || !s.items.length) return '';
+  let items = s.items, t0 = items[0].at;
+  if (orig === 'rec' && s.rec) {   // minutage du fichier enregistré : le titre qui jouait au début de l'enregistrement est à 00:00
+    const k = items.reduce((a, x, i) => x.at <= s.rec ? i : a, -1);
+    items = items.slice(Math.max(0, k)); t0 = s.rec;
+  }
+  const lines = items.map(x => `${orig === 'clock' ? tlClock(x.at) : tlTime(x.at - t0)}  ${x.title}`);
+  return `Soirée du ${tlDay(s.start)} · ${items.length} titre${items.length > 1 ? 's' : ''}\n\n` + lines.join('\n');
+}
+function tlRender(){
+  const l = tlAll().filter(s => s.items.length);
+  if (!l.length) { $('#tlsess').innerHTML = '<option>Aucune soirée pour l’instant</option>'; $('#tltxt').textContent = 'Rien encore : lance la musique, chaque morceau qui passe plus de 20 secondes dans la salle apparaîtra ici.'; ['#tlcopy', '#tlsave'].forEach(q => $(q).disabled = true); return; }
+  if (!l.some(s => s.start === TL.view)) TL.view = l[l.length - 1].start;
+  $('#tlsess').innerHTML = l.slice().reverse().map(s => `<option value="${s.start}">${esc(tlDay(s.start))} · ${tlClock(s.start)} · ${s.items.length} titre${s.items.length > 1 ? 's' : ''}</option>`).join('');
+  $('#tlsess').value = String(TL.view);
+  const s = l.find(x => x.start === TL.view);
+  const rb = $('#tlorig [data-v="rec"]'); rb.disabled = !s.rec; rb.title = s.rec ? `Enregistrement lancé à ${tlClock(s.rec)}` : 'Pas d’enregistrement du mix pendant cette soirée';
+  if (TL.orig === 'rec' && !s.rec) TL.orig = 'first';
+  $('#tlorig').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === TL.orig));
+  $('#tltxt').textContent = tlText(s, TL.orig);
+  ['#tlcopy', '#tlsave'].forEach(q => $(q).disabled = false);
+}
+$('#tlbtn').onclick = () => { TL.view = null; tlRender(); $('#tldlg').classList.add('show'); };
+$('#tlclose').onclick = () => $('#tldlg').classList.remove('show');
+$('#tlsess').onchange = () => { TL.view = +$('#tlsess').value; tlRender(); };
+$('#tlorig').onclick = e => { const b = e.target.closest('button'); if (!b || b.disabled) return; TL.orig = b.dataset.v; tlRender(); };
+$('#tlcopy').onclick = async () => {
+  const t = $('#tltxt').textContent;
+  try { await navigator.clipboard.writeText(t); }
+  catch { const a = document.createElement('textarea'); a.value = t; document.body.appendChild(a); a.select(); document.execCommand('copy'); a.remove(); }
+  toast('Tracklist copiée', 'ok');
+};
+$('#tlsave').onclick = () => {
+  const s = tlAll().find(x => x.start === TL.view); if (!s) return;
+  const d = new Date(s.start), name = `Tracklist ${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}.txt`;
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + $('#tltxt').textContent.replace(/\n/g, '\r\n')], { type: 'text/plain;charset=utf-8' }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  toast(`« ${name} » enregistré dans tes Téléchargements`, 'ok');
+};
+$('#tlnew').onclick = () => {
+  const s = tlSession(false); if (!s || !s.items.length) { toast('La soirée en cours est encore vide'); return; }
+  const l = tlAll(); l.push({ start: Date.now(), items: [] }); LSJ.set('djlog', l.slice(-20));
+  TL.pend = {}; TL.view = null; tlBtn(); tlRender(); toast('Nouvelle soirée : la tracklist repart de zéro');
+};
+tlBtn();
+
 /* ---------- Analyse de fond : tempo et tonalité de toute la bibliothèque (onglet Mix ouvert) ---------- */
 let anaBusy = false;
 async function djAnalyseLibrary(){
   if (anaBusy || !state || decks.some(a => !a.paused)) return;   // sur tous les écrans, mais pas pendant une lecture
-  const todo = (state.history || []).filter(x => x.exists && x.uploader !== 'Mix YT MP3' && x.uploader !== 'Mixtape YT MP3' && !LSJ.get('anaskip', {})[x.id] && !((djInfo(x.id) || {}).v === 2));
-  $('#anacount').textContent = todo.length ? `analyse du tempo et de la tonalité… (${todo.length} restant${todo.length > 1 ? 's' : ''})` : '';
+  const todo = (state.history || []).filter(x => x.exists && x.uploader !== 'Mix YT MP3' && x.uploader !== 'Mixtape YT MP3' && !LSJ.get('anaskip', {})[x.id] && !((djInfo(x.id) || {}).v >= 3));
+  $('#anacount').textContent = todo.length ? `analyse du tempo, de la tonalité et de l’énergie… (${todo.length} restant${todo.length > 1 ? 's' : ''})` : '';
   if (!todo.length) return;
   anaBusy = true;
   const x = todo[0];
@@ -3080,7 +3220,7 @@ function djRenderLib(force){
   const key = JSON.stringify(rows.map(x => [x.id, x.voix, x.instru])) + f + DJ.d.map(d => d.id).join() + JSON.stringify(info) + SET.ids.join();
   if (!force && key === djLibKey) return; djLibKey = key;
   $('#djlib').innerHTML = rows.length ? rows.map(x => `<div class="item djrow">${thumb(x.vid, x.duration, false, x.thumb)}
-      <div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${info[x.id] && info[x.id].bpm ? `<span class="tag">${fr1(info[x.id].bpm)} BPM</span>` : ''}${info[x.id] && info[x.id].key && info[x.id].key.cam ? `<span class="tag key" title="${esc(info[x.id].key.name)}">${info[x.id].key.cam}</span>` : ''}${x.voix || x.instru ? '<span class="tag">Voix / Instru</span>' : ''}</div></div>
+      <div class="meta"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.uploader)}${info[x.id] && info[x.id].bpm ? `<span class="tag">${fr1(info[x.id].bpm)} BPM</span>` : ''}${info[x.id] && info[x.id].key && info[x.id].key.cam ? `<span class="tag key" title="${esc(info[x.id].key.name)}">${info[x.id].key.cam}</span>` : ''}${info[x.id] && info[x.id].e ? `<span class="tag nrg" title="Énergie estimée sur 10">⚡${info[x.id].e}</span>` : ''}${x.voix || x.instru ? '<span class="tag">Voix / Instru</span>' : ''}</div></div>
       <div class="acts"><button class="ab plus ${SET.ids.includes(x.id) ? 'on' : ''}" data-setadd="${x.id}" title="${SET.ids.includes(x.id) ? 'Retirer de' : 'Ajouter à'} la liste de soirée">${SET.ids.includes(x.id) ? '✓' : '+'}</button><button class="ab a ${DJ.d[0].id === x.id ? 'on' : ''}" data-load="0" data-id="${x.id}" title="Charger sur la platine A">A</button><button class="ab b ${DJ.d[1].id === x.id ? 'on' : ''}" data-load="1" data-id="${x.id}" title="Charger sur la platine B">B</button></div></div>`).join('')
     : `<div class="empty">${I.note}<div>${f ? 'Aucun résultat' : 'Télécharge des morceaux pour les mixer ici'}</div></div>`;
 }
@@ -4328,18 +4468,35 @@ function cpMixRender(){
         : `« ${esc(y.title)} » a ${fr1(gap)} % d'écart de tempo avec la platine ${d.L} : le calage n'est pas possible, préfère une coupure ou un effet (frein, écho) avant de le lancer.`;
       html = `<b class="h">${SP}Copilote</b><span>${txt}</span><div class="acts">${ok && gap <= 8 ? `<button class="pri" data-cpm="mix">Enchaîner vers ${o.L}</button>` : ''}<button data-cpm="other" data-deck="${o.i}" data-cur="${d.id}">Proposer autre chose</button></div>`;
     } else {
-      const nid = autoNextId(d.id), y = nid && byId(nid), i = y && djInfo(y.id);
-      key = ['sug', d.id, nid, i && i.bpm].join();
-      html = y ? `<b class="h">${SP}Copilote</b><span>Pour la suite, je propose « ${esc(y.title)} »${i && i.bpm ? ` (${fr1(i.bpm)} BPM${i.key && i.key.cam ? ', ' + i.key.cam : ''})` : ''}${SET.ids.includes(nid) ? ', le prochain de ta liste de soirée' : ''}.</span><div class="acts"><button class="pri" data-cpm="load" data-deck="${o.i}" data-id="${nid}">Charger sur ${o.L}</button><button data-cpm="other" data-deck="${o.i}" data-cur="${d.id}">Proposer autre chose</button></div>`
-        : `<b class="h">${SP}Copilote</b><span>Aucun autre morceau disponible pour la suite.</span>`;
+      // Prochain de la liste de soirée en tête, puis les meilleurs titres de la bibliothèque
+      const i0 = SET.ids.indexOf(d.id), fromSet = i0 >= 0 ? SET.ids.slice(i0 + 1).find(id => !SET.played.has(id) && byId(id)) : SET.ids.find(id => !SET.played.has(id) && id !== d.id && byId(id));
+      if (!DJ.cpSkip || DJ.cpSkip.for !== d.id) DJ.cpSkip = { for: d.id, ids: [] };
+      const sk = DJ.cpSkip.ids, all = djNextCands(d.id, 6, sk);
+      const list = (fromSet && !sk.includes(fromSet) ? [{ id: fromSet, set: true, why: ['prochain de ta liste de soirée'] }] : []).concat(all.filter(c => c.id !== fromSet)).slice(0, 3);
+      const cur = djInfo(d.id) || {};
+      key = ['sug', d.id, DJ.eDir, cur.e, list.map(c => c.id + c.why.join()).join()].join('|');
+      const ED = [[-1, '↘ Calmer'], [0, '= Garder'], [1, '↗ Monter']];
+      html = `<b class="h">${SP}Prochain titre idéal</b>
+        <div class="cpe"><span>Énergie${cur.e ? ` (en cours : ${cur.e}/10)` : ''}</span><div class="seg mini">${ED.map(([v, t]) => `<button type="button" data-cpe="${v}" class="${DJ.eDir === v ? 'on' : ''}">${t}</button>`).join('')}</div></div>`
+        + (list.length ? `<div class="cpl">${list.map((c, k) => { const y = byId(c.id); return `<div class="cpi${k ? '' : ' best'}"><div class="m"><b>${esc(y.title)}</b><small>${esc(c.why.join(' · ') || y.uploader)}</small></div><button class="${k ? '' : 'pri'}" data-cpm="load" data-deck="${o.i}" data-id="${c.id}">Sur ${o.L}</button></div>`; }).join('')}</div>
+          <div class="acts"><button data-cpm="more" data-cur="${d.id}" data-ids="${list.map(c => c.id).join(',')}">Autres idées</button></div>`
+        : `<span>Aucun autre morceau disponible pour la suite.</span>`);
     }
   }
   if (key === cpmKey) return; cpmKey = key; $('#cpmix').innerHTML = html;
 }
 $('#cpmix').addEventListener('click', e => {
+  const eb = e.target.closest('[data-cpe]');
+  if (eb) { DJ.eDir = +eb.dataset.cpe; LSJ.set('djedir', DJ.eDir); SET.pick = null; cpmKey = ''; cpMixRender(); return; }
   const b = e.target.closest('[data-cpm]'); if (!b) return;
   if (b.dataset.cpm === 'mix') djAutoMix();
   if (b.dataset.cpm === 'load') djLoadSafe(+b.dataset.deck, b.dataset.id);
+  if (b.dataset.cpm === 'more') {   // écarte les 3 propositions affichées
+    const ids = b.dataset.ids.split(',').filter(Boolean);
+    if (!DJ.cpSkip || DJ.cpSkip.for !== b.dataset.cur) DJ.cpSkip = { for: b.dataset.cur, ids: [] };
+    DJ.cpSkip.ids.push(...ids);
+    if (!djNextCands(b.dataset.cur, 1, DJ.cpSkip.ids).length) { DJ.cpSkip.ids = []; toast('Plus d’autres idées : je repars du début'); }
+  }
   if (b.dataset.cpm === 'other') {   // écarte la proposition actuelle et en charge une autre
     const d = DJ.d[+b.dataset.deck], skip = d.id || (SET.pick && SET.pick.id);
     if (skip) SET.played.add(skip);

@@ -1,5 +1,3 @@
-- Limiteur de sortie sur le Mix : le son ne sature plus quand tu empiles sirènes et gunshots sur le morceau (bouton « Limiteur », il s’allume quand il travaille)
-- Voix / Instru en direct sur chaque platine : pour les morceaux séparés, la bascule est instantanée, sans coupure ni décalage
-- Dubplates parlées : tape « Big up… pull up selecta ! », une voix Windows le dit avec les effets sound system, prêt pour un pad
-- Nouvelle page de pads BOUCLES : repère + boucle en un clic, sauts de 4 ou 16 temps calés sur le rythme, boucle ½ et ×2
-- Barre latérale : la durée totale de la bibliothèque s’affiche à côté du nombre de titres
+- Prochain titre idéal : le copilote du Mix propose 3 morceaux selon le tempo, la tonalité et l’énergie, en évitant le même artiste deux fois de suite
+- Énergie de chaque morceau estimée sur 10 (⚡ dans la bibliothèque du Mix), avec un choix Calmer / Garder / Monter pour la suite
+- Tracklist de soirée : chaque morceau passé dans la salle est noté avec l’heure, à copier (YouTube, Mixcloud) ou enregistrer en .txt, calée si besoin sur ton enregistrement du mix
