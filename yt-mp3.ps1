@@ -1,10 +1,10 @@
-﻿# =====================================================================
-#  YT MP3 v4.0.1 - convertisseur YouTube vers MP3 (usage personnel)
+﻿﻿# =====================================================================
+#  YT MP3 v4.0.2 - convertisseur YouTube vers MP3 (usage personnel)
 #  Moteur : yt-dlp + ffmpeg + deno, installés automatiquement dans .\outils
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '4.0.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '4.1.0'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -441,6 +441,7 @@ body.dj-mode main{max-width:1360px}
 .dk-pads .dk-hot{--pc:var(--hc)}.dk-pads .dk-loop{--pc:#22c55e}
 .dk-pads .dk-hot.set::before,.dk-pads .dk-loop.on::before,.pad.on::before{opacity:0}
 .pad small{display:block;font-size:9px;font-weight:600;opacity:.7;letter-spacing:0}
+.dk-pads .dk-cl.set:not(.on){color:var(--pc)}.dk-pads .dk-cl.set:not(.on)::before{opacity:1}
 /* Table de mix : une tranche par platine, au centre */
 .smpbanks{grid-column:1/-1;display:flex;gap:5px;flex-wrap:wrap}
 .smpbanks button{padding:4px 9px;border-radius:7px;font-size:10.5px;font-weight:800;letter-spacing:.5px;color:var(--muted);background:var(--panel2);border:1px solid var(--line)}
@@ -448,6 +449,9 @@ body.dj-mode main{max-width:1360px}
 .smpbanks [data-bankadd]{margin-left:auto;color:#a3e635}
 .smpbanks [data-packimp]{color:#fbbf24}
 .smpbanks [data-voixrec]{color:#f87171}
+.vxtxt{width:100%;box-sizing:border-box;margin-top:12px;background:var(--panel2,#1e1b26);border:1px solid var(--line);border-radius:10px;color:inherit;font:inherit;padding:10px 12px;resize:vertical}
+.vxtxt:focus{outline:none;border-color:var(--a1)}
+.vxsel{background:var(--panel2,#1e1b26);border:1px solid var(--line);border-radius:8px;color:inherit;font:inherit;padding:6px 8px;min-width:220px}
 .dk-pads .pad.empty{color:#5b6070;font-size:18px;font-weight:400;background:#16181e;box-shadow:inset 0 0 0 1px #2a2e38,inset 0 2px 6px #0008}
 .dk-pads .pad.empty::before{display:none}
 .dk-pads .pad.empty:hover{color:#a1a1aa;box-shadow:inset 0 0 0 1px #4b5060}
@@ -534,6 +538,7 @@ body.dj-mode main{max-width:1360px}
 .recb{display:flex;align-items:center;gap:7px;font-size:13.5px}
 .recb svg{width:15px;height:15px}
 #recbtn svg{color:#f43f5e}
+#limbtn.on svg{color:var(--ok)}#limbtn.work{border-color:var(--warn);box-shadow:0 0 12px #ffb45455}#limbtn.work svg{color:var(--warn)}
 #recbtn.on{background:#f43f5e;color:#fff;border-color:transparent;font-variant-numeric:tabular-nums}
 #recbtn.on svg{color:#fff;animation:blink 1s steps(2) infinite}
 @keyframes blink{50%{opacity:.25}}
@@ -877,6 +882,7 @@ kbd{font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,25
           <button type="button" data-l="4">4 s</button><button type="button" data-l="8">8 s</button><button type="button" data-l="16">16 s</button>
         </div>
         <button class="btn-ghost recb" id="beatmix" title="Enchaînement calé : même tempo, départ sur la mesure, échange des basses"></button>
+        <button class="btn-ghost recb" id="limbtn" title="Limiteur de sortie : le son ne sature jamais, même quand tu empiles sirènes et gunshots sur le morceau. Il s'allume en orange quand il travaille"></button>
         <button class="btn-ghost recb" id="recbtn"></button>
         <button class="btn-ghost recb" id="keysbtn" title="Raccourcis clavier"></button>
         <button class="btn-ghost recb" id="telbtn" title="Piloter le Mix depuis ton téléphone"></button>
@@ -1083,9 +1089,17 @@ kbd{font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,25
   <div class="dlg-btns"><button class="btn-ghost" data-packimp style="margin-right:auto">Importer des sons…</button><button class="btn-ghost" id="smpclose">Annuler</button></div>
 </div></div>
 <div class="overlay" id="voixdlg"><div class="box dlg wide">
-  <h3 style="margin-top:0">Enregistre ta voix</h3>
-  <p>Crie ton « Pull up my selecta ! », le nom de ton sound system, une dédicace… YT MP3 ajoute les effets et le range dans tes sons (sampler et Mixtape).</p>
-  <div class="vxrec"><button class="vxbtn" id="vxbtn">● ENREGISTRER</button><div class="vxlvl"><i id="vxlvl"></i></div><div class="vxt" id="vxt">15 secondes maximum</div></div>
+  <h3 style="margin-top:0">Ta voix, tes dubplates</h3>
+  <p>Ton « Pull up my selecta ! », le nom de ton sound system, une dédicace… au micro, ou tape le texte et une voix Windows le dit pour toi. YT MP3 ajoute les effets et le range dans tes sons (sampler et Mixtape).</p>
+  <div class="seg mini" id="vxmode" style="margin-top:12px"><button type="button" data-v="mic" class="on">🎤 Au micro</button><button type="button" data-v="txt">⌨ Au clavier</button></div>
+  <div class="vxrec" id="vxmic"><button class="vxbtn" id="vxbtn">● ENREGISTRER</button><div class="vxlvl"><i id="vxlvl"></i></div><div class="vxt" id="vxt">15 secondes maximum</div></div>
+  <div id="vxtxtbox" hidden>
+    <textarea id="vxtxt" class="vxtxt" maxlength="200" rows="2" spellcheck="false" placeholder="Big up Guillaume ! Pull up selecta, wheel and come again !"></textarea>
+    <div class="mxrow"><span>Voix</span><select id="vxvoice" class="vxsel"></select></div>
+    <div class="mxrow"><span>Débit</span><div class="seg mini" id="vxrate"><button type="button" data-v="-3">Posé</button><button type="button" data-v="0" class="on">Normal</button><button type="button" data-v="3">Rapide</button></div>
+      <button class="go sm" id="vxsay" style="margin:0 0 0 auto;align-self:center">Faire parler</button></div>
+    <div class="vxt" id="vxtt" style="margin-top:6px">Astuce : une voix anglaise prononce mieux le jargon dancehall</div>
+  </div>
   <div class="mxrow" style="margin-top:16px"><span>Effet</span><div class="seg mini" id="vxfx"><button type="button" data-v="sound" class="on">Sound system</button><button type="button" data-v="megaphone">Mégaphone</button><button type="button" data-v="grosse">Grosse voix</button><button type="button" data-v="naturel">Naturel</button></div></div>
   <div class="mxrow"><span>Nom</span><input id="vxname" class="mxtitle" style="margin:0" placeholder="Pull up selecta" spellcheck="false"></div>
   <div class="dlg-btns"><button class="btn-ghost" id="vxplay" disabled>▶ Écouter</button><button class="btn-ghost" id="vxclose">Fermer</button><button class="go" id="vxkeep" disabled>Garder ce son</button></div>
@@ -1327,6 +1341,8 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['4.1', '22/11/2026', ['Limiteur de sortie sur le Mix : le son ne sature plus quand tu empiles sirènes et gunshots sur le morceau (bouton « Limiteur », il s’allume quand il travaille)', 'Voix / Instru en direct sur chaque platine : pour les morceaux séparés, la bascule est instantanée, sans coupure ni décalage', 'Dubplates parlées : tape « Big up… pull up selecta ! », une voix Windows le dit avec les effets sound system, prêt pour un pad', 'Nouvelle page de pads BOUCLES : repère + boucle en un clic, sauts de 4 ou 16 temps calés sur le rythme, boucle ½ et ×2', 'Barre latérale : la durée totale de la bibliothèque s’affiche à côté du nombre de titres']],
+  ['4.0.2', '22/11/2026', ['Barre latérale : la durée totale de la bibliothèque s’affiche à côté du nombre de titres']],
   ['4.0.1', '18/11/2026', ['Correction : les sons du sampler passent maintenant par leur platine (volume, crossfader, casque, effets) : un pad de la platine B ne sort plus en salle quand le crossfader est sur A', 'Sur le téléphone, le sampler joue sur la platine choisie en haut de l’onglet Pads']],
   ['4.0', '14/11/2026', ['Nouvelle interface : barre latérale, panneaux translucides, nouvelle typographie, sur tous les écrans', 'Copilote : écris ce que tu veux dans la barre (« entre 95 et 105 BPM », « compatible avec … », « charge … sur B », « mixtape de 30 min », « sépare la voix de … »)', 'Barre de commande Ctrl + K depuis n’importe quel écran', 'Suggestions sur l’accueil : doublons, titres prêts à mixer, morceaux à séparer', 'Dans le Mix : le copilote propose le morceau suivant et le bon type d’enchaînement', 'L’analyse du tempo et de la tonalité se fait maintenant sur tous les écrans']],
   ['3.5', '03/11/2026', ['Scratch sur la molette : pose la main sur le disque, il s’arrête ; pousse et tire, le son suit ton geste en avant comme en arrière ; lâche, la platine repart']],
@@ -1709,10 +1725,17 @@ function djDeckHtml(L){
     <div class="sp"></div>
     <div class="seg mini dk-stem"><button type="button" data-s="orig">Original</button><button type="button" data-s="voix">Voix</button><button type="button" data-s="instru">Instru</button></div>
   </div>
-  <div class="dk-padbar"><div class="seg mini dk-pmode"><button type="button" data-m="cue" class="on">REPÈRES</button><button type="button" data-m="fx">EFFETS</button><button type="button" data-m="smp">SAMPLER</button></div></div>
+  <div class="dk-padbar"><div class="seg mini dk-pmode"><button type="button" data-m="cue" class="on">REPÈRES</button><button type="button" data-m="loop">BOUCLES</button><button type="button" data-m="fx">EFFETS</button><button type="button" data-m="smp">SAMPLER</button></div></div>
   <div class="dk-pads" data-page="cue" title="Repères (${keys[3]}) : clic sur un repère vide = le placer ; clic = y sauter ; clic droit = l'effacer">
     ${[0, 1, 2, 3].map(n => `<button class="dk-hot" data-h="${n}" style="--hc:${HOT_COL[n]}">REPÈRE ${n + 1}</button>`).join('')}
     ${[1, 2, 4, 8].map(n => `<button class="dk-loop" data-n="${n}" title="Boucle de ${n} temps (re-clic pour sortir)">BOUCLE ${n}</button>`).join('')}
+  </div>
+  <div class="dk-pads hid" data-page="loop">
+    ${[0, 1, 2, 3].map(n => `<button class="pad dk-cl" data-h="${n}" style="--pc:${HOT_COL[n]}" title="Repère + boucle : saute au repère ${n + 1} et boucle à partir de là (re-clic pour sortir de la boucle). Repère vide : il est placé ici. Clic droit : effacer le repère">BOUCLE R${n + 1}<small>4 temps</small></button>`).join('')}
+    <button class="pad dk-jmp" data-j="-1" style="--pc:#38bdf8" title="Recule de 4 temps en restant dans le rythme (Maj + clic : 16 temps). Dans une boucle, la boucle recule avec toi">◀ SAUT<small>4 temps</small></button>
+    <button class="pad dk-jmp" data-j="1" style="--pc:#38bdf8" title="Avance de 4 temps en restant dans le rythme (Maj + clic : 16 temps). Dans une boucle, la boucle avance avec toi">SAUT ▶<small>4 temps</small></button>
+    <button class="pad dk-lsz" data-z="0.5" style="--pc:#a3e635" title="Boucle deux fois plus courte (marche aussi sur la boucle en cours)">BOUCLE ½<small>taille</small></button>
+    <button class="pad dk-lsz" data-z="2" style="--pc:#a3e635" title="Boucle deux fois plus longue (marche aussi sur la boucle en cours)">BOUCLE ×2<small>taille</small></button>
   </div>
   <div class="dk-pads hid" data-page="fx">${PAD_FX.map(f => `<button class="pad" data-fx="${f.k}" style="--pc:${f.c}" title="${PAD_HELP[f.k]}">${f.t}</button>`).join('')}</div>
   <div class="dk-pads hid" data-page="smp"></div>
@@ -1885,7 +1908,7 @@ function djSmpRender(){
   if (DJ.bank >= banks) DJ.bank = banks - 1;
   document.querySelectorAll('.dk-pads[data-page="smp"]').forEach(p => {
     const di = p.closest('#deckB') ? 1 : 0;
-    let h = `<div class="smpbanks">${Array.from({ length: banks }, (_, i) => `<button type="button" data-bank="${i}" class="${i === DJ.bank ? 'on' : ''}">BANQUE ${i + 1}</button>`).join('')}<button type="button" data-bankadd title="Ajouter une banque de pads vides">+ BANQUE</button><button type="button" data-voixrec title="Enregistre ta propre voix (« Pull up my selecta ! ») avec les effets sound system">🎤 MA VOIX</button><button type="button" data-packimp title="Importer un pack de sons (fichier ZIP téléchargé, ou des sons)">+ IMPORTER</button></div>`;
+    let h = `<div class="smpbanks">${Array.from({ length: banks }, (_, i) => `<button type="button" data-bank="${i}" class="${i === DJ.bank ? 'on' : ''}">BANQUE ${i + 1}</button>`).join('')}<button type="button" data-bankadd title="Ajouter une banque de pads vides">+ BANQUE</button><button type="button" data-voixrec title="Ta voix au micro, ou un texte lu par une voix Windows (« Big up… pull up selecta ! »), avec les effets sound system">🎤 MA VOIX</button><button type="button" data-packimp title="Importer un pack de sons (fichier ZIP téléchargé, ou des sons)">+ IMPORTER</button></div>`;
     for (let k = 0; k < 8; k++) {
       const slot = DJ.bank * 8 + k, x = smpById(L.slots[slot]);
       h += x ? `<button class="pad ${smpOn(x.id, di) ? 'on' : ''}" data-smp="${esc(x.id)}" data-slot="${slot}" style="--pc:${SMP_COL[slot % 8]}" title="Appuie pour jouer, ré-appuie pour arrêter · clic droit : changer ou libérer">${esc(x.label.toUpperCase())}${x.user ? '<small>perso</small>' : x.voice ? '<small>voix</small>' : ''}</button>`
@@ -2011,7 +2034,12 @@ function djCtx(){
   if (!DJ.ctx) {
     const C = window.AudioContext || window.webkitAudioContext;
     DJ.ctx = new C({ latencyHint: 'interactive' });
-    DJ.master = DJ.ctx.createGain(); DJ.master.connect(DJ.ctx.destination);
+    DJ.master = DJ.ctx.createGain();
+    // Limiteur de sortie : empêche la saturation quand les sons du sampler s'ajoutent au morceau
+    // (compresseur rapide, puis écrêtage doux en sécurité : la crête ne dépasse jamais 0 dB)
+    DJ.lim = DJ.ctx.createDynamicsCompressor(); DJ.lim.knee.value = 0; DJ.lim.attack.value = 0.001; DJ.lim.release.value = 0.15;
+    DJ.limOut = DJ.ctx.createWaveShaper(); DJ.limOut.oversample = '2x';
+    DJ.master.connect(DJ.lim).connect(DJ.limOut).connect(DJ.ctx.destination); djLimApply();
     DJ.cueBus = DJ.ctx.createMediaStreamDestination();
     DJ.d.forEach(d => {
       const c = DJ.ctx, src = c.createMediaElementSource(d.el);
@@ -2026,15 +2054,18 @@ function djCtx(){
       const conv = c.createConvolver(), revWet = c.createGain();
       conv.buffer = djImpulse(c, 2.6);
       echoWet.gain.value = 0; revWet.gain.value = 0; fb.gain.value = 0;
-      src.connect(low).connect(mid).connect(high).connect(lp).connect(hp);
+      // Original, voix seules et instrumental jouent ensemble, calés : changer de version = changer de volume (sans coupure)
+      const gs = {};
+      [['orig', src], ['voix', c.createMediaElementSource(d.sv.voix)], ['instru', c.createMediaElementSource(d.sv.instru)]].forEach(([k, s]) => { gs[k] = c.createGain(); s.connect(gs[k]).connect(low); });
+      low.connect(mid).connect(high).connect(lp).connect(hp);
       hp.connect(sum);
       hp.connect(delay); delay.connect(fb).connect(delay); delay.connect(echoWet).connect(sum);
       hp.connect(conv).connect(revWet).connect(sum);
       sum.connect(vol).connect(xg).connect(DJ.master);
       sum.connect(pfl).connect(DJ.cueBus);
       const an = c.createAnalyser(); an.fftSize = 512; vol.connect(an);
-      d.nodes = { low, mid, high, lp, hp, vol, xg, pfl, delay, fb, echoWet, revWet, an };
-      djApply(d);
+      d.nodes = { low, mid, high, lp, hp, vol, xg, pfl, delay, fb, echoWet, revWet, an, gs };
+      djApply(d); djStemGains(d, true);
     });
     djScratchInit();
     djApplyXf();
@@ -2042,6 +2073,21 @@ function djCtx(){
   }
   if (DJ.ctx.state === 'suspended') DJ.ctx.resume();
   return DJ.ctx;
+}
+DJ.limOn = LSJ.get('djlim', true);
+function djLimApply(){
+  if (DJ.lim) {
+    DJ.lim.threshold.value = DJ.limOn ? -4 : 0; DJ.lim.ratio.value = DJ.limOn ? 20 : 1;
+    if (DJ.limOn && !DJ.limCurve) {   // linéaire jusqu'à 0,8 puis arrondi vers 0,99
+      const n = 4096, c = new Float32Array(n);
+      for (let i = 0; i < n; i++) { const x = i / (n - 1) * 4 - 2, a = Math.abs(x); c[i] = Math.sign(x) * (a <= 0.8 ? a : 0.8 + 0.19 * Math.tanh((a - 0.8) / 0.19)); }
+      DJ.limCurve = c;
+    }
+    DJ.limOut.curve = DJ.limOn ? DJ.limCurve : null;
+  }
+  const b = $('#limbtn'); if (!b) return;
+  b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12h3l2-7 3 14 3-10 2 3h5"/><path d="M3 5h18" stroke-dasharray="2 2"/></svg><span>Limiteur ${DJ.limOn ? 'oui' : 'non'}</span>`;
+  b.classList.toggle('on', DJ.limOn);
 }
 async function djApplyOutputs(){
   const o = djOut();
@@ -2098,6 +2144,9 @@ function djLoad(i, id, stem, quiet){
   if (!quiet) djStopMix();
   d.el.pause();
   d.id = id; d.stem = stemFor(x, stem || 'orig'); d.cue = 0; d.peaks = null; d.loop = null; d.sync = false; d.nudge = 1;
+  d.hasStems = !!(x.voix && x.instru);
+  ['voix', 'instru'].forEach(k => { const s = d.sv[k]; s.pause(); if (d.hasStems) s.src = url(id, k); else { s.removeAttribute('src'); s.load(); } });
+  djStemGains(d, true);
   const inf = djInfo(id); d.bpm = inf ? inf.bpm : null; d.b0 = inf ? inf.b0 : 0; d.key = inf ? inf.key : null;
   d.hot = djCuesOf(id);
   djSetSrc(d, 0, false);
@@ -2105,7 +2154,7 @@ function djLoad(i, id, stem, quiet){
   if (!quiet) toast(`${x.title} chargé sur la platine ${d.L}`);
 }
 function djSetSrc(d, at, play){
-  d.el.src = url(d.id, d.stem);
+  d.el.src = url(d.id, d.hasStems ? 'orig' : d.stem);
   d.el.defaultPlaybackRate = d.rate * d.nudge; d.el.preservesPitch = true;
   d.el.addEventListener('loadedmetadata', () => {
     d.el.playbackRate = d.rate * d.nudge;
@@ -2113,6 +2162,32 @@ function djSetSrc(d, at, play){
     if (play) d.el.play().catch(() => {});
   }, { once: true });
 }
+// Version entendue (original / voix / instru) : fondu de 30 ms entre les lecteurs qui tournent ensemble
+function djStemGains(d, now){
+  if (!d.nodes) return;
+  const t = DJ.ctx.currentTime;
+  ['orig', 'voix', 'instru'].forEach(k => {
+    const v = (d.hasStems ? d.stem : 'orig') === k ? 1 : 0, g = d.nodes.gs[k].gain;
+    if (now) { g.cancelScheduledValues(t); g.value = v; } else g.setTargetAtTime(v, t, 0.01);
+  });
+}
+// Les lecteurs voix et instru suivent le lecteur principal : lecture, pause, vitesse, position
+function djStemFollow(d, hard){
+  if (!d.hasStems || !d.nodes) return;
+  const m = d.el, run = !m.paused && !d.jog;
+  ['voix', 'instru'].forEach(k => {
+    const s = d.sv[k];
+    if (!run) { if (!s.paused) s.pause(); if (hard && s.readyState) s.currentTime = m.currentTime; return; }
+    s.preservesPitch = m.preservesPitch;
+    if (s.paused) { s.currentTime = m.currentTime; s.playbackRate = m.playbackRate; s.play().catch(() => {}); return; }
+    if (s.seeking) return;
+    const e = m.currentTime - s.currentTime;
+    if (hard || Math.abs(e) > 0.1) { s.currentTime = m.currentTime; s.playbackRate = m.playbackRate; }
+    else s.playbackRate = m.playbackRate * (1 + Math.max(-0.04, Math.min(0.04, e * 0.8)));   // rattrape les petits écarts sans à-coup
+  });
+}
+setInterval(() => DJ.d.forEach(d => djStemFollow(d)), 40);
+
 // Récupère tout le fichier par morceaux (le moteur envoie 2 Mo maximum par requête)
 async function djFetchAll(u, max = DJ_MAX){
   const parts = []; let got = 0, total = null;
@@ -2308,7 +2383,9 @@ function djMeta(d){
   const kel = q('.dk-key'), o = DJ.d[1 - d.i];
   kel.innerHTML = d.key && d.key.cam ? `<b>${d.key.cam}</b>${d.key.name}` : '';
   kel.classList.toggle('ok', !!(o && o.id && djKeyOk(d.key, o.key)));
-  d.root.querySelectorAll('.dk-loop').forEach(b => b.classList.toggle('on', !!d.loop && d.loop.n === +b.dataset.n));
+  d.root.querySelectorAll('.dk-loop').forEach(b => b.classList.toggle('on', !!d.loop && d.loop.n === +b.dataset.n && d.loop.cue === undefined));
+  d.root.querySelectorAll('.dk-cl').forEach(b => { const n = +b.dataset.h; b.classList.toggle('set', d.hot[n] !== null); b.classList.toggle('on', !!d.loop && d.loop.cue === n); b.querySelector('small').textContent = djBeats(d.lsz); });
+  d.root.querySelectorAll('.dk-lsz small').forEach(x => { x.textContent = djBeats(d.lsz); });
   q('.dk-sync').classList.toggle('on', d.sync);
   q('.dk-pfl').classList.toggle('on', d.pfl);
 }
@@ -2375,6 +2452,7 @@ function djZoom(d){
 }
 function djDraw(){
   if (!$('#v-dj').hidden) { DJ.d.forEach(djJog); DJ.d.forEach(djZoom); DJ.knobs.forEach(k => k.render()); }
+  if (DJ.lim) { const w = DJ.limOn && DJ.lim.reduction < -1; if (w !== DJ.limWork) { DJ.limWork = w; $('#limbtn').classList.toggle('work', w); } }
   if (!$('#v-dj').hidden) DJ.d.forEach(d => {
     const cv = d.root.querySelector('.dk-wave'), w = cv.clientWidth, h = cv.clientHeight, r = devicePixelRatio || 1;
     if (!w) return;
@@ -2492,6 +2570,38 @@ function djHot(d, n, erase){
   djMeta(d);
 }
 
+/* ---------- Repère + boucle, sauts de temps, taille de boucle ---------- */
+const djBeats = n => n >= 1 ? `${n} temps` : n === 0.5 ? '½ temps' : '¼ temps';
+function djCueLoop(d, n, erase){
+  if (!d.id) return;
+  if (erase) { djHot(d, n, true); return; }
+  if (!d.bpm) { toast('Tempo pas encore détecté : boucle impossible', 'err'); return; }
+  if (d.loop && d.loop.cue === n) { d.loop = null; djMeta(d); return; }   // re-clic : on sort de la boucle
+  if (d.hot[n] === null) { d.hot[n] = Math.max(0, djQuant(d, d.el.currentTime)); djCuesSave(d.id, d.hot); }
+  const st = d.hot[n];
+  d.loop = { n: d.lsz, in: st, out: st + d.lsz * 60 / d.bpm, cue: n };
+  d.el.currentTime = st;
+  if (d.el.paused) { djCtx(); d.el.play().catch(() => {}); }
+  djMeta(d);
+}
+function djJump(d, dir, big){
+  if (!d.id) return;
+  if (!d.bpm) { toast('Tempo pas encore détecté : saut impossible', 'err'); return; }
+  const dt = dir * (big ? 16 : 4) * 60 / d.bpm, dur = d.el.duration || 0;
+  let t = d.el.currentTime + dt;
+  if (t < 0 || (dur && t > dur - 0.2)) { toast(dir < 0 ? 'Début du morceau' : 'Fin du morceau'); return; }
+  if (d.loop) { d.loop.in += dt; d.loop.out += dt; if (d.loop.in < 0) { d.loop = null; } else delete d.loop.cue; }   // la boucle se déplace avec la lecture
+  d.el.currentTime = t; djMeta(d);
+}
+function djLoopSize(d, z){
+  d.lsz = Math.max(0.25, Math.min(32, d.lsz * z));
+  if (d.loop && d.bpm) {
+    d.loop.n = d.lsz; d.loop.out = d.loop.in + d.lsz * 60 / d.bpm;
+    const t = d.el.currentTime; if (t >= d.loop.out) d.el.currentTime = d.loop.in + (t - d.loop.in) % (d.loop.out - d.loop.in);
+  }
+  djMeta(d);
+}
+
 /* ---------- Enchaînement automatique : le crossfader glisse vers l'autre platine ---------- */
 function djStopMix(){
   if (DJ.mix) { clearInterval(DJ.mix.timer); clearTimeout(DJ.mix.wait); DJ.mix = null; }
@@ -2579,13 +2689,13 @@ function djRecToggle(){
   if (DJ.rec) { DJ.rec.mr.stop(); return; }
   if (!window.MediaRecorder) { toast('Enregistrement non pris en charge', 'err'); return; }
   djCtx();
-  const dest = DJ.ctx.createMediaStreamDestination(); DJ.master.connect(dest);
+  const dest = DJ.ctx.createMediaStreamDestination(); DJ.limOut.connect(dest);
   const type = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'].find(t => MediaRecorder.isTypeSupported(t)) || '';
   const mr = new MediaRecorder(dest.stream, type ? { mimeType: type, audioBitsPerSecond: 256000 } : {});
   const chunks = [];
   mr.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
   mr.onstop = async () => {
-    clearInterval(DJ.rec.timer); try { DJ.master.disconnect(dest); } catch {}
+    clearInterval(DJ.rec.timer); try { DJ.limOut.disconnect(dest); } catch {}
     const secs = (performance.now() - DJ.rec.t0) / 1000; DJ.rec = null; djRecBtn();
     if (secs < 2) { toast('Enregistrement trop court, ignoré'); return; }
     const blob = new Blob(chunks, { type: type || 'audio/webm' });
@@ -2605,15 +2715,19 @@ function djRecToggle(){
 ['A', 'B'].forEach((L, i) => {
   const root = $('#deck' + L); root.innerHTML = djDeckHtml(L);
   const el = new Audio(); el.preload = 'auto';
-  const d = { i, L, root, el, id: null, stem: 'orig', cue: 0, bpm: null, b0: 0, peaks: null, rate: 1, nudge: 1, vol: 1,
-              eq: { low: 0, mid: 0, high: 0 }, filt: 0, echo: 0, rev: 0, key: null, pfl: false, sync: false, syncF: 1, loop: null, hot: [null, null, null, null], nodes: null };
+  const sv = { voix: new Audio(), instru: new Audio() }; sv.voix.preload = sv.instru.preload = 'auto';
+  const d = { i, L, root, el, sv, hasStems: false, id: null, stem: 'orig', cue: 0, bpm: null, b0: 0, peaks: null, rate: 1, nudge: 1, vol: 1,
+              eq: { low: 0, mid: 0, high: 0 }, filt: 0, echo: 0, rev: 0, key: null, pfl: false, sync: false, syncF: 1, loop: null, lsz: 4, hot: [null, null, null, null], nodes: null };
   DJ.d.push(d);
   const q = s => root.querySelector(s);
   root.querySelectorAll('.dk-stem button').forEach(b => { b.disabled = b.dataset.s !== 'orig'; b.classList.toggle('on', b.dataset.s === 'orig'); });
   djPlayIcon(d);
   el.addEventListener('play', () => { djPlayIcon(d); djPauseMain(); });
   el.addEventListener('playing', () => { DJ.autoPending = false; djAlign(d); });
-  el.addEventListener('pause', () => djPlayIcon(d));
+  el.addEventListener('pause', () => { djPlayIcon(d); djStemFollow(d); });
+  el.addEventListener('play', () => djStemFollow(d, true));
+  el.addEventListener('seeking', () => djStemFollow(d, true));
+  el.addEventListener('ratechange', () => { if (d.hasStems) ['voix', 'instru'].forEach(k => { d.sv[k].preservesPitch = el.preservesPitch; d.sv[k].playbackRate = el.playbackRate; }); });
   el.addEventListener('ended', () => djPlayIcon(d));
   d.toggle = () => {
     if (!d.id) { toast(`Charge un morceau sur la platine ${L}`, 'err'); return; }
@@ -2679,6 +2793,9 @@ function djRecToggle(){
     b.oncontextmenu = e => { e.preventDefault(); djHot(d, +b.dataset.h, true); };
   });
   root.querySelectorAll('.dk-loop').forEach(b => { b.onclick = () => djLoop(d, +b.dataset.n); });
+  root.querySelectorAll('.dk-cl').forEach(b => { b.onclick = () => djCueLoop(d, +b.dataset.h); b.oncontextmenu = e => { e.preventDefault(); djCueLoop(d, +b.dataset.h, true); }; });
+  root.querySelectorAll('.dk-jmp').forEach(b => { b.onclick = e => djJump(d, +b.dataset.j, e.shiftKey); });
+  root.querySelectorAll('.dk-lsz').forEach(b => { b.onclick = () => djLoopSize(d, +b.dataset.z); });
   const cv = q('.dk-wave'); let drag = false;
   const seek = e => { if (!el.duration) return; const r = cv.getBoundingClientRect(); d.loop = null; el.currentTime = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * el.duration; };
   cv.addEventListener('pointerdown', e => { drag = true; cv.setPointerCapture(e.pointerId); seek(e); });
@@ -2687,8 +2804,8 @@ function djRecToggle(){
   q('.dk-stem').onclick = e => {
     const b = e.target.closest('button'); if (!b || b.disabled || !d.id || b.dataset.s === d.stem) return;
     d.stem = b.dataset.s; d.peaks = null;
-    djSetSrc(d, el.currentTime, !el.paused); djScratchPrep(d);
-    djMeta(d); djAnalyse(d);
+    if (d.hasStems) djStemGains(d); else djSetSrc(d, el.currentTime, !el.paused);   // morceau séparé : bascule instantanée
+    djScratchPrep(d); djMeta(d); djAnalyse(d);
   };
   const tempo = q('.dk-tempo');
   const setTempo = v => {   // réglage manuel : désactive SYNC
@@ -2743,6 +2860,8 @@ $('#automix').onclick = djAutoMix;
 $('#beatmix').onclick = () => { DJ.beatmix = !DJ.beatmix; LSJ.set('beatmix', DJ.beatmix); djBeatBtn(); toast(DJ.beatmix ? 'Enchaînement calé sur le rythme activé' : 'Enchaînement simple (fondu sans calage)'); };
 djBeatBtn();
 $('#recbtn').onclick = djRecToggle;
+$('#limbtn').onclick = () => { DJ.limOn = !DJ.limOn; LSJ.set('djlim', DJ.limOn); djLimApply(); toast(DJ.limOn ? 'Limiteur activé : plus de saturation' : 'Limiteur désactivé'); };
+djLimApply();
 $('#keysbtn').innerHTML = IC.keys + '<span>Raccourcis</span>';
 $('#keysbtn').onclick = () => $('#keyhelp').classList.toggle('show');
 $('#keyhelp').onclick = e => { if (e.target === $('#keyhelp') || e.target.closest('.kclose')) $('#keyhelp').classList.remove('show'); };
@@ -3147,7 +3266,12 @@ function render(s){
   // Bibliothèque
   const h = s.history || [];
   const total = h.reduce((a, x) => a + (x.exists ? x.size : 0), 0);
-  $('#stats').textContent = h.length ? `${h.length} titre${h.length > 1 ? 's' : ''} · ${mb(total)}` : 'Bibliothèque vide';
+  // Durée totale des titres présents sur le disque : « 1 h 24 min », « 42 min », « 3 min 20 s »
+  const secs = h.reduce((a, x) => a + (x.exists ? secsOf(x.duration) : 0), 0);
+  const fdur = t => { t = Math.round(t); const hh = Math.floor(t / 3600), mm = Math.floor(t % 3600 / 60), ss = t % 60;
+    return hh ? `${hh} h ${String(mm).padStart(2, '0')} min` : mm >= 10 ? `${mm} min` : mm ? `${mm} min ${String(ss).padStart(2, '0')} s` : `${ss} s`; };
+  $('#stats').textContent = h.length ? `${h.length} titre${h.length > 1 ? 's' : ''} · ${fdur(secs)} · ${mb(total)}` : 'Bibliothèque vide';
+  $('#stats').title = h.length ? `Durée totale de la bibliothèque : ${fdur(secs)}` : '';
   $('#hcount').textContent = h.length || '';
   const key = JSON.stringify(h) + filter + '|' + (P.id || '') + (P.playing ? 1 : 0);
   if (key === libKey) return;
@@ -3890,7 +4014,47 @@ function packState(m){
 
 /* ===================== Enregistrer sa voix (micro) ===================== */
 const VX = { rec: null, stream: null, t0: 0, timer: null, has: false, fx: 'sound', audio: new Audio() };
-function voixOpen(){ $('#voixdlg').classList.add('show'); }
+function voixOpen(){ $('#voixdlg').classList.add('show'); if (VX.mode === 'txt') ttsVoices(); }
+VX.mode = 'mic'; VX.rate = 0;
+$('#vxmode').onclick = e => {
+  const b = e.target.closest('button'); if (!b || VX.rec) return;
+  VX.mode = b.dataset.v; $('#vxmode').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+  $('#vxmic').hidden = VX.mode !== 'mic'; $('#vxtxtbox').hidden = VX.mode !== 'txt';
+  if (VX.mode === 'txt') { ttsVoices(); setTimeout(() => $('#vxtxt').focus(), 30); }
+};
+$('#vxrate').onclick = e => { const b = e.target.closest('button'); if (!b) return; VX.rate = +b.dataset.v; $('#vxrate').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); };
+// Voix Windows installées : une voix anglaise d'homme par défaut (meilleure pour « pull up », « big up »…)
+async function ttsVoices(){
+  if (VX.voices) return;
+  let r; try { r = await api('/api/ttsvoices', {}); } catch { return; }
+  VX.voices = r.voices || [];
+  const sel = $('#vxvoice'), lang = l => l.startsWith('en') ? 'anglais' : l.startsWith('fr') ? 'français' : l;
+  if (!VX.voices.length) { sel.innerHTML = '<option value="">Aucune voix Windows trouvée</option>'; $('#vxsay').disabled = true;
+    $('#vxtt').textContent = 'Ajoute une voix dans Paramètres Windows > Heure et langue > Voix, puis relance YT MP3'; return; }
+  const sorted = [...VX.voices].sort((a, b) => (b.lang.startsWith('en') - a.lang.startsWith('en')) || (b.male - a.male));
+  const saved = LSJ.get('ttsvoice', '');
+  sel.innerHTML = sorted.map(v => `<option value="${esc(v.name)}">${esc(v.name.replace(/^Microsoft\s+/, '').replace(/\s+Desktop$/, ''))} · ${lang(v.lang)} · ${v.male ? 'homme' : 'femme'}</option>`).join('');
+  if (saved && VX.voices.some(v => v.name === saved)) sel.value = saved;
+}
+$('#vxvoice').onchange = () => LSJ.set('ttsvoice', $('#vxvoice').value);
+$('#vxsay').onclick = async () => {
+  const text = $('#vxtxt').value.trim(); if (!text) { toast('Écris d’abord ce que la voix doit dire', 'err'); $('#vxtxt').focus(); return; }
+  const b = $('#vxsay'); b.disabled = true; $('#vxtt').textContent = 'La voix se prépare…';
+  try {
+    const r = await api('/api/tts', { text, voice: $('#vxvoice').value, rate: VX.rate });
+    if (r.error) throw new Error(r.error);
+    for (let k = 0; k < 120; k++) {
+      await new Promise(res => setTimeout(res, 400));
+      const st = await api('/api/ttsstate', { preset: VX.fx });
+      if (st.state === 'preparation') continue;
+      if (st.state === 'erreur') throw new Error(st.error || 'Voix impossible');
+      VX.has = true; voixUi(); $('#vxtt').textContent = 'Écoute le résultat, change d’effet si tu veux, puis garde-le';
+      if (!$('#vxname').value.trim()) $('#vxname').value = text.replace(/[\s!?.,;:]+$/, '').slice(0, 40).trim();
+      voixPlay(); break;
+    }
+  } catch (err) { toast(err.message, 'err'); $('#vxtt').textContent = 'Réessaie'; }
+  b.disabled = false;
+};
 function voixUi(){
   $('#vxbtn').classList.toggle('on', !!VX.rec);
   $('#vxbtn').textContent = VX.rec ? '■ STOP' : '● ENREGISTRER';
@@ -5727,12 +5891,64 @@ function Update-PackImport {
 }
 
 # Ta voix au micro : enregistrement brut gardé pour pouvoir changer d'effet avant de l'enregistrer
+$script:voixRaw = Join-Path $Data 'voix-brute.webm'   # micro (webm) ou texte lu par Windows (wav)
 function Invoke-VoiceFx([string]$preset) {
-    $raw = Join-Path $Data 'voix-brute.webm'; $out = Join-Path $Data 'voix-apercu.wav'
+    $raw = $script:voixRaw; $out = Join-Path $Data 'voix-apercu.wav'
     if (-not (Test-Path -LiteralPath $raw)) { return 'Aucun enregistrement' }
     & $Ffmpeg -nostdin -v error -y -i $raw -vn -af (Get-VoiceChain $preset) -ac 2 -c:a pcm_s16le $out 2>$null
     if (-not (Test-Path -LiteralPath $out) -or (Get-Item -LiteralPath $out).Length -lt 2000) { return 'Rien d''audible dans l''enregistrement : parle plus près du micro' }
     return ''
+}
+
+# Dubplates parlées : le texte tapé est lu par une voix Windows (hors ligne), puis passe dans les effets sound system
+$script:ttsVoices = $null; $script:ttsJob = $null; $script:tts = @{ state = 'vide'; error = '' }
+function Get-TtsVoices {
+    if ($null -ne $script:ttsVoices) { return $script:ttsVoices }
+    $l = @()
+    try {
+        Add-Type -AssemblyName System.Speech -ErrorAction Stop
+        $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+        $l = @($s.GetInstalledVoices() | Where-Object { $_.Enabled } | ForEach-Object {
+            $v = $_.VoiceInfo
+            @{ name = $v.Name; lang = $v.Culture.Name; male = ([string]$v.Gender -eq 'Male') }
+        })
+        $s.Dispose()
+    } catch { Write-LogOnce 'Voix Windows' $_ }
+    if (-not $l.Count -and $env:YTMP3_TTS_TEST) { $l = @(@{ name = 'Voix de test'; lang = 'en-US'; male = $true }) }
+    $script:ttsVoices = $l
+    return $l
+}
+function Start-Tts([string]$text, [string]$voice, [int]$rate) {
+    if ($script:ttsJob) { return 'Une voix est déjà en préparation' }
+    $text = ($text -replace '\s+', ' ').Trim()
+    if (-not $text) { return 'Écris d''abord le texte à dire' }
+    if ($text.Length -gt 200) { $text = $text.Substring(0, 200) }
+    $out = Join-Path $Data 'voix-tts.wav'; Remove-Item -LiteralPath $out -Force -ErrorAction SilentlyContinue
+    $script:tts = @{ state = 'preparation'; error = '' }
+    $script:ttsJob = Start-Job -ArgumentList $Ffmpeg, $out, $text, $voice, ([math]::Max(-10, [math]::Min(10, $rate))), ([string]$env:YTMP3_TTS_TEST) -ScriptBlock {
+        param($ffmpeg, $out, $text, $voice, $rate, $fake)
+        if ($fake) { & $ffmpeg -nostdin -v error -y -f lavfi -i 'sine=f=330:d=1.2' -ac 1 $out 2>$null; return }
+        Add-Type -AssemblyName System.Speech
+        $s = New-Object System.Speech.Synthesis.SpeechSynthesizer
+        if ($voice) { try { $s.SelectVoice($voice) } catch {} }
+        $s.Rate = $rate; $s.Volume = 100
+        $s.SetOutputToWaveFile($out); [void]$s.Speak($text); $s.SetOutputToNull(); $s.Dispose()
+    }
+    return ''
+}
+function Update-Tts([string]$preset) {
+    $j = $script:ttsJob; if (-not $j -or $j.State -eq 'Running' -or $j.State -eq 'NotStarted') { return }
+    $out = Join-Path $Data 'voix-tts.wav'
+    if ($j.State -eq 'Completed' -and (Test-Path -LiteralPath $out) -and (Get-Item -LiteralPath $out).Length -gt 1000) {
+        $script:voixRaw = $out
+        $err = Invoke-VoiceFx $preset
+        $script:tts = @{ state = $(if ($err) { 'erreur' } else { 'pret' }); error = $err }
+    } else {
+        $m = ''; try { $m = $j.ChildJobs[0].JobStateInfo.Reason.Message } catch {}
+        if ($m) { Write-Log ('Voix Windows : ' + $m) }
+        $script:tts = @{ state = 'erreur'; error = 'La voix Windows n''a rien produit : vérifie qu''une voix est installée (Paramètres Windows > Heure et langue > Voix)' }
+    }
+    Remove-Job $j -Force -ErrorAction SilentlyContinue; $script:ttsJob = $null
 }
 
 function Get-SoundList {
@@ -6303,7 +6519,8 @@ function Invoke-Request($ctx) {
         '/api/mxsounds' { $l = @(Get-SoundList); Send-Json $ctx @{ sounds = $l; userDir = (Get-UserSoundsDir); voices = $(if ($script:sndJob) { 'preparation' } else { $script:voiceState }) }; return }
         '/api/voixrec' {
             if ($ctx.Length -lt 800) { Send-Json $ctx @{ error = 'Enregistrement vide' }; return }
-            $fs = [IO.File]::Create((Join-Path $Data 'voix-brute.webm')); try { $fs.Write($ctx.Bytes, 0, [int]$ctx.Length) } finally { $fs.Close() }
+            $script:voixRaw = Join-Path $Data 'voix-brute.webm'
+            $fs = [IO.File]::Create($script:voixRaw); try { $fs.Write($ctx.Bytes, 0, [int]$ctx.Length) } finally { $fs.Close() }
             $pm = [regex]::Match([string]$ctx.Query, 'preset=([a-z]+)')
             $err = Invoke-VoiceFx $(if ($pm.Success) { $pm.Groups[1].Value } else { 'sound' })
             Send-Json $ctx @{ ok = -not $err; error = $err }; return
@@ -6313,6 +6530,9 @@ function Invoke-Request($ctx) {
             if ($err) { Send-Json $ctx @{ error = $err }; return }
         }
         '/api/packdone' { if (-not $script:impJob) { $script:imp = @{ status = 'vide'; done = 0; total = 0; pack = ''; error = '' } } }
+        '/api/ttsvoices' { Send-Json $ctx @{ voices = @(Get-TtsVoices) }; return }
+        '/api/tts' { $err = Start-Tts ([string]$body.text) ([string]$body.voice) ([int]$body.rate); Send-Json $ctx @{ ok = -not $err; error = $err }; return }
+        '/api/ttsstate' { Update-Tts ([string]$body.preset); Send-Json $ctx $script:tts; return }
         '/api/voixfx' { $err = Invoke-VoiceFx ([string]$body.preset); Send-Json $ctx @{ ok = -not $err; error = $err }; return }
         '/api/voixkeep' {
             $src = Join-Path $Data 'voix-apercu.wav'

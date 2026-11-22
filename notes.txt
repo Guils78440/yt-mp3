@@ -1,8 +1,5 @@
-- Correction : les sons du sampler passent maintenant par leur platine (volume, crossfader, casque, effets) : un pad de la platine B ne sort plus en salle quand le crossfader est sur A
-- Sur le téléphone, le sampler joue sur la platine choisie en haut de l’onglet Pads
-- Nouvelle interface : barre latérale, panneaux translucides, nouvelle typographie, sur tous les écrans
-- Copilote : écris ce que tu veux dans la barre (« entre 95 et 105 BPM », « compatible avec … », « charge … sur B », « mixtape de 30 min », « sépare la voix de … »)
-- Barre de commande Ctrl + K depuis n’importe quel écran
-- Suggestions sur l’accueil : doublons, titres prêts à mixer, morceaux à séparer
-- Dans le Mix : le copilote propose le morceau suivant et le bon type d’enchaînement
-- L’analyse du tempo et de la tonalité se fait maintenant sur tous les écrans
+- Limiteur de sortie sur le Mix : le son ne sature plus quand tu empiles sirènes et gunshots sur le morceau (bouton « Limiteur », il s’allume quand il travaille)
+- Voix / Instru en direct sur chaque platine : pour les morceaux séparés, la bascule est instantanée, sans coupure ni décalage
+- Dubplates parlées : tape « Big up… pull up selecta ! », une voix Windows le dit avec les effets sound system, prêt pour un pad
+- Nouvelle page de pads BOUCLES : repère + boucle en un clic, sauts de 4 ou 16 temps calés sur le rythme, boucle ½ et ×2
+- Barre latérale : la durée totale de la bibliothèque s’affiche à côté du nombre de titres
