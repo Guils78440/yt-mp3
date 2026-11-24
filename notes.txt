@@ -1,3 +1,4 @@
+- Correction : YT MP3 ne s’arrête plus quand sa fenêtre reste longtemps ouverte en arrière-plan (Edge la met en veille) ; il ne s’arrête que si la fenêtre est vraiment fermée
 - Prochain titre idéal : le copilote du Mix propose 3 morceaux selon le tempo, la tonalité et l’énergie, en évitant le même artiste deux fois de suite
 - Énergie de chaque morceau estimée sur 10 (⚡ dans la bibliothèque du Mix), avec un choix Calmer / Garder / Monter pour la suite
 - Tracklist de soirée : chaque morceau passé dans la salle est noté avec l’heure, à copier (YouTube, Mixcloud) ou enregistrer en .txt, calée si besoin sur ton enregistrement du mix

@@ -4,7 +4,7 @@
 # =====================================================================
 
 $ErrorActionPreference = 'Stop'
-$AppVersion = '4.2.0'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
+$AppVersion = '4.2.1'   # à incrémenter à chaque évolution (voir CHANGELOG dans l'interface)
 # Dossier de l'application : celui du script (version installée) ou celui du .bat (version portable)
 $Root = $PSScriptRoot
 if ($env:YTMP3_DIR) { $Root = $env:YTMP3_DIR.TrimEnd('\', '/') }
@@ -107,6 +107,35 @@ function Open-Window {
     if ($Silent) { return }
     try { Start-Process 'msedge.exe' -ArgumentList "--app=$Url", '--window-size=1000,800' -ErrorAction Stop }
     catch { try { Start-Process $Url } catch {} }
+}
+
+# La fenêtre YT MP3 est-elle encore ouverte ? (titre « YT MP3 » ou « … — YT MP3 », même réduite ou endormie par Edge)
+function Test-AppWindow {
+    try {
+        if (-not ('YtMp3Win' -as [type])) {
+            Add-Type -ErrorAction Stop -TypeDefinition @'
+using System; using System.Text; using System.Runtime.InteropServices;
+public static class YtMp3Win {
+    public delegate bool EnumProc(IntPtr h, IntPtr l);
+    [DllImport("user32.dll")] static extern bool EnumWindows(EnumProc f, IntPtr l);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
+    [DllImport("user32.dll")] static extern bool IsWindowVisible(IntPtr h);
+    public static bool Find() {
+        bool found = false;
+        EnumWindows(delegate (IntPtr h, IntPtr l) {
+            if (!IsWindowVisible(h)) return true;
+            StringBuilder sb = new StringBuilder(512); GetWindowText(h, sb, 512);
+            string t = sb.ToString();
+            if (t == "YT MP3" || t.EndsWith(" \u2014 YT MP3")) { found = true; return false; }
+            return true;
+        }, IntPtr.Zero);
+        return found;
+    }
+}
+'@
+        }
+        return [YtMp3Win]::Find()
+    } catch { Write-LogOnce 'recherche de la fenêtre' $_; return $false }
 }
 
 function Show-Error([string]$msg) {
@@ -1363,6 +1392,7 @@ document.addEventListener('drop', e => { e.preventDefault(); add(e.dataTransfer.
 
 /* --- Journal des versions : ajouter une entrée en tête à chaque évolution --- */
 const CHANGELOG = [
+  ['4.2.1', '24/11/2026', ['Correction : YT MP3 ne s’arrête plus quand sa fenêtre reste longtemps ouverte en arrière-plan (Edge la met en veille) ; il ne s’arrête que si la fenêtre est vraiment fermée']],
   ['4.2', '22/11/2026', ['Prochain titre idéal : le copilote du Mix propose 3 morceaux selon le tempo, la tonalité et l’énergie, en évitant le même artiste deux fois de suite', 'Énergie de chaque morceau estimée sur 10 (⚡ dans la bibliothèque du Mix), avec un choix Calmer / Garder / Monter pour la suite', 'Tracklist de soirée : chaque morceau passé dans la salle est noté avec l’heure, à copier (YouTube, Mixcloud) ou enregistrer en .txt, calée si besoin sur ton enregistrement du mix']],
   ['4.1', '22/11/2026', ['Limiteur de sortie sur le Mix : le son ne sature plus quand tu empiles sirènes et gunshots sur le morceau (bouton « Limiteur », il s’allume quand il travaille)', 'Voix / Instru en direct sur chaque platine : pour les morceaux séparés, la bascule est instantanée, sans coupure ni décalage', 'Dubplates parlées : tape « Big up… pull up selecta ! », une voix Windows le dit avec les effets sound system, prêt pour un pad', 'Nouvelle page de pads BOUCLES : repère + boucle en un clic, sauts de 4 ou 16 temps calés sur le rythme, boucle ½ et ×2', 'Barre latérale : la durée totale de la bibliothèque s’affiche à côté du nombre de titres']],
   ['4.0.2', '22/11/2026', ['Barre latérale : la durée totale de la bibliothèque s’affiche à côté du nombre de titres']],
@@ -6794,7 +6824,12 @@ while ($true) {
         $pending = @($queue | Where-Object { $_.status -eq 'attente' }).Count -gt 0 -and (Get-SetupState) -ne 'erreur'
         if (-not $script:proc -and -not $pending -and -not $script:sepProc -and -not $script:searchProcs.Count -and -not $recQueue.Count -and -not $script:splitCur -and -not $script:expJob -and -not $script:mxRun) {
             if ($script:byeAt -and ($now - $script:byeAt).TotalSeconds -gt 5) { $script:stopWhy = 'fenêtre fermée'; break }
-            if (($now - $script:lastSeen).TotalSeconds -gt $IdleSeconds) { $script:stopWhy = 'fenêtre muette depuis 1 h'; break }
+            if (($now - $script:lastSeen).TotalSeconds -gt $IdleSeconds) {
+                # Edge endort une fenêtre laissée longtemps en arrière-plan : elle ne donne plus signe de vie mais reste ouverte.
+                # On ne s'arrête que si la fenêtre YT MP3 a vraiment disparu.
+                if (Test-AppWindow) { $script:lastSeen = $now; Write-Log 'Fenêtre endormie par Edge mais toujours ouverte : le moteur reste prêt' }
+                else { $script:stopWhy = 'fenêtre muette depuis 1 h et plus ouverte'; break }
+            }
         }
     } catch {
         Write-Log ('Erreur imprévue : ' + (Format-Err $_))
